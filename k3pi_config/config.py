@@ -6,6 +6,7 @@ all_polarities = (magup, magdown, magboth)
 eos_root = 'root://eoslhcb.cern.ch//eos/lhcb/user/d/dmuller/K3PI'
 
 D0ToKpipipi_RS = 'D0ToKpipipi_RS'
+D0ToKpipipi_WS = 'D0ToKpipipi_WS'
 
 kaon = 'K'
 pion = 'Pi'
