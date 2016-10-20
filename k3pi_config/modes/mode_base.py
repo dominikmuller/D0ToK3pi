@@ -24,6 +24,8 @@ class mode_base(object):
         self.mother_prefixes = list(map(name_getter, self.head.all_mothers()))
         self.daughter_prefixes = map(name_getter, self.head.all_daughters())
         self.daughter_prefixes = list(self.daughter_prefixes)
+        self.daughter_prefixes = map(name_getter, self.head.all_daughters())
+        self.daughter_prefixes = list(self.daughter_prefixes)
 
         self.files = getattr(filelists, '{}_{}_{}'.format(self.mode, polarity,
                                                           year))
