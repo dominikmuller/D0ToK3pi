@@ -17,7 +17,7 @@ class D0ToKpipipi_RS(mode_base):
     ])
 
     Pislow = Particle('Pislow', 'r\pi_{\text{s}}^{+}', pid=config.slowpion)
-    Dst = Particle('Dstp', r'D^{*+}', [
+    head = Particle('Dstp', r'D^{*+}', [
         D0, Pislow
     ])
 
