@@ -12,7 +12,7 @@ kaon = 'K'
 pion = 'Pi'
 slowpion = 'sPi'
 proton = 'P'
-Dz = 'Dz'
+Dz = 'D0'
 Dst = 'Dst'
 species = [kaon, pion, proton]
 
@@ -24,4 +24,5 @@ PDG_MASSES = {
 }
 
 ntuple_strip = 'Tuple{0}/DecayTree'
-output_prefix = '../output'
+output_prefix = 'output'
+data_store = output_prefix + '/data/store.h5'

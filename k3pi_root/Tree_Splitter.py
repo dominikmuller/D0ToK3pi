@@ -10,7 +10,7 @@ import numpy
 import ROOT
 from collections import defaultdict
 
-
+ROOT.gSystem.Load(os.environ['ROOTEXLIB'])
 YPES_MAP = {
     # int-like
     "B": "int8",
@@ -37,6 +37,8 @@ def add_branch(tree, name):
 def tree_splitter(tree_path_in, input_fns, out_fn, variables_to_copy,
                   selection_string, formula_vars=None):
     # Build the input TChain and get a list of branches
+    if formula_vars is None:
+        formula_vars = []
     in_tree = ROOT.TChain(tree_path_in)
     for fn in input_fns:
         in_tree.Add(fn)
@@ -45,7 +47,7 @@ def tree_splitter(tree_path_in, input_fns, out_fn, variables_to_copy,
 
     # Set up the output TFile with the path of directories
     outputfile = ROOT.TFile(out_fn, 'RECREATE')
-    components = tree_path_out.split('/')
+    components = tree_name_out.split('/')
     # Tree name is the last component of the 'path'
     tree_name_out = components.pop()
     for dirname in components:
@@ -59,7 +61,7 @@ def tree_splitter(tree_path_in, input_fns, out_fn, variables_to_copy,
     for new_var in variables_to_copy:
         in_tree.SetBranchStatus(new_var, 1)
 
-    if os.path.basename(tree_path_in) == os.path.basename(tree_path_out):
+    if os.path.basename(tree_path_in) == os.path.basename(tree_name_out):
         # Copy the activated branches from the input tree with a selection
         out_tree = in_tree.CopyTree(selection_string)
     else:
@@ -115,62 +117,6 @@ def tree_splitter(tree_path_in, input_fns, out_fn, variables_to_copy,
     else:
         outputfile.WriteTObject(out_tree)
 
-    new_lumi_tree = ROOT.TTree('LumiTuple', 'new_lumi_ntuple')
-    lumi_var = [
-        numpy.zeros(1, dtype=numpy.float64),
-        numpy.zeros(1, dtype=numpy.float64)
-    ]
-    lumi_err_var = [
-        numpy.zeros(1, dtype=numpy.float64),
-        numpy.zeros(1, dtype=numpy.float64)
-    ]
-
-    for fn in input_fns:
-        # Get the existing lumituple, skipping if it isn't found
-        f = ROOT.TFile.Open(fn)
-        f_dirs = [x.GetName() for x in list(f.GetListOfKeys())]
-        if 'GetIntegratedLuminosity' not in f_dirs:
-            continue
-        if tree_path_in.split('/')[0] in f_dirs:
-            data_tree = f.Get(tree_path_in)
-        elif 'Tuple' in f_dirs[0]:
-            data_tree = f.Get(f_dirs[0] + '/' + tree_path_in.split('/')[1])
-        else:
-            raise RuntimeError('Lumi tuple present but no DecayTreeTuple found'
-                               ' in: '.format(fn))
-        lumi_tree = f.Get('GetIntegratedLuminosity/LumiTuple')
-
-        # Find all the rum numbers corresponding to this input file
-        run_number = numpy.zeros(1, dtype=numpy.int)
-        data_tree.SetBranchAddress('runNumber', run_number)
-
-        run_numbers = []
-        for i in range(data_tree.GetEntries()):
-            data_tree.GetEvent(i)
-            if run_number[0] not in run_numbers:
-                run_numbers.append(run_number[0])
-
-        lumi_tree.SetBranchAddress('IntegratedLuminosity', lumi_var[0])
-        lumi_tree.SetBranchAddress('IntegratedLuminosityErr', lumi_err_var[0])
-
-        for i in range(lumi_tree.GetEntries()):
-            lumi_tree.GetEvent(i)
-            lval = lumi_var[0][0]
-            lerr = lumi_err_var[0][0]
-            lumi_var[1][0] = lval
-            lumi_err_var[1][0] = lerr
-            new_lumi_tree.Fill()
-
-        f.Close()
-
-    lumi_per_fill = dict(lumi_per_fill)
-    if len(lumi_per_fill) > 0:
-        utilities.dump(lumi_per_fill,
-                    out_fn.replace('.root', '_lumi.p'))
-
-    d = outputfile.mkdir('GetIntegratedLuminosity')
-    d.WriteTObject(new_lumi_tree)
-
     outputfile.Close()
 
 
@@ -224,7 +170,7 @@ def main():
         out_fn=args.outputfile,
         variables_to_copy=args.variables,
         selection_string=args.selection,
-        tree_path_out=args.newtreename if args.newtreename else args.treename,
+        tree_name_out=args.newtreename if args.newtreename else args.treename,
         year=args.year,
         formula_vars=addvariables,
         decay_mother=args.mothers,

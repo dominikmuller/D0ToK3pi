@@ -84,6 +84,9 @@ class Particle(object):
             return daughters
         return recurse_daughters(self)
 
+    def all_flattened(self):
+        return self.all_mothers() + self.all_daughters()
+
     def all_pid(self, pid):
         """Function to get all daugthers for a given pid
         """
