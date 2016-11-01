@@ -3,6 +3,13 @@ import os
 
 from k3pi_config import filelists, config
 from itertools import product
+import pandas as pd
+
+
+class ModeConfig(Exception):
+
+    def __init__(self, message):
+        super(ModeConfig, self).__init__(message)
 
 
 class mode_base(object):
@@ -44,3 +51,23 @@ class mode_base(object):
 
     def get_tree_name(self, mc=False):
         return config.ntuple_strip.format(self.mode)
+
+    def get_store_name(self, mc=False, polarity=None):
+        if self.polarity == config.magboth and polarity is None:
+            raise ModeConfig('Cannot get store for MagBoth mode. Need to'
+                             ' specify polarity as an argument')
+        if polarity is None:
+            polarity = self.polarity
+        return config.store_name.format(self.mode, polarity)
+
+    def get_data(self, columns,  mc=False):
+        with pd.get_store(config.data_store) as store:
+            if self.polarity == config.magboth:
+                df = store.select(
+                    self.get_store_name(mc, config.magup), columns=columns)
+                df = df.append(store.select(
+                    self.get_store_name(mc, config.magdown), columns=columns))
+            else:
+                df = store.select(
+                    self.get_store_name(mc), columns=columns)
+        return df

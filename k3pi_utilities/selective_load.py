@@ -1,8 +1,10 @@
 from collections import defaultdict
 import logging as log
-import root_pandas
+import pandas as pd
+from k3pi_config import config
 
 accumulated = set()
+
 
 class selective_load():
     def __init__(self, function):
@@ -12,12 +14,12 @@ class selective_load():
         [accumulated.add(n) for n in d.keys()]
         self._func = function
 
-    def __call__(self, files, key):
+    def __call__(self, mode):
         log.debug('Loading {} from {} with columns {}'.format(
-            key, files, self.requested_columns
+            mode.get_tree_name, config.data_store, self.requested_columns
         ))
-        df = root_pandas.read_root(files, key,
-                                   columns=self.requested_columns)
-        ret = self._func(df)
-        # del df
+        with pd.get_store(config.data_store) as store:
+            df = store.select(mode.get_tree_name(),
+                              columns=self.requested_columns)
+            ret = self._func(df)
         return ret

@@ -24,5 +24,6 @@ PDG_MASSES = {
 }
 
 ntuple_strip = 'Tuple{0}/DecayTree'
+store_name = '{0}_{1}'
 output_prefix = 'output'
 data_store = output_prefix + '/data/store.h5'

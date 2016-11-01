@@ -5,21 +5,18 @@
 #include "TChain.h"
 #include "TTreeFormula.h"
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 #include <string>
 #include <unordered_map>
 #include <map>
 #include <vector>
 
-namespace py = pybind11;
+#include "k3pi_cpp.h"
 
 void TreeSplitter(std::vector<std::string> files,
                   std::vector<std::string> variables, std::string output,
-                  std::string treename, std::string outputtreename = "",
-                  std::string selection = "1",
-                  std::map<std::string, std::string> addvariables =
-                      std::map<std::string, std::string>()) {
+                  std::string treename, std::string outputtreename,
+                  std::string selection,
+                  std::map<std::string, std::string> addvariables) {
   if (outputtreename == "") {
     outputtreename = treename;
   }
@@ -79,19 +76,4 @@ void TreeSplitter(std::vector<std::string> files,
     outputfile->WriteTObject(outputtree);
   }
   outputfile->Close();
-}
-
-PYBIND11_PLUGIN(treesplitter) {
-  py::module m("treesplitter",
-               "Because pybind11 looks more interesting than actual work.");
-
-  m.def("treesplitter", &TreeSplitter,
-        "Splits given root files and only keeps selected and specified "
-        "branches. Can also add additional variables.",
-        py::arg("files"), py::arg("variables"), py::arg("output"),
-        py::arg("treename"), py::arg("outputtreename") = "",
-        py::arg("selection") = "1",
-        py::arg("addvariables") = std::map<std::string, std::string>());
-
-  return m.ptr();
 }

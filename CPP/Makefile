@@ -24,10 +24,10 @@ _Objects_TreeSplitter=TreeSplitter.o AnyWriter.o DConfig.o MyUtils.o ROOTex.o
 Objects_TreeSplitter=$(patsubst %,$(ODIR)/%,$(_Objects_TreeSplitter))
 
 
-all: lib/treesplitter.so lib/libROOTex.so
+all: lib/k3pi_cpp.so lib/libROOTex.so
 
-lib/treesplitter.so: lib/libROOTex.so
-	clang++ -O3 -shared -o $@ -fPIC -g -std=c++11 -I./include $(RCXX) $(PYTHONCFLAGS) src/TreeSplitter.cxx $(ROOTLIBS) $(PYTHONLIBS) -L./lib/ -lROOTex
+lib/k3pi_cpp.so: lib/libROOTex.so
+	clang++ -O3 -shared -o $@ -fPIC -g -std=c++11 -I./include $(RCXX) $(PYTHONCFLAGS) src/delta_m.cpp src/bindings.cpp src/TreeSplitter.cpp $(ROOTLIBS) $(PYTHONLIBS) -L./lib/ -lROOTex
 
 dict/MyDict.cxx: include/ROOTex.h include/LinkDef.h
 	rootcint -f $@ -c -p $^

@@ -1,4 +1,5 @@
-from k3pi_utilities.variables import p, pt, ipchi2, m, dtf_chi2
+from k3pi_utilities.variables import (p, pt, ipchi2, m, dtf_chi2, ltime,
+                                      vdchi2, maxdoca, mindoca)
 from k3pi_config import config
 
 
@@ -38,5 +39,9 @@ def get(mode):
         _cuts += [p(daug) + ' >= 3000.']
         _cuts += [p(daug) + ' < 100000.']
     _cuts += [dtf_chi2(mode.head) + ' > 0.']
+    _cuts += [vdchi2(mode.D0) + ' > 0.']
+    _cuts += [maxdoca(mode.D0) + ' > 0.']
+    _cuts += [mindoca(mode.D0) + ' > 0.']
+    _cuts += [ltime(mode.D0) + ' > -10000.']
 
     return ' && '.join(['({})'.format(x) for x in _cuts])

@@ -16,6 +16,8 @@ thismodule = sys.modules[__name__]
 tev = r'$\mathrm{\,Te\kern -0.1em V}$'
 gev = r'$\mathrm{\,Ge\kern -0.1em V}$'
 mev = r'$\mathrm{\,Me\kern -0.1em V}$'
+mm = r'mm'
+ns = r'ns'
 kev = r'$\mathrm{\,ke\kern -0.1em V}$'
 ev = r'$\mathrm{\,e\kern -0.1em V}$'
 gevc = r'${\mathrm{\,Ge\kern -0.1em V\!/}c}$'
@@ -26,7 +28,7 @@ mevcc = r'${\mathrm{\,Me\kern -0.1em V\!/}c^2}$'
 
 
 class var(object):
-    def __init__(self, name, fmt, mom, kid, pretty=None, unit=None):
+    def __init__(self, name, fmt, mom, kid, pretty=None, unit=None, append=True):  # NOQA
         self.name = name
         self.fmt = fmt
         self.mom = mom
@@ -37,7 +39,8 @@ class var(object):
             self.pretty = fmt
         self.unit = unit
         setattr(thismodule, name, self)
-        __all__.append(name)
+        if append:
+            __all__.append(name)
 
     def __call__(self, part=None):
         if 'head' not in self.fmt and 'part' not in self.fmt:
@@ -54,9 +57,14 @@ class var(object):
         all_ever_used.add(var_name)
         return var_name
 
-    def latex(self, part, with_unit=False):
+    def latex(self, part=None, with_unit=False):
         if self.pretty is None:
             return None
+        if self.mom is False and self.kid is False:
+            if with_unit and self.unit is not None:
+                return self.pretty + ' [{}]'.format(self.unit)
+            else:
+                return self.pretty
         pn = part.title.replace('$', '')
         if 'PART' in self.pretty:
             fm = self.pretty.replace('PART', pn)
@@ -69,23 +77,27 @@ class var(object):
 
 var('pt', '{part}_PT', True, True, r'$p_{\text{T}}(PART)$', mevc)
 var('p', '{part}_P', True, True, r'$p(PART)$', mevc)
-var('eta', '{part}_ETA', True, True, r'$\phi(PART)$', mevc)
-var('phi', '{part}_PHI', True, True, r'$\eta(PART)$', mevc)
+var('eta', '{part}_ETA', True, True, r'$\eta(PART)$', mevc)
+var('phi', '{part}_PHI', True, True, r'$\phi(PART)$', mevc)
 var('m', '{part}_M', True, False, r'$m(PART)$', mevcc)
-var('vchi2', '{part}_Loki_VCHI2NDOF', True, False)
-var('ipchi2', '{part}_Loki_BPVIPCHI2', True, True)
-var('dira', '{part}_Loki_BPVDIRA', True, False)
-var('maxdoca', '{part}_Loki_ADOCAMAX', True, False)
-var('mindoca', '{part}_Loki_ADOCAMIN', True, False)
-var('probnnk', '{part}_MC15TuneV1_ProbNNk', False, True)
-var('probnnpi', '{part}_MC15TuneV1_ProbNNpi', False, True)
-var('probnnghost', '{part}_MC15TuneV1_ProbNNghost', False, True)
-var('pidk', '{part}_PIDK', False, True)
-var('evt_num', 'eventNumber', False, False)
-var('dtf_pt', '{head}_DTFDict_{part}_PT', True, True)
-var('dtf_p', '{head}_DTFDict_{part}_P', True, True)
-var('dtf_eta', '{head}_DTFDict_{part}_ETA', True, True)
-var('dtf_phi', '{head}_DTFDict_{part}_PHI', True, True)
-var('dtf_m', '{head}_DTFDict_{part}_M', True, True)
-var('dtf_chi2', '{head}_DTF_CHI2', True, False)
-var('dtf_ndof', '{head}_DTF_NDOF', True, False)
+var('ltime', '{part}_Loki_BPVLTIME', True, False, r'$\tau$', ns)  # NOQA
+var('vchi2', '{part}_Loki_VCHI2NDOF', True, False, r'Vertex $\chi^2/\text{dof}(PART)$')  # NOQA
+var('ipchi2', '{part}_Loki_BPVIPCHI2', True, True, r'$\chi^2_\text{IP}(PART)$')  # NOQA
+var('dira', '{part}_Loki_BPVDIRA', True, False, r'DIRA$(PART)$')
+var('maxdoca', '{part}_Loki_AMAXDOCA', True, False, r'DOCA$_{\text{max}}(PART)$', mm)  # NOQA
+var('mindoca', '{part}_Loki_AMINDOCA', True, False, r'DOCA$_{\text{min}}(PART)$', mm)  # NOQA
+var('vdchi2', '{part}_Loki_BPVVDCHI2', True, False, r'$\chi^2_\text{VD}(PART)$')  # NOQA
+var('probnnk', '{part}_MC15TuneV1_ProbNNk', False, True, r'ProbNN$K(PART)$')
+var('probnnpi', '{part}_MC15TuneV1_ProbNNpi', False, True, r'ProbNN$\pi(PART)$')  # NOQA
+var('probnnghost', '{part}_MC15TuneV1_ProbNNghost', False, True, r'ProbNNghost$(PART)$')  # NOQA
+var('pidk', '{part}_PIDK', False, True, r'$\text{DLL}_{K^\pm-\pi^\pm}(PART)$')
+var('evt_num', 'eventNumber', False, False, 'Eventnumber')
+var('dtf_pt', '{head}_DTFDict_{part}_PT', True, True, r'DTF $p_{\text{T}}(PART)$', mevc)  # NOQA
+var('dtf_p', '{head}_DTFDict_{part}_P', True, True, r'DTF $p(PART)$', mevc)
+var('dtf_eta', '{head}_DTFDict_{part}_ETA', True, True, r'DTF $\phi(PART)$', mevc)  # NOQA
+var('dtf_phi', '{head}_DTFDict_{part}_PHI', True, True, r'DTF $\eta(PART)$', mevc)  # NOQA
+var('dtf_m', '{head}_DTFDict_{part}_M', True, True, r'DTF $m(PART)$', mevcc)
+var('dtf_chi2', '{head}_DTF_CHI2', True, False, r'DTF $\chi^2$')
+var('dtf_ndof', '{head}_DTF_NDOF', True, False, r'DTF dof')
+var('dm', 'delta_m', False, False, '$\Delta m$', mevcc, append=False)
+var('dtf_dm', 'delta_m_dtf', False, False, 'DTF $\Delta m$', mevcc, append=False)  # NOQA

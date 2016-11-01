@@ -1,4 +1,5 @@
 from analysis import get_root_preselection
+import os
 from k3pi_config import get_mode, config
 from k3pi_utilities import variables, helpers, parser, get_logger
 from k3pi_utilities.variables import m, dtf_m, evt_num
@@ -6,25 +7,25 @@ from treesplitter import treesplitter
 import root_pandas
 import tempfile
 import tqdm
-from multiprocessing import Pool
 import pandas as pd
+from pathos.multiprocessing import ProcessingPool
 
 log = get_logger('download_data')
 
 
-def download(mode, polarity, year):
+def download(mode, polarity, year, full=False, test=False):
     log.info('Getting data for {} {} {}'.format(
         mode, polarity, year))
     mode = get_mode(polarity, year, mode)
 
     sel = get_root_preselection.get(mode)
 
-    if args.full is False:
-        sel += ' && ({} % 20 == 0)'.format(evt_num())
+    if full is False:
+        sel = '({} % 20 == 0) && '.format(evt_num()) + sel
 
     tempfile.mktemp('.root')
 
-    if args.test:
+    if test:
         mode.files = mode.files[:4]
     chunked = list(helpers.chunks(mode.files, 25))
     length = len(list(chunked))
@@ -48,9 +49,9 @@ def download(mode, polarity, year):
                      addvariables=add_vars)
         return temp_file
 
-    pool = Pool(processes=4)
+    pool = ProcessingPool(4)
     temp_files = []
-    for r in tqdm.tqdm(pool.imap_unordered(run_splitter, chunked, chunksize=1),
+    for r in tqdm.tqdm(pool.uimap(run_splitter, chunked),
                        leave=True, total=length, smoothing=0):
         temp_files.append(r)
 
@@ -69,9 +70,16 @@ def download(mode, polarity, year):
     for df in df_gen:
         log.info('Adding {} events of {} to store {}.'.format(
             len(df), mode.get_tree_name(), config.data_store))
-        df.to_hdf(config.data_store, mode.get_tree_name(),
+        df.to_hdf(config.data_store, mode.get_store_name(),
                   mode='a', format='t', append=True)
+    for f in temp_files:
+        os.remove(f)
+
 
 if __name__ == '__main__':
     args = parser.create_parser()
-    download(args.mode, args.polarity, args.year)
+    if args.polarity == config.magboth:
+        download(args.mode, config.magdown, args.year, args.full, args.test)
+        download(args.mode, config.magup, args.year, args.full, args.test)
+    else:
+        download(args.mode, args.polarity, args.year, args.full, args.test)
