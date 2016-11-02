@@ -15,7 +15,7 @@ def create_parser():
     parser.add_argument('-y', '--year', default=None, choices=[2015, 2016],
                         type=int, help='Acticates testing mode')
     parser.add_argument('-p', '--polarity', default=None,
-                        choices=['MagDown', 'MagUp'],
+                        choices=['MagDown', 'MagUp', 'MagBoth'],
                         help='Acticates testing mode')
 
     return parser.parse_args()

@@ -3,7 +3,7 @@ import os
 from k3pi_config import get_mode, config
 from k3pi_utilities import variables, helpers, parser, get_logger
 from k3pi_utilities.variables import m, dtf_m, evt_num
-from treesplitter import treesplitter
+from k3pi_cpp import treesplitter
 import root_pandas
 import tempfile
 import tqdm

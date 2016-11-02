@@ -4,6 +4,7 @@ import os
 from k3pi_config import filelists, config
 from itertools import product
 import pandas as pd
+from k3pi_utilities import helpers
 
 
 class ModeConfig(Exception):
@@ -19,14 +20,14 @@ class mode_base(object):
     def specific_selection(self):
         pass
 
-    def __init__(self, polarity=None, year=None):
+    def __init__(self, polarity, year):
         self.polarity = polarity
         self.year = year
         self.files = []
-        if polarity:
-            pols = [polarity]
-        else:
+        if polarity == config.magboth:
             pols = [config.magup, config.magdown]
+        else:
+            pols = [polarity]
         if year:
             years = [year]
         else:
@@ -71,3 +72,12 @@ class mode_base(object):
                 df = store.select(
                     self.get_store_name(mc), columns=columns)
         return df
+
+    def get_output_path(self, extra=None):
+        path = config.output_mode.format(self.mode, self.year, self.polarity)
+        if extra is not None:
+            path += extra
+        if path[-1] != '/':
+            path += '/'
+        helpers.ensure_directory_exists(path)
+        return path
