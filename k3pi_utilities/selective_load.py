@@ -18,8 +18,11 @@ class selective_load():
         log.debug('Loading {} from {} with columns {}'.format(
             mode.get_tree_name, config.data_store, self.requested_columns
         ))
-        with pd.get_store(config.data_store) as store:
-            df = store.select(mode.get_tree_name(),
-                              columns=self.requested_columns)
-            ret = self._func(df)
+        # with pd.get_store(config.data_store) as store:
+            # df = store.select(mode.get_tree_name(),
+                              # columns=self.requested_columns)
+            # ret = self._func(df)
+        df = mode.get_data(self.requested_columns)
+        ret = self._func(df)
+        del df
         return ret
