@@ -77,7 +77,7 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
     daughter_loki_vars = {
         'PIDK': 'PIDK',
         'Loki_TRACKCHI2NDOF': 'TRCHI2DOF',
-        # 'Loki_TRACKGHOSTPROB': 'TRGHOSTPROB',
+        'Loki_TRACKGHOSTPROB': 'TRGHOSTPROB',
     }
     mother_loki_vars = {
         'M': 'M',
@@ -104,6 +104,7 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
         t.Inputs = [inputs]
     t.Decay = decay
     # Merge the mother and daughter dictionaries
+    ALL = dict(mothers.items() + intermediate.items() + daughters.items())
     t.addBranches(dict(mothers.items() + intermediate.items()
                        + daughters.items()))
     # Tools for all branches
@@ -124,6 +125,7 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
     # Add mother-specific varaibles to each mother branch
     for mother in mothers:
         branch = getattr(t, mother)
+        loki_vars = mother_loki_vars.copy()
         branch.addTupleTool(
             'LoKi::Hybrid::TupleTool/{0}LoKiTT'.format(mother)
         ).Variables = mother_loki_vars
@@ -193,7 +195,7 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
 
 
 def charm_tuple(name, decay, mothers, intermediate,
-                daughters, inputs, mc, dtf_layout=None):
+                daughters, inputs, mc):
     """Return a charm cross section specific DecayTreeTuple instance.
 
     This amounts to the return value of decay_tree_tuple plus some event-level
@@ -227,8 +229,9 @@ def charm_tuple(name, decay, mothers, intermediate,
     trigger.Verbose = True
     # trigger.VerboseHlt1 = True
 
-    t.WriteP2PVRelations = False
-    t.InputPrimaryVertices = "Turbo/Primary"
+    if has_turbo_inputs(t):
+        t.WriteP2PVRelations = False
+        t.InputPrimaryVertices = "Turbo/Primary"
 
     return t
 
@@ -281,3 +284,9 @@ def mc_decay_tree_tuple(name, decay, mothers, daughters):
         # above 1e-7 ns? Record the secondaries info if so
         branch.addTupleTool('MCTupleToolPrompt')
     return t
+
+
+def has_turbo_inputs(dtt):
+    """Return True if the DecayTreeTuple has Turbo stream inputs."""
+    # Assume that 'Turbo' in any input string means this DTT runs on Turbo data
+    return any('Turbo' in iput for iput in dtt.Inputs)

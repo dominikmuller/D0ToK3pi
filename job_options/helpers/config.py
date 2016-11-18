@@ -4,7 +4,10 @@ stream = 'Turbo'
 
 simulation = DaVinci().Simulation
 # inputs_template = '/Event/{0}/{{0}}/Particles'.format(stream)
-inputs_template = '{0}/{{0}}/Particles'.format(stream)
+
+
+def inputs_template():
+    return '{0}/{{0}}/Particles'.format(stream)
 
 # Import things necessary for LoKi MC truth matching
 truth_matching_preambulo = [

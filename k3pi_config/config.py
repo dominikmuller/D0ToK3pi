@@ -7,11 +7,15 @@ eos_root = 'root://eoslhcb.cern.ch//eos/lhcb/user/d/dmuller/K3PI'
 
 D0ToKpipipi_RS = 'D0ToKpipipi_RS'
 D0ToKpipipi_WS = 'D0ToKpipipi_WS'
+D0ToKpipipi_2tag_RS = 'D0ToKpipipi_2tag_RS'
+D0ToKpipipi_2tag_WS = 'D0ToKpipipi_2tag_WS'
 
 kaon = 'K'
+muon = 'Mu'
 pion = 'Pi'
 slowpion = 'sPi'
 proton = 'P'
+proton = 'muon'
 Dz = 'D0'
 Dst = 'Dst'
 species = [kaon, pion, proton]

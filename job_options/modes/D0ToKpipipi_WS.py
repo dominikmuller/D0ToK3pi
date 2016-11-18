@@ -1,6 +1,6 @@
 from k3pi_config.modes.D0ToKpipipi_WS import D0ToKpipipi_WS as WS
 from helpers import tuple_templates
-from helpers.modes import (
+from helpers.config import (
     inputs_template,
     simulation
 )

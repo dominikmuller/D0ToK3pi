@@ -1,7 +1,7 @@
 from Configurables import DaVinci
 
 
-def configure(year, mc, input_type, n_events):
+def configure(year, mc, input_type, n_events, root=None, tfn=None):
     """General configuration of DaVinci object.
 
     Keyword arguments:
@@ -22,3 +22,7 @@ def configure(year, mc, input_type, n_events):
     dv.Simulation = mc
     # Add a GetIntegratedLuminosity/LumiTuple TTree to output if appropriate
     dv.Lumi = not mc
+    if root is not None:
+        dv.RootInTES = root
+    if tfn is not None:
+        dv.TupleFile = tfn
