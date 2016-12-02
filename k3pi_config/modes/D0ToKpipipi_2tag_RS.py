@@ -18,12 +18,13 @@ class D0ToKpipipi_2tag_RS(mode_base):
         K, Pi_SS, Pi_OS1, Pi_OS2
     ])
 
-    Dst = Particle('Dstp', r'$D^{*+}$', [
+    Dstp = Particle('Dstp', r'$D^{*+}$', [
         D0, Pislow
     ])
-    head = Particle('B0', r'$B$', [
-        Dst, Mu
+    B0 = Particle('B0', r'$B$', [
+        Dstp, Mu
     ])
+    head = B0
 
     def __init__(self, polarity=None, year=None):
         super(D0ToKpipipi_2tag_RS, self).__init__(polarity, year)

@@ -62,11 +62,12 @@ def bookkeeping_path(polarity, year, twotag=False):
     else:
         bkq_path = (
             '/LHCb/Collision{year}/Beam6500GeV-VeloClosed-{polarity}/'
-            'Real Data/Reco15a/Stripping{stripping}/90000000/BHADRON.MDST'
+            'Real Data/Reco{reco}/Stripping{stripping}/90000000/BHADRON.MDST'
         )
         bkq = bkq_path.format(
             # Only use last two digits of the year
             year=(year - 2000),
+            reco='15a' if year == 2015 else '16',
             polarity=polarity,
             stripping=24 if year == 2015 else 26
         )

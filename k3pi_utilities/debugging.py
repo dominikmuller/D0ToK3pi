@@ -1,9 +1,10 @@
 import logging as log
+from decorator import decorate
 
 
 def call_debug(function):
-    def wrapper(*args, **kwargs):
+    def wrapper(f, *args, **kwargs):
         log.debug('Calling {}.'.format(function.__name__))
-        return function(*args, **kwargs)
+        return f(*args, **kwargs)
 
-    return wrapper
+    return decorate(function, wrapper)

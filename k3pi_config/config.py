@@ -10,6 +10,18 @@ D0ToKpipipi_WS = 'D0ToKpipipi_WS'
 D0ToKpipipi_2tag_RS = 'D0ToKpipipi_2tag_RS'
 D0ToKpipipi_2tag_WS = 'D0ToKpipipi_2tag_WS'
 
+all_modes = [
+    D0ToKpipipi_RS,
+    D0ToKpipipi_WS,
+    D0ToKpipipi_2tag_RS,
+    D0ToKpipipi_2tag_WS
+]
+
+twotag_modes = [
+    D0ToKpipipi_2tag_RS,
+    D0ToKpipipi_2tag_WS
+]
+
 kaon = 'K'
 muon = 'Mu'
 pion = 'Pi'

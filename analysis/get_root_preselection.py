@@ -30,7 +30,6 @@ def get(mode):
 
     """
     _cuts = []
-    _cuts += [pt(mode.D0) + ' >= 5000.']
     _cuts += ['fabs(' +
               m(mode.D0) +
               ' - {}) < 60.'.format(config.PDG_MASSES[config.Dz])]
@@ -43,5 +42,11 @@ def get(mode):
     _cuts += [maxdoca(mode.D0) + ' > 0.']
     _cuts += [mindoca(mode.D0) + ' > 0.']
     _cuts += [ltime(mode.D0) + ' > -10000.']
+
+    if mode.mode in config.twotag_modes:
+        _cuts += [pt(mode.D0) + ' >= 1800.']
+    else:
+        _cuts += [pt(mode.D0) + ' >= 5000.']
+        _cuts += [ipchi2(mode.D0) + ' < 2.']
 
     return ' && '.join(['({})'.format(x) for x in _cuts])

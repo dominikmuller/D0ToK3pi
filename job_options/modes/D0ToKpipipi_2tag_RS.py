@@ -18,7 +18,7 @@ def get():
             RS.head.name: '( ( B0  -> ( D*(2010)+  -> ( D0  -> K-  pi-  pi+  pi+ )  pi+ )  mu- ) || ( B0  -> ( D*(2010)-  -> ( D0  -> K+  pi+  pi-  pi- )  pi- )  mu+ ) )'
         },
         {
-            RS.Dst.name: '( ( B0  -> ^( ( D*(2010)+  -> ( D0  -> K-  pi-  pi+  pi+ )  pi+ ) ) mu- ) || ( B0  -> ^( ( D*(2010)-  -> ( D0  -> K+  pi+  pi-  pi- )  pi- ) ) mu+ ) )',
+            RS.Dstp.name: '( ( B0  -> ^( ( D*(2010)+  -> ( D0  -> K-  pi-  pi+  pi+ )  pi+ ) ) mu- ) || ( B0  -> ^( ( D*(2010)-  -> ( D0  -> K+  pi+  pi-  pi- )  pi- ) ) mu+ ) )',
             RS.D0.name: '( ( B0  -> ( D*(2010)+  -> ^( ( D0  -> K-  pi-  pi+  pi+ ) ) pi+ )  mu- ) || ( B0  -> ( D*(2010)-  -> ^( ( D0  -> K+  pi+  pi-  pi- ) ) pi- )  mu+ ) )'
         },
         {

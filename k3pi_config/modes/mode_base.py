@@ -14,6 +14,7 @@ class ModeConfig(Exception):
 
 
 class mode_base(object):
+
     """Class to hold the basic mode configuration.
     """
 
@@ -33,8 +34,13 @@ class mode_base(object):
         else:
             years = [2015, 2016]
 
+        if self.mode in config.twotag_modes:
+            _fl_template = 'D0ToKpipipi_2tag_{}_{}'
+        else:
+            _fl_template = 'D0ToKpipipi_{}_{}'
+
         for p, y in product(pols, years):
-            self.files += getattr(filelists, 'D0ToKpipipi_{}_{}'.format(
+            self.files += getattr(filelists, _fl_template.format(
                 p, y)).paths
 
         # Set the default output location
@@ -67,7 +73,9 @@ class mode_base(object):
                 df = store.select(
                     self.get_store_name(mc, config.magup), columns=columns)
                 df = df.append(store.select(
-                    self.get_store_name(mc, config.magdown), columns=columns))
+                    self.get_store_name(mc, config.magdown), columns=columns),
+                    ignore_index=True
+                )
             else:
                 df = store.select(
                     self.get_store_name(mc), columns=columns)
@@ -81,3 +89,15 @@ class mode_base(object):
             path += '/'
         helpers.ensure_directory_exists(path)
         return path
+
+    def get_rf_vars(self, identifier):
+        if identifier not in self.mass_fit_pars:
+            raise ModeConfig('No information on parameter given.')
+        val = self.mass_fit_pars[identifier]
+        if 'fix_' + identifier in self.mass_fit_pars and \
+                self.mass_fit_pars['fix_' + identifier]:
+            return val
+        if 'limit_' + identifier in self.mass_fit_pars:
+            low, high = self.mass_fit_pars['limit_' + identifier]
+            return identifier + '[{}, {}, {}]'.format(val, low, high)
+        return identifier + '[{}]'.format(val)

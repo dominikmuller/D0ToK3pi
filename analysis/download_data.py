@@ -1,3 +1,4 @@
+from pathos.multiprocessing import ProcessingPool
 from analysis import get_root_preselection
 import os
 from k3pi_config import get_mode, config
@@ -8,7 +9,6 @@ import root_pandas
 import tempfile
 import tqdm
 import pandas as pd
-from pathos.multiprocessing import ProcessingPool
 
 log = get_logger('download_data')
 
@@ -30,6 +30,8 @@ def download(mode, polarity, year, full=False, test=False):
     chunked = list(helpers.chunks(mode.files, 25))
     length = len(list(chunked))
 
+    # While the code is in developement, just get any variables we can
+    # access
     for part in mode.head.all_mothers() + mode.head.all_daughters():
         for func in variables.__all__:
             try:
@@ -38,8 +40,8 @@ def download(mode, polarity, year, full=False, test=False):
                 pass
 
     add_vars = {
-        'delta_m': '{} - {}'.format(m(mode.head), m(mode.D0)),
-        'delta_m_dtf': '{} - {}'.format(dtf_m(mode.head), dtf_m(mode.D0))
+        'delta_m': '{} - {}'.format(m(mode.Dstp), m(mode.D0)),
+        'delta_m_dtf': '{} - {}'.format(dtf_m(mode.Dstp), dtf_m(mode.D0))
     }
 
     def run_splitter(fns):
@@ -59,9 +61,9 @@ def download(mode, polarity, year, full=False, test=False):
 
     with pd.get_store(config.data_store) as store:
         try:
-            store.remove(mode.get_tree_name())
+            store.remove(mode.get_store_name())
             log.info('Removing already existing data at {}'.format(
-                mode.get_tree_name()))
+                mode.get_store_name()))
         except KeyError:
             log.info('No previous data found. Nothing to delete.')
 
@@ -77,7 +79,7 @@ def download(mode, polarity, year, full=False, test=False):
 
 
 if __name__ == '__main__':
-    args = parser.create_parser()
+    args = parser.create_parser(log)
     if args.polarity == config.magboth:
         download(args.mode, config.magdown, args.year, args.full, args.test)
         download(args.mode, config.magup, args.year, args.full, args.test)

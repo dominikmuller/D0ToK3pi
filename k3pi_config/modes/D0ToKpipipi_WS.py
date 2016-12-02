@@ -4,6 +4,29 @@ from .mode_base import mode_base
 
 
 class D0ToKpipipi_WS(mode_base):
+    mass_fit_pars = dict(
+        # Dst - D0 mass fit
+        mu_dm=145.5, error_mu_dm=2, limit_mu_dm=(140, 150),
+        sigma_dm_L=0.2, error_sigma_dm_L=0.02, limit_sigma_dm_L=(0.0001, 1.),
+        sigma_dm_R=0.2, error_sigma_dm_R=0.02, limit_sigma_dm_R=(0.0001, 1.),
+        alpha_dm_L=0.2, error_alpha_dm_L=0.02, limit_alpha_dm_L=(0.0001, 1.),
+        alpha_dm_R=0.2, error_alpha_dm_R=0.02, limit_alpha_dm_R=(0.0001, 1.),
+        a_bkg=1.2, error_a_bkg=0.1, limit_a_bkg=(0.0001, 5.),
+        p_bkg=-0.03, error_p_bkg=0.01, limit_p_bkg=(-0.5, 0.5),
+        NSig=10000, error_NSig=10000, limit_NSig=(100, 100000),
+        NBkg=20000, error_NBkg=5000, limit_NBkg=(100, 600000),
+        NSPi=20000, error_NSPi=5000, limit_NSPi=(100, 600000),
+        width_dm=0.4, error_width_dm=0.02, limit_width_dm=(0.0001, 1.),
+        nu_dm=1.0, error_nu_dm=0.02, limit_nu_dm=(0.0001, 5.),
+        tau_dm=1.0, error_tau_dm=0.02, limit_tau_dm=(0.0001, 5.),
+        # D0 mass fit
+        mu_m=1865., error_mu_m=0.2, limit_mu1=(1855., 1875.),
+        sigma_m_L=5, error_sigma_m_L=0.1, limit_sigma_m_L=(0.001, 15.),
+        sigma_m_R=5, error_sigma_m_R=0.1, limit_sigma_m_R=(0.001, 15.),
+        alpha_m_L=0.2, error_alpha_m_L=0.001, limit_alpha_m_L=(0.001, 1.),
+        alpha_m_R=0.2, error_alpha_m_R=0.001, limit_alpha_m_R=(0.001, 1.),
+        c = 0, error_c = 0.1, limit_c=(-0.5, 0.5)
+    )
     mode = config.D0ToKpipipi_WS
     tpl = config.ntuple_strip.format(mode)
 
@@ -17,9 +40,10 @@ class D0ToKpipipi_WS(mode_base):
     ])
 
     Pislow = Particle('Pislow', r'$\pi_{\text{s}}^{+}$', pid=config.slowpion)
-    head = Particle('Dstp', r'$D^{*+}$', [
+    Dstp = Particle('Dstp', r'$D^{*+}$', [
         D0, Pislow
     ])
+    head = Dstp
 
     def __init__(self, polarity=None, year=None):
         super(D0ToKpipipi_WS, self).__init__(polarity, year)
