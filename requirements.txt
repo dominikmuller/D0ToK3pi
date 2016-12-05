@@ -1,0 +1,8 @@
+numpy
+pandas
+root_pandas
+decorator
+scipy
+seaborn
+tqdm
+matplotlib
