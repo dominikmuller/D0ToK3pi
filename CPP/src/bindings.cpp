@@ -27,6 +27,11 @@ PYBIND11_PLUGIN(k3pi_cpp) {
         py::arg("extra_pt"), py::arg("extra_eta"), py::arg("extra_phi"),
         py::arg("extra_m"), py::arg("d_pt"), py::arg("d_eta"), py::arg("d_phi"),
         py::arg("d_m"));
+  m.def("compute_delta_angle", py::vectorize(compute_delta_angle),
+        "Computes the delta mass.",
+        py::arg("extra_pt"), py::arg("extra_eta"), py::arg("extra_phi"),
+        py::arg("extra_m"), py::arg("d_pt"), py::arg("d_eta"), py::arg("d_phi"),
+        py::arg("d_m"));
 
   return m.ptr();
 }

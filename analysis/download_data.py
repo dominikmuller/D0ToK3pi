@@ -8,20 +8,23 @@ from k3pi_cpp import treesplitter
 import root_pandas
 import tempfile
 import tqdm
+from itertools import product
 import pandas as pd
 
 log = get_logger('download_data')
 
 
-def download(mode, polarity, year, full=False, test=False):
+def download(mode, polarity, year, full, test=False):
     log.info('Getting data for {} {} {}'.format(
         mode, polarity, year))
     mode = get_mode(polarity, year, mode)
 
     sel = get_root_preselection.get(mode)
 
-    if full is False:
-        sel = '({} % 20 == 0) && '.format(evt_num()) + sel
+    if full != 1:
+        ctr = int(1./float(full))
+        sel = '({} % {} == 0) && '.format(evt_num(), ctr) + sel
+        log.info('Using ({} % {} == 0)'.format(evt_num(), ctr))
 
     tempfile.mktemp('.root')
 
@@ -51,7 +54,7 @@ def download(mode, polarity, year, full=False, test=False):
                      addvariables=add_vars)
         return temp_file
 
-    pool = ProcessingPool(4)
+    pool = ProcessingPool(6)
     temp_files = []
     for r in tqdm.tqdm(pool.uimap(run_splitter, chunked),
                        leave=True, total=length, smoothing=0):
@@ -81,7 +84,12 @@ def download(mode, polarity, year, full=False, test=False):
 if __name__ == '__main__':
     args = parser.create_parser(log)
     if args.polarity == config.magboth:
-        download(args.mode, config.magdown, args.year, args.full, args.test)
-        download(args.mode, config.magup, args.year, args.full, args.test)
+        pols = [config.magup, config.magdown]
     else:
-        download(args.mode, args.polarity, args.year, args.full, args.test)
+        pols = [args.polarity]
+    if args.year == 1516:
+        years = [2015, 2016]
+    else:
+        years = [args.year]
+    for p, y in product(pols, years):
+        download(args.mode, p, y, args.full, args.test)

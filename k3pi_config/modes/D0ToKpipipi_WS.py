@@ -4,9 +4,10 @@ from .mode_base import mode_base
 
 
 class D0ToKpipipi_WS(mode_base):
+    shapes = ('CRU', 'JSU', 'PID')
     mass_fit_pars = dict(
         # Dst - D0 mass fit
-        mu_dm=145.5, error_mu_dm=2, limit_mu_dm=(140, 150),
+        mu_dm=145.5, error_2_mu_dm=2, limit_mu_dm=(140, 150),
         sigma_dm_L=0.2, error_sigma_dm_L=0.02, limit_sigma_dm_L=(0.0001, 1.),
         sigma_dm_R=0.2, error_sigma_dm_R=0.02, limit_sigma_dm_R=(0.0001, 1.),
         alpha_dm_L=0.2, error_alpha_dm_L=0.02, limit_alpha_dm_L=(0.0001, 1.),
@@ -19,12 +20,27 @@ class D0ToKpipipi_WS(mode_base):
         width_dm=0.4, error_width_dm=0.02, limit_width_dm=(0.0001, 1.),
         nu_dm=1.0, error_nu_dm=0.02, limit_nu_dm=(0.0001, 5.),
         tau_dm=1.0, error_tau_dm=0.02, limit_tau_dm=(0.0001, 5.),
+        width_1_dm=0.4, error_width_1_dm=0.02, limit_width_1_dm=(0.0001, 1.),
+        nu_1_dm=1.0, error_nu_1_dm=0.02, limit_nu_1_dm=(0.0001, 5.),
+        tau_1_dm=1.0, error_tau_1_dm=0.02, limit_tau_1_dm=(0.0001, 5.),
+        width_2_dm=0.4, error_width_2_dm=0.02, limit_width_2_dm=(0.0001, 1.),
+        nu_2_dm=1.0, error_nu_2_dm=0.02, limit_nu_2_dm=(0.0001, 5.),
+        tau_2_dm=1.0, error_tau_2_dm=0.02, limit_tau_2_dm=(0.0001, 5.),
         # D0 mass fit
-        mu_m=1865., error_mu_m=0.2, limit_mu1=(1855., 1875.),
+        mu_m=1865., error_mu_m=0.2, limit_mu_m=(1855., 1875.),
         sigma_m_L=5, error_sigma_m_L=0.1, limit_sigma_m_L=(0.001, 15.),
         sigma_m_R=5, error_sigma_m_R=0.1, limit_sigma_m_R=(0.001, 15.),
         alpha_m_L=0.2, error_alpha_m_L=0.001, limit_alpha_m_L=(0.001, 1.),
         alpha_m_R=0.2, error_alpha_m_R=0.001, limit_alpha_m_R=(0.001, 1.),
+        width_m=5, error_width_m=0.12, limit_width_m=(0.0001, 15.),
+        nu_m=0., error_nu_m=0.02,
+        tau_m=1.0, error_tau_m=0.02, limit_tau_m=(0.0001, 5.),
+        width_1_m=5, error_width_1_m=0.12, limit_width_1_m=(0.0001, 15.),
+        nu_1_m=0., error_nu_1_m=0.02,
+        tau_1_m=1.0, error_tau_1_m=0.02, limit_tau_1_m=(0.0001, 5.),
+        width_2_m=5, error_width_2_m=0.12, limit_width_2_m=(0.0001, 15.),
+        nu_2_m=0., error_nu_2_m=0.02,
+        tau_2_m=1.0, error_tau_2_m=0.02, limit_tau_2_m=(0.0001, 5.),
         c = 0, error_c = 0.1, limit_c=(-0.5, 0.5)
     )
     mode = config.D0ToKpipipi_WS

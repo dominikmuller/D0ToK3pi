@@ -3,6 +3,7 @@ import numpy as np
 import ROOT.RooFit as RF
 import matplotlib.pyplot as plt
 import logging as log
+import palettable
 
 
 def rooplot(ax, rc, **kwargs):
@@ -106,7 +107,7 @@ def plot_fit(part, wsp, varfunctor, output_name='', subs=None, data=None,
 
     pdf_tot = 'total'
 
-    frame = var.frame(RF.Bins(200))
+    frame = var.frame(RF.Bins(100))
     if data is None:
         wsp.data(dataname).plotOn(frame)
     else:
@@ -123,7 +124,8 @@ def plot_fit(part, wsp, varfunctor, output_name='', subs=None, data=None,
     pdf_rnd = plotobjs[3]
     pdf_comb = plotobjs[4]
 
-    colours = ['#333333', '#325B9D', '#269784', '#8677CF']
+    # colours = ['#333333', '#325B9D', '#269784', '#8677CF']
+    colours = ['#333333'] + palettable.tableau.TableauMedium_10.hex_colors[:3]
     cdata, csig, crn, cbkg = colours
 
     # Change 'Events' to 'Candidates and remove the parens around the units

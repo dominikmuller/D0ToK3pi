@@ -2,7 +2,9 @@ from k3pi_utilities import variables as vars
 import seaborn as sns
 import matplotlib.pyplot as plt
 from k3pi_utilities import parser
+from k3pi_config import config
 from scipy.cluster import hierarchy
+from analysis import selection, add_variables
 import numpy as np
 
 from k3pi_config import get_mode
@@ -29,6 +31,18 @@ def correlations(mode, year, polarity):
     nlist = [f.latex(p) for f, p in functors]
 
     df = mode.get_data(varlist)
+    sel = selection.pid_selection(mode)
+    sel &= selection.pid_fiducial_selection(mode)
+    sel &= selection.mass_fiducial_selection(mode)
+    if mode.mode not in config.twotag_modes:
+        sel &= selection.remove_secondary(mode)
+    sel &= selection.slow_pion(mode)
+    add_variables.append_angle(df, mode)
+    df = df[sel]
+
+    varlist += [vars.angle()]
+    nlist += [vars.angle.latex()]
+
     correlations = df.corr()
     correlations_array = np.asarray(df.corr())
 

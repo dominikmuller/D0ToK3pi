@@ -29,7 +29,7 @@ class mode_base(object):
             pols = [config.magup, config.magdown]
         else:
             pols = [polarity]
-        if year:
+        if year != 1516:
             years = [year]
         else:
             years = [2015, 2016]
@@ -59,26 +59,39 @@ class mode_base(object):
     def get_tree_name(self, mc=False):
         return config.ntuple_strip.format(self.mode)
 
-    def get_store_name(self, mc=False, polarity=None):
+    def get_store_name(self, mc=False, polarity=None, year=None):
         if self.polarity == config.magboth and polarity is None:
             raise ModeConfig('Cannot get store for MagBoth mode. Need to'
                              ' specify polarity as an argument')
+        if self.year == 1516 and year is None:
+            raise ModeConfig('Cannot get store for 1516 mode. Need to'
+                             ' specify polarity as an argument')
         if polarity is None:
             polarity = self.polarity
-        return config.store_name.format(self.mode, polarity)
+        if year is None:
+            year = self.year
+        return config.store_name.format(self.mode, polarity, year)
 
     def get_data(self, columns,  mc=False):
+        if self.polarity == config.magboth:
+            pols = [config.magup, config.magdown]
+        else:
+            pols = [self.polarity]
+        if self.year == 1516:
+            years = [2015, 2016]
+        else:
+            years = [self.year]
+        df = None
         with pd.get_store(config.data_store) as store:
-            if self.polarity == config.magboth:
-                df = store.select(
-                    self.get_store_name(mc, config.magup), columns=columns)
-                df = df.append(store.select(
-                    self.get_store_name(mc, config.magdown), columns=columns),
-                    ignore_index=True
-                )
-            else:
-                df = store.select(
-                    self.get_store_name(mc), columns=columns)
+            for p, y in product(pols, years):
+                if df is not None:
+                    df = df.append(store.select(
+                        self.get_store_name(mc, p, y), columns=columns),
+                        ignore_index=True
+                    )
+                else:
+                    df = store.select(
+                        self.get_store_name(mc, p, y), columns=columns)
         return df
 
     def get_output_path(self, extra=None):

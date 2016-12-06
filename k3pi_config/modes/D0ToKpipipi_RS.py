@@ -1,4 +1,7 @@
 from k3pi_utilities import Particle
+import numpy as np
+from k3pi_utilities import PlotConfig
+from k3pi_utilities import variables as vars
 from k3pi_config import config
 from .mode_base import mode_base
 
@@ -6,6 +9,7 @@ from .mode_base import mode_base
 class D0ToKpipipi_RS(mode_base):
     mode = config.D0ToKpipipi_RS
     tpl = config.ntuple_strip.format(mode)
+    shapes = ('CRU', 'DJSU', 'PID')
     mass_fit_pars = dict(
         # Dst - D0 mass fit
         mu_dm=145.5, error_mu_dm=2, limit_mu_dm=(140, 150),
@@ -21,12 +25,27 @@ class D0ToKpipipi_RS(mode_base):
         width_dm=0.4, error_width_dm=0.02, limit_width_dm=(0.0001, 1.),
         nu_dm=1.0, error_nu_dm=0.02, limit_nu_dm=(0.0001, 5.),
         tau_dm=1.0, error_tau_dm=0.02, limit_tau_dm=(0.0001, 5.),
+        width_1_dm=0.4, error_width_1_dm=0.02, limit_width_1_dm=(0.0001, 1.),
+        nu_1_dm=1.0, error_nu_1_dm=0.02, limit_nu_1_dm=(0.0001, 5.),
+        tau_1_dm=1.0, error_tau_1_dm=0.02, limit_tau_1_dm=(0.0001, 5.),
+        width_2_dm=0.4, error_width_2_dm=0.02, limit_width_2_dm=(0.0001, 1.),
+        nu_2_dm=1.0, error_nu_2_dm=0.02, limit_nu_2_dm=(0.0001, 5.),
+        tau_2_dm=1.0, error_tau_2_dm=0.02, limit_tau_2_dm=(0.0001, 5.),
         # D0 mass fit
-        mu_m=1865., error_mu_m=0.2, limit_mu1=(1855., 1875.),
+        mu_m=1865., error_mu_m=0.2, limit_mu_m=(1855., 1875.),
         sigma_m_L=5, error_sigma_m_L=0.1, limit_sigma_m_L=(0.001, 15.),
         sigma_m_R=5, error_sigma_m_R=0.1, limit_sigma_m_R=(0.001, 15.),
         alpha_m_L=0.2, error_alpha_m_L=0.001, limit_alpha_m_L=(0.001, 1.),
         alpha_m_R=0.2, error_alpha_m_R=0.001, limit_alpha_m_R=(0.001, 1.),
+        width_m=5, error_width_m=0.12, limit_width_m=(0.0001, 15.),
+        nu_m=1., error_nu_m=0.02, limit_nu_m=(0.0000001, 5.),
+        tau_m=1.0, error_tau_m=0.02, limit_tau_m=(0.0001, 5.),
+        width_1_m=5, error_width_1_m=0.12, limit_width_1_m=(0.0001, 15.),
+        nu_1_m=1., error_nu_1_m=0.02, limit_nu_1_m=(0.0000001, 5.),
+        tau_1_m=1.0, error_tau_1_m=0.02, limit_tau_1_m=(0.0001, 5.),
+        width_2_m=5, error_width_2_m=0.12, limit_width_2_m=(0.0001, 15.),
+        nu_2_m=1., error_nu_2_m=0.02, limit_nu_2_m=(0.0000001, 5.),
+        tau_2_m=1.0, error_tau_2_m=0.02, limit_tau_2_m=(0.0001, 5.),
         c = 0, error_c = 0.1, limit_c=(-0.5, 0.5)
     )
 
@@ -47,5 +66,23 @@ class D0ToKpipipi_RS(mode_base):
 
     def __init__(self, polarity=None, year=None):
         super(D0ToKpipipi_RS, self).__init__(polarity, year)
+
+    bdt_vars = [
+        PlotConfig(vars.pt, D0, (50, 0, 15000)),
+        PlotConfig(vars.eta, D0, (50, 1.5, 5.5)),
+        PlotConfig(vars.ipchi2, D0, (50, -7, 2.), np.log, r'$\ln(\text{{{}}})$'),
+        PlotConfig(vars.dira, D0, (50, 0.9998, 1)),
+        PlotConfig(vars.vdchi2, D0, (50, 0, 20), np.log, r'$\ln(\text{{{}}})$'),
+        PlotConfig(vars.ltime, D0, (50, 0, 0.001)),
+        PlotConfig(vars.mindoca, D0, (50, 0, 0.1)),
+        PlotConfig(vars.maxdoca, D0, (50, 0, 0.5)),
+        PlotConfig(vars.angle, None, (50, 0, 0.03))
+    ]
+    for d in Dstp.all_daughters():
+        bdt_vars += [
+            PlotConfig(vars.pt, d, (50, 0, 8000)),
+            PlotConfig(vars.eta, d, (50, 1.5, 5.5)),
+            PlotConfig(vars.ipchi2, d, (50, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),
+        ]
 
 __all__ = ['D0ToKpipipi_RS']

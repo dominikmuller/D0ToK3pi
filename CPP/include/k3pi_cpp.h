@@ -19,5 +19,8 @@ double compute_delta_m(double extra_pt, double extra_eta, double extra_phi,
 double compute_dstp_pt(double extra_pt, double extra_eta, double extra_phi,
                        double extra_m, double d_pt, double d_eta, double d_phi,
                        double d_m);
+double compute_delta_angle(double extra_pt, double extra_eta, double extra_phi,
+                       double extra_m, double d_pt, double d_eta, double d_phi,
+                       double d_m);
 
 #endif /* ifndef k3pi_cpp */

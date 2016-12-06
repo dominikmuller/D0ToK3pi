@@ -7,13 +7,15 @@ def create_parser(logger=None):
     This method is responsible for checking that the input arguments are valid.
     """
     parser = argparse.ArgumentParser(description='Generate sWeights for PID')
-    parser.add_argument('-f', '--full', action='store_true', default=False,
-                        help='No using the event number to only run on 5% of the data')  # NOQA
+    parser.add_argument('-f', '--full', default=0.05,
+                        help='Fraction of events to download. 5% of the data')  # NOQA
     parser.add_argument('-t', '--test', action='store_true', default=False,
                         help='Acticates testing mode')
     parser.add_argument('-m', '--mode', default='RS', choices=['RS', 'WS', '2tag_RS', '2tag_WS'],  # NOQA
                         help='Acticates testing mode')
-    parser.add_argument('-y', '--year', default=None, choices=[2015, 2016],
+    parser.add_argument('-a', '--all', action='store_true', default=False,
+                        help='All modes, overrules --mode')
+    parser.add_argument('-y', '--year', default=None, choices=[2015, 2016, 1516],  # NOQA
                         type=int, help='Acticates testing mode')
     parser.add_argument('-p', '--polarity', default=None,
                         choices=['MagDown', 'MagUp', 'MagBoth'],
@@ -35,8 +37,8 @@ def create_parser(logger=None):
     elif args.verbose == 2:
         logger.setLevel(log.DEBUG)
     else:
+        import ROOT
         ROOT.RooMsgService.instance().setSilentMode(False)
         ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.DEBUG)
         logger.setLevel(log.DEBUG)
-        config.devnull = None
     return args
