@@ -40,8 +40,6 @@ def pid_fiducial_selection(df, mode):
 def mass_fiducial_selection(df, mode):
     ret = True
     ret &= (np.abs(df[m(mode.D0)] - config.PDG_MASSES[config.Dz] - 5.) < 60)
-    # ret &= (df[dm()] >= 140.5)
-    # ret &= (df[dm()] < 152.5)
     ret &= (df[dtf_dm()] >= 140.5)
     ret &= (df[dtf_dm()] < 160.5)
 
@@ -64,6 +62,18 @@ def slow_pion(df, mode):
     ret &= (df[probnnk(mode.Pislow)] < 0.7)
 
     return ret
+
+
+@buffer_load
+@call_debug
+def full_selection(mode):
+    sel = pid_selection(mode)
+    sel &= pid_fiducial_selection(mode)
+    sel &= mass_fiducial_selection(mode)
+    if mode.mode not in config.twotag_modes:
+        sel &= remove_secondary(mode)
+    sel &= slow_pion(mode)
+    return sel
 
 
 if __name__ == '__main__':

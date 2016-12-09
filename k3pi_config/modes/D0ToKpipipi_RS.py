@@ -69,20 +69,27 @@ class D0ToKpipipi_RS(mode_base):
 
     bdt_vars = [
         PlotConfig(vars.pt, D0, (50, 0, 15000)),
-        PlotConfig(vars.eta, D0, (50, 1.5, 5.5)),
         PlotConfig(vars.ipchi2, D0, (50, -7, 2.), np.log, r'$\ln(\text{{{}}})$'),
         PlotConfig(vars.dira, D0, (50, 0.9998, 1)),
-        PlotConfig(vars.vdchi2, D0, (50, 0, 20), np.log, r'$\ln(\text{{{}}})$'),
-        PlotConfig(vars.ltime, D0, (50, 0, 0.001)),
+        PlotConfig(vars.vdchi2, D0, (50, 0, 10), np.log, r'$\ln(\text{{{}}})$'),
         PlotConfig(vars.mindoca, D0, (50, 0, 0.1)),
         PlotConfig(vars.maxdoca, D0, (50, 0, 0.5)),
-        PlotConfig(vars.angle, None, (50, 0, 0.03))
+        PlotConfig(vars.maxdoca, D0, (50, 0, 0.5)),
+        PlotConfig(vars.dtf_chi2, head, (50, 0, 60)),
+        # PlotConfig(vars.angle, None, (50, 0, 0.03))
     ]
     for d in Dstp.all_daughters():
         bdt_vars += [
-            PlotConfig(vars.pt, d, (50, 0, 8000)),
-            PlotConfig(vars.eta, d, (50, 1.5, 5.5)),
             PlotConfig(vars.ipchi2, d, (50, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),
         ]
+    for d in [Pislow]:
+        bdt_vars += [
+            PlotConfig(vars.pt, d, (50, 0, 8000)),
+            PlotConfig(vars.probnnghost, d, (50, 0., 0.3)),
+        ]
+    spectator_vars = [
+        PlotConfig(vars.pt, d, (50, 0, 8000)),
+        PlotConfig(vars.ltime, D0, (50, 0, 0.001)),
+    ]
 
 __all__ = ['D0ToKpipipi_RS']

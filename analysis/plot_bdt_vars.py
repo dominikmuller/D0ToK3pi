@@ -61,10 +61,10 @@ def plot_bdt_variables(mode):
             h_sig = h_sig*1./float(n_sig)
             err_sig /= float(n_sig)
 
-            ax.bar(x_ctr-x_err, h_bkg, width, color='#42BA42', linewidth=0,
-                   label='Background', edgecolor='#42BA42', alpha=0.55)
-            ax.bar(x_ctr-x_err, h_sig, width, color='#E95252', linewidth=0,
-                   label='Signal', edgecolor='#E95252', alpha=0.55)
+            ax.bar(x_ctr-x_err, h_bkg, width, color='#11073B', linewidth=0,
+                   label='Background', edgecolor='#11073B', alpha=0.80)
+            ax.bar(x_ctr-x_err, h_sig, width, color='#5F5293', linewidth=0,
+                   label='Signal', edgecolor='#5F5293', alpha=0.80)
 
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(handles[::-1], labels[::-1], loc='best')

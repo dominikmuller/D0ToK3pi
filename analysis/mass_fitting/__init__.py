@@ -101,12 +101,7 @@ def get_sweights(mode):
     shapes.load_shape_class('RooBackground')
     wsp = fit_config.load_workspace(mode)
 
-    sel = selection.pid_selection(mode)
-    sel &= selection.pid_fiducial_selection(mode)
-    sel &= selection.mass_fiducial_selection(mode)
-    if mode.mode not in config.twotag_modes:
-        sel &= selection.remove_secondary(mode)
-    sel &= selection.slow_pion(mode)
+    sel = selection.full_selection(mode)
 
     df = df[sel]
 

@@ -26,6 +26,7 @@ def correlations(mode, year, polarity):
     functors += [(vars.dira, mode.D0)]
     functors += [(vars.ltime, mode.D0)]
     functors += [(vars.dm, None), (vars.m, mode.D0)]
+    functors += [(vars.dtf_chi2, mode.head)]
 
     varlist = [f(p) for f, p in functors]
     nlist = [f.latex(p) for f, p in functors]
