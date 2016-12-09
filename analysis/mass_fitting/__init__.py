@@ -2,7 +2,6 @@ from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import pandas as pd
 from k3pi_config import config
-import collections
 from . import shapes
 from k3pi_utilities.buffer import buffer_load
 from k3pi_utilities.debugging import call_debug
@@ -77,6 +76,15 @@ def plot_fit(mode, suffix=None, wsp=None):
         for func in [m, dtf_dm]:
             roofit_to_matplotlib.plot_fit(mode.D0, wsp, func,
                                           data=data, pdf=pdf)
+
+
+def fit_parameters(mode):
+    from . import fit_config
+    shapes.load_shape_class('RooCruijff')
+    shapes.load_shape_class('RooJohnsonSU')
+    shapes.load_shape_class('RooBackground')
+    from .fit_setup import setup_pdf
+    pass
 
 
 @np.vectorize

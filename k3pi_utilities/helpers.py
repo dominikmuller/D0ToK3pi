@@ -288,3 +288,25 @@ class suppress_stdout_stderr(object):
         # Close the null files
         os.close(self.null_fds[0])
         os.close(self.null_fds[1])
+
+
+def rounder(num, l_for_sig_dgt, is_unc=False, sig_prec=1):
+    l_for_sig_dgt = [x for x in l_for_sig_dgt if x != 0]
+    if len(l_for_sig_dgt) == 0:
+        return num, 0
+    most_precise = min(map(abs, l_for_sig_dgt))
+    dec_pos = [int(floor(log10(abs(x)))) for x in l_for_sig_dgt]
+    sig_digit = int(floor(log10(abs(most_precise))))
+    # normed_val = most_precise*10**(-sig_digit)
+    # if 1.00 <= normed_val < 3.45:
+    # sig_digit -= 1
+    # elif normed_val >= 9.50:
+    # sig_digit -= 1
+    # if is_unc:
+    # num += sign(num)*0.5*10**sig_digit
+    if False not in [d == min(dec_pos) for d in dec_pos]:
+        sig_digit -= sig_prec
+    prec = [0, -sig_digit][sig_digit < 0]
+    return round(num, -sig_digit), prec
+
+
