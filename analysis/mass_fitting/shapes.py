@@ -1,4 +1,3 @@
-import ROOT
 import os
 
 import logging as log
@@ -7,6 +6,7 @@ from .fit_config import get_delta_mass_var, get_mass_var
 
 
 def load_shape_class(name):
+    import ROOT
     """Load the shape class corresponding to name.
 
     First an attempt is made to load a compiled shared library name.so, if this
@@ -164,6 +164,73 @@ def dst_d0_johnsonsu(species, workspace, mode):
     return 'pdf_dm_{0}'.format(species)
 
 
+def d0_johnsonsu(species, workspace, mode):
+    """Add v2 of empirical D*-D0 delta mass background shape PDF to workspace.
+
+    Expression used has parameters dm, dm0, a, b, and the functional form is
+        y = (dm - dm0)^A * exp(B*dm)
+    Taken from LHCb-ANA-2014-016.
+    """
+    load_shape_class('RooJohnsonSU')
+    mass_var = get_mass_var(workspace).GetName()
+    workspace.factory(mode.get_rf_vars('mu_m{0}'.format(species)))
+    workspace.factory(mode.get_rf_vars('width_m{0}'.format(species)))
+    workspace.factory(mode.get_rf_vars('nu_m{0}'.format(species)))
+    workspace.factory(mode.get_rf_vars('tau_m{0}'.format(species)))
+    # Threshold at the charged pion mass
+    workspace.factory((
+        'RooJohnsonSU::pdf_m_{0}('
+        '{1},mu_m{0},width_m{0},nu_m{0},tau_m{0}'
+        ')'
+    ).format(species, mass_var))
+    return 'pdf_m_{0}'.format(species)
+
+
+def d0_double_johnsonsu(species, workspace, mode):
+    mass_var = get_mass_var(workspace).GetName()
+    return double_johnsonsu('m', workspace, mode, mass_var)
+
+
+def dst_d0_double_johnsonsu(species, workspace, mode):
+    dmass_var = get_delta_mass_var(workspace).GetName()
+    return double_johnsonsu('dm', workspace, mode, dmass_var)
+
+
+def double_johnsonsu(species, workspace, mode, var):
+    """Add v2 of empirical D*-D0 delta mass background shape PDF to workspace.
+
+    Expression used has parameters dm, dm0, a, b, and the functional form is
+        y = (dm - dm0)^A * exp(B*dm)
+    Taken from LHCb-ANA-2014-016.
+    """
+    load_shape_class('RooJohnsonSU')
+    workspace.factory(mode.get_rf_vars('mu_{0}'.format(species)))
+    workspace.factory(mode.get_rf_vars('width_1_{0}'.format(species)))
+    workspace.factory(mode.get_rf_vars('nu_1_{0}'.format(species)))
+    workspace.factory(mode.get_rf_vars('tau_1_{0}'.format(species)))
+    workspace.factory(mode.get_rf_vars('width_2_{0}'.format(species)))
+    workspace.factory(mode.get_rf_vars('nu_2_{0}'.format(species)))
+    workspace.factory(mode.get_rf_vars('tau_2_{0}'.format(species)))
+    workspace.factory('ds_fraction_{0}[0.5,0,1]'.format(species))
+    # Threshold at the charged pion mass
+    workspace.factory((
+        'RooJohnsonSU::pdf_1_{0}('
+        '{1},mu_{0},width_1_{0},nu_1_{0},tau_1_{0}'
+        ')'
+    ).format(species, var))
+    workspace.factory((
+        'RooJohnsonSU::pdf_2_{0}('
+        '{1},mu_{0},width_2_{0},nu_2_{0},tau_2_{0}'
+        ')'
+    ).format(species, var))
+    workspace.factory((
+        'SUM::pdf_{0}('
+        'ds_fraction_{0}*pdf_1_{0},pdf_2_{0}'
+        ')'
+    ).format(species))
+    return 'pdf_{0}'.format(species)
+
+
 def d0_cruijff(species, workspace, mode):
     """Add empirical power law D*-D0 delta mass background PDF to workspace.
 
@@ -190,3 +257,19 @@ def d0_bkg(species, workspace, mode):
     workspace.factory(mode.get_rf_vars('c{}'.format(species)))
     workspace.factory("Chebychev::m_bkg{0}({1},c{0})".format(species, mass_var))
     return 'm_bkg{}'.format(species)
+
+
+dst_d0_shapes = {
+    'CRU': dst_d0_cruijff,
+    'JSU': dst_d0_johnsonsu,
+    'DJSU': dst_d0_double_johnsonsu,
+    'PID': dst_d0_pid_bkg,
+    'DM1': dst_d0_delta_mass_bkg,
+    'DM2': dst_d0_delta_mass_bkg_two
+}
+
+d0_shapes = {
+    'CRU': d0_cruijff,
+    'JSU': d0_johnsonsu,
+    'DJSU': d0_double_johnsonsu,
+}

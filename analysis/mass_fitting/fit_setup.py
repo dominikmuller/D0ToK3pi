@@ -9,15 +9,20 @@ def setup_pdf(wsp, mode):
         return
     # ROOT.RooMsgService.instance().setGlobalKillBelow(RF.WARNING)
     # ROOT.RooMsgService.instance().setSilentMode(True)
+    SIG_M, SIG_DM, BKG_DM = mode.shapes
+
+    SIG_M = shapes.d0_shapes[SIG_M]
+    SIG_DM = shapes.dst_d0_shapes[SIG_DM]
+    BKG_DM = shapes.dst_d0_shapes[BKG_DM]
 
     # Variables for the signal pdf
-    sig_m = shapes.d0_cruijff('', wsp, mode)
+    sig_m = SIG_M('', wsp, mode)
     bkg_m = shapes.d0_bkg('', wsp, mode)
 
     # delta random slow
-    slow_pi_dm = shapes.dst_d0_delta_mass_bkg('sp', wsp)
-    bkg_dm = shapes.dst_d0_delta_mass_bkg('bkg', wsp)
-    sig_dm = shapes.dst_d0_johnsonsu('', wsp, mode)
+    slow_pi_dm = BKG_DM('sp', wsp)
+    bkg_dm = BKG_DM('bkg', wsp)
+    sig_dm = SIG_DM('', wsp, mode)
     # Signal 2D pdf
     wsp.factory("PROD::signal({}, {})".format(sig_m, sig_dm))
     wsp.factory("PROD::random({}, {})".format(sig_m, slow_pi_dm))

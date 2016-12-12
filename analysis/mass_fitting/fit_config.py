@@ -1,7 +1,4 @@
-import ROOT
-import root_pandas
 import tempfile
-import ROOT.RooFit as RF
 from k3pi_utilities import helpers
 
 
@@ -20,6 +17,7 @@ def get_mass_var(workspace):
 
 
 def workspace_import(workspace, obj, name='', cmdargs=None):
+    import ROOT
     """Import object obj in to the RooWorkspace.
     Import as normal if name is given, else use hack to fix ROOT 6 bug.
     https://sft.its.cern.ch/jira/browse/ROOT-6785
@@ -38,6 +36,9 @@ def workspace_import(workspace, obj, name='', cmdargs=None):
 
 
 def pandas_to_roodataset(df, st, dataname='roofit_ds'):
+    import ROOT
+    import ROOT.RooFit as RF
+    import root_pandas  # NOQA, actually need this for to_root function.
     tmpfile = tempfile.mktemp()+'.root'
     treename = 'default'
     df.index = df.index.astype('int32')

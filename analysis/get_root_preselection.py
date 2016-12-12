@@ -1,5 +1,6 @@
 from k3pi_utilities.variables import (p, pt, ipchi2, m, dtf_chi2, ltime,
-                                      vdchi2, maxdoca, mindoca)
+                                      vdchi2, maxdoca, mindoca, probnnk,
+                                      probnnpi, probnnghost)
 from k3pi_config import config
 
 
@@ -42,11 +43,24 @@ def get(mode):
     _cuts += [maxdoca(mode.D0) + ' > 0.']
     _cuts += [mindoca(mode.D0) + ' > 0.']
     _cuts += [ltime(mode.D0) + ' > -10000.']
+    for daug in mode.head.all_daughters():
+        _cuts += [p(daug) + ' >= 3000.']
+        _cuts += [p(daug) + ' < 100000.']
+    for kaon in mode.head.all_pid(config.kaon):
+        _cuts += [probnnk(kaon) + ' > 0.3']
+        _cuts += [probnnpi(kaon) + ' < 0.7']
+    for pion in mode.head.all_pid(config.pion):
+        _cuts += [probnnpi(pion) + ' > 0.3']
+        _cuts += [probnnk(pion) + ' < 0.7']
+    for pion in mode.head.all_pid(config.slowpion):
+        _cuts += [probnnghost(mode.Pislow) + ' < 0.3']
+        _cuts += [probnnpi(mode.Pislow) + ' > 0.3']
+        _cuts += [probnnk(mode.Pislow) + ' < 0.7']
 
     if mode.mode in config.twotag_modes:
         _cuts += [pt(mode.D0) + ' >= 1800.']
     else:
         _cuts += [pt(mode.D0) + ' >= 5000.']
-        _cuts += [ipchi2(mode.D0) + ' < 2.']
+        _cuts += ['TMath::Log(' + ipchi2(mode.D0) + ') < 2.']
 
     return ' && '.join(['({})'.format(x) for x in _cuts])
