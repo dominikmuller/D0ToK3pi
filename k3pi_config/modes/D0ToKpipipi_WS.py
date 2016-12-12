@@ -1,4 +1,7 @@
 from k3pi_utilities import Particle
+from k3pi_utilities import PlotConfig
+from k3pi_utilities import variables as vars
+import numpy as np
 from k3pi_config import config
 from .mode_base import mode_base
 
@@ -63,6 +66,33 @@ class D0ToKpipipi_WS(mode_base):
 
     def __init__(self, polarity=None, year=None):
         super(D0ToKpipipi_WS, self).__init__(polarity, year)
+
+    bdt_vars = [
+        PlotConfig(vars.pt, D0, (50, 0, 15000)),
+        PlotConfig(vars.ipchi2, D0, (50, -7, 2.), np.log, r'$\ln(\text{{{}}})$'),
+        PlotConfig(vars.dira, D0, (50, 0.9998, 1)),
+        PlotConfig(vars.vdchi2, D0, (50, 0, 10), np.log, r'$\ln(\text{{{}}})$'),
+        PlotConfig(vars.mindoca, D0, (50, 0, 0.1)),
+        PlotConfig(vars.maxdoca, D0, (50, 0, 0.5)),
+        PlotConfig(vars.dtf_chi2, head, (50, 0, 60)),
+        # PlotConfig(vars.angle, None, (50, 0, 0.03))
+    ]
+    for d in Dstp.all_daughters():
+        bdt_vars += [
+            PlotConfig(vars.ipchi2, d, (50, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),
+        ]
+    for d in [Pislow]:
+        bdt_vars += [
+            PlotConfig(vars.pt, d, (50, 0, 8000)),
+            PlotConfig(vars.probnnghost, d, (50, 0., 0.3)),
+            PlotConfig(vars.probnnp, d, (50, 0., 1.0)),
+            PlotConfig(vars.probnne, d, (50, 0., 1.0)),
+            PlotConfig(vars.probnnmu, d, (50, 0., 1.0)),
+        ]
+    spectator_vars = [
+        PlotConfig(vars.pt, d, (50, 0, 8000)),
+        PlotConfig(vars.ltime, D0, (50, 0, 0.001)),
+    ]
 
 
 __all__ = ['D0ToKpipipi_WS']

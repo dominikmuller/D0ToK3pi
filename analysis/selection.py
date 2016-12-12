@@ -1,4 +1,5 @@
-from k3pi_utilities.variables import eta, probnnk, probnnpi, p, m, dm, dtf_dm
+from k3pi_utilities.variables import (eta, probnnk, probnnpi, p, m, dm, dtf_dm,
+                                      probnnmu)
 from k3pi_utilities.variables import ipchi2, probnnghost
 from k3pi_utilities.selective_load import selective_load
 from k3pi_utilities.buffer import buffer_load
@@ -39,7 +40,8 @@ def pid_fiducial_selection(df, mode):
 @call_debug
 def mass_fiducial_selection(df, mode):
     ret = True
-    ret &= (np.abs(df[m(mode.D0)] - config.PDG_MASSES[config.Dz] - 5.) < 60)
+    ret &= (df[m(mode.D0)] >= 1810.)
+    ret &= (df[m(mode.D0)] < 1920.)
     ret &= (df[dtf_dm()] >= 140.5)
     ret &= (df[dtf_dm()] < 160.5)
 
@@ -60,6 +62,7 @@ def slow_pion(df, mode):
     ret = (df[probnnghost(mode.Pislow)] < 0.3)
     ret &= (df[probnnpi(mode.Pislow)] > 0.3)
     ret &= (df[probnnk(mode.Pislow)] < 0.7)
+    ret &= (df[probnnmu(mode.Pislow)] < 0.1)
 
     return ret
 
@@ -87,7 +90,8 @@ if __name__ == '__main__':
             'pid_fiducial_selection',
             'mass_fiducial_selection',
             'remove_secondary',
-            'slow_pion'
+            'slow_pion',
+            'full_selection'
         ]
     else:
         sels = args.selections

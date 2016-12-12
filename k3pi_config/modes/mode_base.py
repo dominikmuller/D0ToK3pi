@@ -114,3 +114,5 @@ class mode_base(object):
             low, high = self.mass_fit_pars['limit_' + identifier]
             return identifier + '[{}, {}, {}]'.format(val, low, high)
         return identifier + '[{}]'.format(val)
+
+    bdt_vars = []

@@ -10,6 +10,7 @@ except ImportError:
 import logging as log
 import multiprocessing
 import os
+from math import floor, log10
 import pickle
 import random
 import shutil

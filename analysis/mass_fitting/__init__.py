@@ -1,3 +1,4 @@
+from __future__ import print_function
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import pandas as pd
@@ -5,17 +6,21 @@ from k3pi_config import config
 from . import shapes
 from k3pi_utilities.buffer import buffer_load
 from k3pi_utilities.debugging import call_debug
+from k3pi_utilities import helpers
+from k3pi_config.modes import gcm
 
+from k3pi_utilities import tex_compile
 from k3pi_utilities.variables import dtf_dm, m
 from .. import selection
 
 
-def fit(mode):
+def fit():
     from . import fit_config
-    import ROOT
-    import ROOT.RooFit as RF
-    from .fit_setup import setup_pdf
+    from ROOT import RooFit as RF
+    from .fit_setup import setup_workspace
     # Get the data
+    # TODO: rewrite selection to use gcm itself
+    mode = gcm()
     sel = selection.pid_selection(mode)
     sel &= selection.pid_fiducial_selection(mode)
     sel &= selection.mass_fiducial_selection(mode)
@@ -26,35 +31,25 @@ def fit(mode):
     df = mode.get_data([dtf_dm(), m(mode.D0)])
     df = df[sel]
 
-    fit_config.WS_DMASS_NAME = dtf_dm()
-    fit_config.WS_MASS_NAME = m(mode.D0)
-    wsp = ROOT.RooWorkspace(mode.mode, mode.mode)
-
-    wsp.factory('{}[{},{}]'.format(m(mode.D0), df[m(mode.D0)].min(),
-                                   df[m(mode.D0)].max()))
-    wsp.factory('{}[{},{}]'.format(dtf_dm(), df[dtf_dm()].min(),
-                                   df[dtf_dm()].max()))
-
-    wsp.defineSet('datavars', '{},{}'.format(dtf_dm(), m(mode.D0)))
-
-    setup_pdf(wsp, mode)
+    wsp, _ = setup_workspace()
 
     data = fit_config.pandas_to_roodataset(df, wsp.set('datavars'))
     model = wsp.pdf('total')
 
-    plot_fit(mode, 'starting', wsp=wsp)
+    plot_fit('_start_values', wsp=wsp)
     model.fitTo(data, RF.NumCPU(4), RF.Save(True), RF.Strategy(2),
                 RF.Extended(True))
 
     fit_config.dump_workspace(mode, wsp)
 
 
-def plot_fit(mode, suffix=None, wsp=None):
+def plot_fit(suffix=None, wsp=None):
     from . import roofit_to_matplotlib
     from . import fit_config
     shapes.load_shape_class('RooCruijff')
     shapes.load_shape_class('RooJohnsonSU')
     shapes.load_shape_class('RooBackground')
+    mode = gcm()
     if wsp is None:
         wsp = fit_config.load_workspace(mode)
     sel = selection.pid_selection(mode)
@@ -78,13 +73,41 @@ def plot_fit(mode, suffix=None, wsp=None):
                                           data=data, pdf=pdf)
 
 
-def fit_parameters(mode):
+def fit_parameters():
     from . import fit_config
     shapes.load_shape_class('RooCruijff')
     shapes.load_shape_class('RooJohnsonSU')
     shapes.load_shape_class('RooBackground')
-    from .fit_setup import setup_pdf
-    pass
+    helpers.ensure_directory_exists
+    from .fit_setup import setup_workspace
+    mode = gcm()
+    _, vs = setup_workspace()
+    row_template = r'{} & {} & \pm & {} \\'
+
+    fn = mode.get_output_path('sweight_fit') + 'parameters.tex'
+    with open(fn, 'w') as f:
+        print(r'\begin{tabular}{l|r@{\hskip 0.1em}c@{\hskip 0.1em}l}', file=f)
+
+        wsp = fit_config.load_workspace(mode)
+        for pdf in vs:
+            for vn, pn in pdf:
+                var = wsp.var(vn)
+                if var:
+                    val, err = var.getVal(), var.getError()
+                    rounding = [err]
+                    val, prec = helpers.rounder(val, rounding, sig_prec=1)
+                    err, _ = helpers.rounder(err, rounding,
+                                            is_unc=True, sig_prec=1)
+                    spec = '{{:.{}f}}'.format(prec)
+                    print(
+                        row_template.format(pn, spec.format(val),
+                                            spec.format(err)),
+                        file=f)
+            print(r'\hline', file=f)
+        print(r'\end{tabular}', file=f)
+    tex_compile.convert_tex_to_pdf(fn)
+
+
 
 
 @np.vectorize
