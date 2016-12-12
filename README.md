@@ -2,6 +2,8 @@
 
 Preparing to use on LXPlus:
 
+Make sure `.local/bin` is near the beginning of your path.
+
 ```
 pip install --user --upgrade pip
 pip install --user virtualenv virtualenvwrapper
@@ -15,10 +17,16 @@ export PROJECT_HOME=$HOME/Devel
 source $HOME/.local/bin/virtualenvwrapper.sh
 ```
 
+If using zsh, this should be your `.zshrc` file, or if using oh-my-zsh, this can be added with the virtualenvwrapper plugin.
+
 After reruning your bashrc, you'll need to make a k3pi environment:
 
 ```
-mkvirtualenv k3pi -r requirements.txt
+mkvirtualenv k3pi
+pip install numpy scipy matplotlib
+pip install -r requirements.txt
 ```
 
-Then you should be able to source setup.sh (I have to copy and paste it to the command line for some unknown reason).
+Then you should be able to `source ./setup.sh` (be careful, if you don't specify the `./` it might not work due to a bad name choice on LXPlus).
+
+To start using it, try running make in `CPP/shape_classes` then in `CPP`.
