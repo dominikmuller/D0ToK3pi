@@ -6,3 +6,11 @@ scipy
 seaborn
 tqdm
 matplotlib
+mcerp
+pathos
+dill
+h5py
+hep_ml
+ipython
+jupyter
+sklearn
