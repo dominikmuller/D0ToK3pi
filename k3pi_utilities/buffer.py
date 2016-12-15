@@ -1,6 +1,7 @@
 from collections import defaultdict
 import logging as log
-from k3pi_config import config
+from k3pi_config import config, modes
+import inspect
 import pandas as pd
 
 accumulated_per_mode = defaultdict(lambda: set())
@@ -8,12 +9,15 @@ accumulated_per_mode = defaultdict(lambda: set())
 
 class buffer_load():
     def __init__(self, function):
+        self._wants_mode = 'mode' in inspect.getargspec(function).args
         self._func = function
         self._func_name = function.__name__
         self.__name__ = function.__name__
         self.__doc__ = function.__doc__
 
-    def __call__(self, mode, use_buffered=True):
+    def __call__(self, mode=None, use_buffered=True):
+        if mode is None:
+            mode = modes.gcm()
         buffer_name = 'Cached/' + self._func_name + mode.mode + \
             mode.polarity + str(mode.year)
         log.debug('Loading {} from {}'.format(
@@ -26,6 +30,9 @@ class buffer_load():
                 except KeyError:
                     pass
         log.debug('Caching into {}'.format(buffer_name))
-        ret = self._func(mode)
+        if self._wants_mode:
+            ret = self._func(mode)
+        else:
+            ret = self._func()
         ret.to_hdf(config.data_store, buffer_name)
         return ret
