@@ -114,14 +114,12 @@ def call_after_set(pdf, wsp, **kwargs):
         fnd = wsp.var(var)
         if fnd:
             fnd.setVal(val)
-    return pdf.getVal()
+    return pdf.getVal(wsp.set('datavars'))
 
 
 @buffer_load
 @call_debug
 def get_sweights():
-    # I really don't want stupid ROOT here so if we do the dummy call to get
-    # the variables needed, just skip.
     df = gcm().get_data([m(gcm().D0), dtf_dm()])
     from . import fit_config
     from hep_ml import splot
@@ -130,7 +128,7 @@ def get_sweights():
     shapes.load_shape_class('RooBackground')
     wsp = fit_config.load_workspace(gcm())
 
-    sel = selection.full_selection(gcm())
+    sel = selection.full_selection()
 
     df = df[sel]
 
@@ -142,9 +140,9 @@ def get_sweights():
     rnd_prob = call_after_set(rnd_pdf, wsp, **df)
     comb_prob = call_after_set(comb_pdf, wsp, **df)
 
-    probs = pd.DataFrame(dict(sig=sig_prob,
-                              rnd=rnd_prob,
-                              comb=comb_prob))
+    probs = pd.DataFrame(dict(sig=sig_prob*wsp.var('NSig').getVal(),
+                              rnd=rnd_prob*wsp.var('NSPi').getVal(),
+                              comb=comb_prob*wsp.var('NBkg').getVal()))
     probs = probs.div(probs.sum(axis=1), axis=0)
 
     return splot.compute_sweights(probs)
