@@ -1,25 +1,33 @@
 from k3pi_utilities import variables as vars
 from k3pi_utilities.selective_load import selective_load
 from k3pi_utilities.buffer import buffer_load
+from k3pi_utilities import parser
 from analysis import selection
 import collections
 from k3pi_utilities.debugging import call_debug
-from k3pi_config.modes import gcm
+from k3pi_config.modes import gcm, MODE
 from k3pi_cpp import compute_delta_angle, vec_phsp_variables
 from k3pi_config import config
 import pandas as pd
 
 
-def append_angle(df, mode):
-    extra = _dstp_slowpi_angle(mode)
+def append_angle(df):
+    extra = _dstp_slowpi_angle()
     df[extra.name] = extra
+
+
+def append_phsp(df):
+    extra = phsp_variables()
+    for c in extra.columns:
+        df[c] = extra[c].values
 
 
 @buffer_load
 @selective_load
 @call_debug
-def _dstp_slowpi_angle(df, mode):
+def _dstp_slowpi_angle(df):
 
+    mode = gcm()
     ret = compute_delta_angle(
         df[vars.pt(mode.D0)], df[vars.eta(mode.D0)], df[vars.phi(mode.D0)],
         df[vars.m(mode.D0)],
@@ -64,3 +72,17 @@ def phsp_variables(df):
                 df[vars.dtf_pt(mode.Pi_OS2)], df[vars.dtf_eta(mode.Pi_OS2)],
                 df[vars.dtf_phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
         return 1
+
+
+if __name__ == '__main__':
+    import sys
+    args = parser.create_parser()
+
+    funcs = [
+        'phsp_variables',
+        '_dstp_slowpi_angle'
+    ]
+
+    with MODE(args.polarity, args.year, args.mode):
+        for f in funcs:
+            getattr(sys.modules[__name__], f)(use_buffered=False)

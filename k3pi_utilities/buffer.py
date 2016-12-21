@@ -1,7 +1,7 @@
 from collections import defaultdict
 import logging as log
 from k3pi_config import config, modes
-import inspect
+from inspect import getargspec
 import pandas as pd
 
 accumulated_per_mode = defaultdict(lambda: set())
@@ -9,7 +9,10 @@ accumulated_per_mode = defaultdict(lambda: set())
 
 class buffer_load():
     def __init__(self, function):
-        self._wants_mode = 'mode' in inspect.getargspec(function).args
+        try:
+            self._wants_mode = 'mode' in getargspec(function).args
+        except TypeError:
+            self._wants_mode = 'mode' in getargspec(function.__call__).args
         self._func = function
         self._func_name = function.__name__
         self.__name__ = function.__name__

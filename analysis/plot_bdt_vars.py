@@ -1,27 +1,23 @@
-from k3pi_config import get_mode, config
 import matplotlib.pyplot as plt
 from k3pi_utilities import parser
-from k3pi_utilities import variables as vars
 from matplotlib.backends.backend_pdf import PdfPages
 from analysis.mass_fitting import get_sweights
 from analysis import add_variables
 import numpy as np
+from k3pi_config.modes import gcm, MODE
 from analysis import selection
 from tqdm import tqdm
 
 
-def plot_bdt_variables(mode):
-    bdt_vars = mode.bdt_vars
+def plot_bdt_variables():
+    mode = gcm()
+    bdt_vars = mode.bdt_vars + mode.spectator_vars
     df = mode.get_data([v.var for v in bdt_vars])
-    add_variables.append_angle(df, mode)
-    sel = selection.pid_selection(mode)
-    sel &= selection.pid_fiducial_selection(mode)
-    sel &= selection.mass_fiducial_selection(mode)
-    if mode.mode not in config.twotag_modes:
-        sel &= selection.remove_secondary(mode)
-    sel &= selection.slow_pion(mode)
-
+    add_variables.append_angle(df)
+    sel = selection.full_selection()
     df = df[sel]
+    add_variables.append_phsp(df)
+
     sweights = get_sweights(mode)
     nbins = 40
     sig_wgt = sweights['sig']
@@ -77,8 +73,7 @@ def plot_bdt_variables(mode):
             plt.close()
 
 
-
 if __name__ == '__main__':
     args = parser.create_parser()
-    mode = get_mode(args.polarity, args.year, args.mode)
-    plot_bdt_variables(mode)
+    with MODE(args.polarity, args.year, args.mode):
+        plot_bdt_variables()
