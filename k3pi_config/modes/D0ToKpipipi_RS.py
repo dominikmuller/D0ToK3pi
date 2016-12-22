@@ -1,5 +1,6 @@
 from k3pi_utilities import Particle
 import numpy as np
+from math import pi
 from k3pi_utilities import PlotConfig
 from k3pi_utilities import variables as vars
 from k3pi_config import config
@@ -95,6 +96,11 @@ class D0ToKpipipi_RS(mode_base):
         ]
     spectator_vars = [
         PlotConfig(vars.ltime, D0, (50, 0, 0.001)),
+        PlotConfig(vars.m12, None, (100, 0, 1600.)),
+        PlotConfig(vars.m34, None, (100, 0, 1400.)),
+        PlotConfig(vars.cos1, None, (50, -1, 1)),
+        PlotConfig(vars.cos2, None, (50, -1, 1)),
+        PlotConfig(vars.phi1, None, (50, -pi, pi)),
     ]
 
 __all__ = ['D0ToKpipipi_RS']

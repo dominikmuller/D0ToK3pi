@@ -97,7 +97,7 @@ def fit_parameters():
                     rounding = [err]
                     val, prec = helpers.rounder(val, rounding, sig_prec=1)
                     err, _ = helpers.rounder(err, rounding,
-                                            is_unc=True, sig_prec=1)
+                                             is_unc=True, sig_prec=1)
                     spec = '{{:.{}f}}'.format(prec)
                     print(
                         row_template.format(pn, spec.format(val),
@@ -108,31 +108,27 @@ def fit_parameters():
     tex_compile.convert_tex_to_pdf(fn)
 
 
-
-
 @np.vectorize
 def call_after_set(pdf, wsp, **kwargs):
     for var, val in kwargs.iteritems():
         fnd = wsp.var(var)
         if fnd:
             fnd.setVal(val)
-    return pdf.getVal()
+    return pdf.getVal(wsp.set('datavars'))
 
 
 @buffer_load
 @call_debug
-def get_sweights(mode):
-    # I really don't want stupid ROOT here so if we do the dummy call to get
-    # the variables needed, just skip.
-    df = mode.get_data([m(mode.D0), dtf_dm()])
+def get_sweights():
+    df = gcm().get_data([m(gcm().D0), dtf_dm()])
     from . import fit_config
     from hep_ml import splot
     shapes.load_shape_class('RooCruijff')
     shapes.load_shape_class('RooJohnsonSU')
     shapes.load_shape_class('RooBackground')
-    wsp = fit_config.load_workspace(mode)
+    wsp = fit_config.load_workspace(gcm())
 
-    sel = selection.full_selection(mode)
+    sel = selection.full_selection()
 
     df = df[sel]
 
@@ -144,9 +140,9 @@ def get_sweights(mode):
     rnd_prob = call_after_set(rnd_pdf, wsp, **df)
     comb_prob = call_after_set(comb_pdf, wsp, **df)
 
-    probs = pd.DataFrame(dict(sig=sig_prob,
-                              rnd=rnd_prob,
-                              comb=comb_prob))
+    probs = pd.DataFrame(dict(sig=sig_prob*wsp.var('NSig').getVal(),
+                              rnd=rnd_prob*wsp.var('NSPi').getVal(),
+                              comb=comb_prob*wsp.var('NBkg').getVal()))
     probs = probs.div(probs.sum(axis=1), axis=0)
 
     return splot.compute_sweights(probs)

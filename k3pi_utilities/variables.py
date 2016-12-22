@@ -104,4 +104,9 @@ var('dtf_chi2', '{head}_DTF_CHI2', True, False, r'DTF $\chi^2$')
 var('dtf_ndof', '{head}_DTF_NDOF', True, False, r'DTF dof')
 var('dm', 'delta_m', False, False, '$\Delta m$', mevcc, append=False)
 var('dtf_dm', 'delta_m_dtf', False, False, 'DTF $\Delta m$', mevcc, append=False)  # NOQA
-var('angle', 'dstp_slowpi_angle', False, False, r'$\Delta\Phi$')  # NOQA
+var('angle', 'dstp_slowpi_angle', False, False, r'$\Delta\Phi$', append=False)  # NOQA
+var('m12', 'm12', False, False, r'$m_{K^\pm\pi^\mp}$', mevcc, append=False)
+var('m34', 'm34', False, False, r'$m_{\pi^\pm\pi^\mp}$', mevcc, append=False)
+var('cos1', 'cos1', False, False, r'$\cos\theta_1$', None, append=False)
+var('cos2', 'cos2', False, False, r'$\cos\theta_2$', None, append=False)
+var('phi1', 'phi1', False, False, r'$\phi_1$', None, append=False)
