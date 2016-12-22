@@ -49,26 +49,37 @@ def phsp_variables(df):
     """Returns m12, m34, cos1, cos2, phi1"""
     mode = gcm()
 
+    # implementation using pybind11::array requires some special treatment
+    # here, otherwise the passed arrays are of non-matching type.
     if not isinstance(df, collections.defaultdict):
         sel = selection.full_selection(mode)
         df = df[sel]
-    vals = vec_phsp_variables(
-        df[vars.dtf_pt(mode.K)], df[vars.dtf_eta(mode.K)],
-        df[vars.dtf_phi(mode.K)], config.PDG_MASSES['K'],
-        df[vars.dtf_pt(mode.Pi_OS1)], df[vars.dtf_eta(mode.Pi_OS1)],
-        df[vars.dtf_phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-        df[vars.dtf_pt(mode.Pi_SS)], df[vars.dtf_eta(mode.Pi_SS)],
-        df[vars.dtf_phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
-        df[vars.dtf_pt(mode.Pi_OS2)], df[vars.dtf_eta(mode.Pi_OS2)],
-        df[vars.dtf_phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
-    if isinstance(df, collections.defaultdict):
-        return 1
-    return pd.DataFrame({'m12': vals[0],
-                         'm34': vals[1],
-                         'cos1': vals[2],
-                         'cos2': vals[3],
-                         'phi1': vals[4]},
-                        index=df.index)
+        vals = vec_phsp_variables(
+            df[vars.dtf_pt(mode.K)], df[vars.dtf_eta(mode.K)],
+            df[vars.dtf_phi(mode.K)], config.PDG_MASSES['K'],
+            df[vars.dtf_pt(mode.Pi_OS1)], df[vars.dtf_eta(mode.Pi_OS1)],
+            df[vars.dtf_phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
+            df[vars.dtf_pt(mode.Pi_SS)], df[vars.dtf_eta(mode.Pi_SS)],
+            df[vars.dtf_phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
+            df[vars.dtf_pt(mode.Pi_OS2)], df[vars.dtf_eta(mode.Pi_OS2)],
+            df[vars.dtf_phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
+        return pd.DataFrame({'m12': vals[0],
+                            'm34': vals[1],
+                            'cos1': vals[2],
+                            'cos2': vals[3],
+                            'phi1': vals[4]},
+                            index=df.index)
+    else:
+        vals = (
+            df[vars.dtf_pt(mode.K)], df[vars.dtf_eta(mode.K)],
+            df[vars.dtf_phi(mode.K)], config.PDG_MASSES['K'],
+            df[vars.dtf_pt(mode.Pi_OS1)], df[vars.dtf_eta(mode.Pi_OS1)],
+            df[vars.dtf_phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
+            df[vars.dtf_pt(mode.Pi_SS)], df[vars.dtf_eta(mode.Pi_SS)],
+            df[vars.dtf_phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
+            df[vars.dtf_pt(mode.Pi_OS2)], df[vars.dtf_eta(mode.Pi_OS2)],
+            df[vars.dtf_phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
+        return 1.
 
 
 @buffer_load
@@ -78,27 +89,18 @@ def double_misid_d0(df):
     """Returns d0 mass with changed kaon and ss pion mass hypthesis"""
     mode = gcm()
 
-    if type(df) != collections.defaultdict:
-        val = double_misid_d0_mass(
-            df[vars.pt(mode.K)], df[vars.eta(mode.K)],
-            df[vars.phi(mode.K)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
-            df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['K'],
-            df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
-            df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
-            df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
-        return pd.Series(val, name=vars.m(gcm().D0))
-    else:
-        (df[vars.pt(mode.K)], df[vars.eta(mode.K)],
-         df[vars.phi(mode.K)], config.PDG_MASSES['K'],
-         df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
-         df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
-         df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
-         df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
-        return 1
+    val = double_misid_d0_mass(
+        df[vars.pt(mode.K)], df[vars.eta(mode.K)],
+        df[vars.phi(mode.K)], config.PDG_MASSES['Pi'],
+        df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
+        df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['K'],
+        df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
+        df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
+        df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
+        df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
+    if not isinstance(df, collections.defaultdict):
+        return pd.Series(val, name=vars.m(gcm().D0), index=df.index)
+    return 1
 
 
 @buffer_load
@@ -108,35 +110,22 @@ def other_slowpi(df):
     """Returns d0 mass with changed kaon and ss pion mass hypthesis"""
     mode = gcm()
 
-    if type(df) != collections.defaultdict:
-        val = change_slowpi_d0(
-            df[vars.pt(mode.K)], df[vars.eta(mode.K)],
-            df[vars.phi(mode.K)], config.PDG_MASSES['K'],
-            df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
-            df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
-            df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
-            df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
-            df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi'],
-            config.PDG_MASSES['D0']
-        )
-        return pd.Series(val, name=vars.m(gcm().D0))
-    else:
-        (df[vars.pt(mode.K)], df[vars.eta(mode.K)],
-         df[vars.phi(mode.K)], config.PDG_MASSES['K'],
-         df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
-         df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
-         df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
-         df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
-         df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi'],
-         config.PDG_MASSES['D0']
-         )
-        return 1
+    val = change_slowpi_d0(
+        df[vars.pt(mode.K)], df[vars.eta(mode.K)],
+        df[vars.phi(mode.K)], config.PDG_MASSES['K'],
+        df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
+        df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
+        df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
+        df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
+        df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
+        df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'],
+        df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
+        df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi'],
+        config.PDG_MASSES['D0']
+    )
+    if not isinstance(df, collections.defaultdict):
+        return pd.Series(val, name=vars.m(gcm().D0), index=df.index)
+    return 1
 
 
 @buffer_load
@@ -146,141 +135,22 @@ def other_slowpi_ws(df):
     """Returns d0 mass with changed kaon and ss pion mass hypthesis"""
     mode = gcm()
 
-    if type(df) != collections.defaultdict:
-        val = change_slowpi_d0_ws(
-            df[vars.pt(mode.K)], df[vars.eta(mode.K)],
-            df[vars.phi(mode.K)], config.PDG_MASSES['K'],
-            df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
-            df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
-            df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
-            df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
-            df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi'],
-            config.PDG_MASSES['D0']
-        )
-        return pd.Series(val, name=vars.m(gcm().D0))
-    else:
-        (df[vars.pt(mode.K)], df[vars.eta(mode.K)],
-         df[vars.phi(mode.K)], config.PDG_MASSES['K'],
-         df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
-         df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
-         df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
-         df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
-         df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi'],
-         config.PDG_MASSES['D0']
-         )
-        return 1
-
-
-@buffer_load
-@selective_load
-@call_debug
-def double_misid_d0(df):
-    """Returns d0 mass with changed kaon and ss pion mass hypthesis"""
-    mode = gcm()
-
-    if type(df) != collections.defaultdict:
-        val = double_misid_d0_mass(
-            df[vars.pt(mode.K)], df[vars.eta(mode.K)],
-            df[vars.phi(mode.K)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
-            df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['K'],
-            df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
-            df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
-            df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
-        return pd.Series(val, name=vars.m(gcm().D0))
-    else:
-        (df[vars.pt(mode.K)], df[vars.eta(mode.K)],
-         df[vars.phi(mode.K)], config.PDG_MASSES['K'],
-         df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
-         df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
-         df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
-         df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
-        return 1
-
-
-@buffer_load
-@selective_load
-@call_debug
-def other_slowpi(df):
-    """Returns d0 mass with changed kaon and ss pion mass hypthesis"""
-    mode = gcm()
-
-    if type(df) != collections.defaultdict:
-        val = change_slowpi_d0(
-            df[vars.pt(mode.K)], df[vars.eta(mode.K)],
-            df[vars.phi(mode.K)], config.PDG_MASSES['K'],
-            df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
-            df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
-            df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
-            df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
-            df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi'],
-            config.PDG_MASSES['D0']
-        )
-        return pd.Series(val, name=vars.m(gcm().D0))
-    else:
-        (df[vars.pt(mode.K)], df[vars.eta(mode.K)],
-         df[vars.phi(mode.K)], config.PDG_MASSES['K'],
-         df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
-         df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
-         df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
-         df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
-         df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi'],
-         config.PDG_MASSES['D0']
-         )
-        return 1
-
-
-@buffer_load
-@selective_load
-@call_debug
-def other_slowpi_ws(df):
-    """Returns d0 mass with changed kaon and ss pion mass hypthesis"""
-    mode = gcm()
-
-    if type(df) != collections.defaultdict:
-        val = change_slowpi_d0_ws(
-            df[vars.pt(mode.K)], df[vars.eta(mode.K)],
-            df[vars.phi(mode.K)], config.PDG_MASSES['K'],
-            df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
-            df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
-            df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
-            df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
-            df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
-            df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi'],
-            config.PDG_MASSES['D0']
-        )
-        return pd.Series(val, name=vars.m(gcm().D0))
-    else:
-        (df[vars.pt(mode.K)], df[vars.eta(mode.K)],
-         df[vars.phi(mode.K)], config.PDG_MASSES['K'],
-         df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
-         df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
-         df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
-         df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'],
-         df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
-         df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi'],
-         config.PDG_MASSES['D0']
-         )
-        return 1
+    val = change_slowpi_d0_ws(
+        df[vars.pt(mode.K)], df[vars.eta(mode.K)],
+        df[vars.phi(mode.K)], config.PDG_MASSES['K'],
+        df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
+        df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
+        df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
+        df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'],
+        df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
+        df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
+        df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
+        df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi'],
+        config.PDG_MASSES['D0']
+    )
+    if not isinstance(df, collections.defaultdict):
+        return pd.Series(val, name=vars.m(gcm().D0), index=df.index)
+    return 1
 
 
 if __name__ == '__main__':
