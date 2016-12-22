@@ -114,6 +114,9 @@ PYBIND11_PLUGIN(k3pi_cpp) {
         py::arg("extra_phi"), py::arg("extra_m"), py::arg("d_pt"),
         py::arg("d_eta"), py::arg("d_phi"), py::arg("d_m"));
   m.def("vec_phsp_variables", &vec_phsp_variables, "Adding two numpy arrays");
+  m.def("double_misid_d0_mass", py::vectorize(double_misid_d0_mass), "D0 mass");
+  m.def("change_slowpi_d0", py::vectorize(change_slowpi_d0), "D0 mass");
+  m.def("change_slowpi_d0_ws", py::vectorize(change_slowpi_d0_ws), "D0 mass");
 
   return m.ptr();
 }
