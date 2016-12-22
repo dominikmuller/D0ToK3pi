@@ -19,7 +19,7 @@ def append_angle(df):
 def append_phsp(df):
     extra = phsp_variables()
     for c in extra.columns:
-        df[c] = extra[c].values
+        df[c] = extra[c]
 
 
 @buffer_load
@@ -35,7 +35,9 @@ def _dstp_slowpi_angle(df):
         df[vars.phi(mode.Pislow)],
         config.PDG_MASSES[config.pion],
     )
-    return pd.Series(ret, name='dstp_slowpi_angle')
+    if isinstance(df, collections.defaultdict):
+        return 1
+    return pd.Series(ret, name='dstp_slowpi_angle', index=df.index)
 
 
 @buffer_load
@@ -45,33 +47,26 @@ def phsp_variables(df):
     """Returns m12, m34, cos1, cos2, phi1"""
     mode = gcm()
 
-    if type(df) != collections.defaultdict:
+    if not isinstance(df, collections.defaultdict):
         sel = selection.full_selection(mode)
         df = df[sel]
-        vals = vec_phsp_variables(
-            df[vars.dtf_pt(mode.K)], df[vars.dtf_eta(mode.K)],
-            df[vars.dtf_phi(mode.K)], config.PDG_MASSES['K'],
-            df[vars.dtf_pt(mode.Pi_OS1)], df[vars.dtf_eta(mode.Pi_OS1)],
-            df[vars.dtf_phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-            df[vars.dtf_pt(mode.Pi_SS)], df[vars.dtf_eta(mode.Pi_SS)],
-            df[vars.dtf_phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
-            df[vars.dtf_pt(mode.Pi_OS2)], df[vars.dtf_eta(mode.Pi_OS2)],
-            df[vars.dtf_phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
-        return pd.DataFrame({'m12': vals[0],
-                             'm34': vals[1],
-                             'cos1': vals[2],
-                             'cos2': vals[3],
-                             'phi1': vals[4]})
-    else:
-        vals = (df[vars.dtf_pt(mode.K)], df[vars.dtf_eta(mode.K)],
-                df[vars.dtf_phi(mode.K)], config.PDG_MASSES['K'],
-                df[vars.dtf_pt(mode.Pi_OS1)], df[vars.dtf_eta(mode.Pi_OS1)],
-                df[vars.dtf_phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-                df[vars.dtf_pt(mode.Pi_SS)], df[vars.dtf_eta(mode.Pi_SS)],
-                df[vars.dtf_phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
-                df[vars.dtf_pt(mode.Pi_OS2)], df[vars.dtf_eta(mode.Pi_OS2)],
-                df[vars.dtf_phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
+    vals = vec_phsp_variables(
+        df[vars.dtf_pt(mode.K)], df[vars.dtf_eta(mode.K)],
+        df[vars.dtf_phi(mode.K)], config.PDG_MASSES['K'],
+        df[vars.dtf_pt(mode.Pi_OS1)], df[vars.dtf_eta(mode.Pi_OS1)],
+        df[vars.dtf_phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
+        df[vars.dtf_pt(mode.Pi_SS)], df[vars.dtf_eta(mode.Pi_SS)],
+        df[vars.dtf_phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
+        df[vars.dtf_pt(mode.Pi_OS2)], df[vars.dtf_eta(mode.Pi_OS2)],
+        df[vars.dtf_phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
+    if isinstance(df, collections.defaultdict):
         return 1
+    return pd.DataFrame({'m12': vals[0],
+                         'm34': vals[1],
+                         'cos1': vals[2],
+                         'cos2': vals[3],
+                         'phi1': vals[4]},
+                        index=df.index)
 
 
 if __name__ == '__main__':
