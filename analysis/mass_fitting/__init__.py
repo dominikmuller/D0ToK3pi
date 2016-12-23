@@ -142,7 +142,8 @@ def get_sweights():
 
     probs = pd.DataFrame(dict(sig=sig_prob*wsp.var('NSig').getVal(),
                               rnd=rnd_prob*wsp.var('NSPi').getVal(),
-                              comb=comb_prob*wsp.var('NBkg').getVal()))
+                              comb=comb_prob*wsp.var('NBkg').getVal()),
+                         index=df.index)
     probs = probs.div(probs.sum(axis=1), axis=0)
 
     return splot.compute_sweights(probs)
