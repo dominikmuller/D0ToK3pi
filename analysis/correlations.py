@@ -5,14 +5,18 @@ from scipy.cluster import hierarchy
 from analysis import selection, add_variables
 from k3pi_config.modes import MODE, gcm
 import numpy as np
+from k3pi_utilities.variables import m, dtf_dm
 
 
 def correlations():
     sns.set(style="white")
 
     functors = set()
-    for pc in gcm().bdt_vars + gcm().spectator_vars:
+    for pc in gcm().bdt_vars:
         functors.add((pc.functor, pc.particle))
+
+    functors.add((m, gcm().D0))
+    functors.add((dtf_dm, None))
 
     varlist = [f(p) for f, p in functors]
     nlist = [f.latex(p) for f, p in functors]

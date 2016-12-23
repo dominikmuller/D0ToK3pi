@@ -104,6 +104,14 @@ var('dtf_chi2', '{head}_DTF_CHI2', True, False, r'DTF $\chi^2$')
 var('dtf_ndof', '{head}_DTF_NDOF', True, False, r'DTF dof')
 var('dm', 'delta_m', False, False, '$\Delta m$', mevcc, append=False)
 var('dtf_dm', 'delta_m_dtf', False, False, 'DTF $\Delta m$', mevcc, append=False)  # NOQA
+var('ipchi21', '1ipchi2', False, False, r'$1^\text{st} \chi^2_\text{IP}$', append=False)  # NOQA
+var('ipchi22', '2ipchi2', False, False, r'$2^\text{nd} \chi^2_\text{IP}$', append=False)  # NOQA
+var('ipchi23', '3ipchi2', False, False, r'$3^\text{rd} \chi^2_\text{IP}$', append=False)  # NOQA
+var('ipchi24', '4ipchi2', False, False, r'$4^\text{th} \chi^2_\text{IP}$', append=False)  # NOQA
+var('pt1', '1pt', False, False, r'$1^\text{st} p_{\text{T}}$', mevc, append=False)  # NOQA
+var('pt2', '2pt', False, False, r'$2^\text{nd} p_{\text{T}}$', mevc, append=False)  # NOQA
+var('pt3', '3pt', False, False, r'$3^\text{rd} p_{\text{T}}$', mevc, append=False)  # NOQA
+var('pt4', '4pt', False, False, r'$4^\text{th} p_{\text{T}}$', mevc, append=False)  # NOQA
 var('angle', 'dstp_slowpi_angle', False, False, r'$\Delta\Phi$', append=False)  # NOQA
 var('m12', 'm12', False, False, r'$m_{K^\pm\pi^\mp}$', mevcc, append=False)
 var('m34', 'm34', False, False, r'$m_{\pi^\pm\pi^\mp}$', mevcc, append=False)

@@ -3,7 +3,7 @@ from analysis import get_root_preselection
 import os
 from k3pi_config import get_mode, config
 from k3pi_utilities import variables, helpers, parser, get_logger
-from k3pi_utilities.variables import m, dtf_m, evt_num
+from k3pi_utilities.variables import m, dtf_m, evt_num, ipchi2, pt
 from k3pi_cpp import treesplitter
 import root_pandas
 import tempfile
@@ -44,9 +44,23 @@ def download(mode, polarity, year, full, test=False, mc=None):
             except variables.AccessorUsage:
                 pass
 
+    # Make some sorted variables. Saves the hassle when later training BDTs
+    arg_sorted_ip = '{},{},{},{}'.format(
+        *[ipchi2(p) for p in mode.D0.all_daughters()])
+    arg_sorted_pt = '{},{},{},{}'.format(
+        *[pt(p) for p in mode.D0.all_daughters()])
+
     add_vars = {
         'delta_m': '{} - {}'.format(m(mode.Dstp), m(mode.D0)),
-        'delta_m_dtf': '{} - {}'.format(dtf_m(mode.Dstp), dtf_m(mode.D0))
+        'delta_m_dtf': '{} - {}'.format(dtf_m(mode.Dstp), dtf_m(mode.D0)),
+        '1ipchi2': 'ROOTex::Leading({})'.format(arg_sorted_ip),
+        '2ipchi2': 'ROOTex::SecondLeading({})'.format(arg_sorted_ip),
+        '3ipchi2': 'ROOTex::ThirdLeading({})'.format(arg_sorted_ip),
+        '4ipchi2': 'ROOTex::FourthLeading({})'.format(arg_sorted_ip),
+        '1pt': 'ROOTex::Leading({})'.format(arg_sorted_pt),
+        '2pt': 'ROOTex::SecondLeading({})'.format(arg_sorted_pt),
+        '3pt': 'ROOTex::ThirdLeading({})'.format(arg_sorted_pt),
+        '4pt': 'ROOTex::FourthLeading({})'.format(arg_sorted_pt),
     }
     variables_needed = list(variables.all_ever_used)
 

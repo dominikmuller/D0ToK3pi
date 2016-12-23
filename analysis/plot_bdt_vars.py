@@ -105,7 +105,7 @@ def sig_sec_comb_stack(v, df):
 
 def plot_bdt_variables():
     mode = gcm()
-    bdt_vars = mode.bdt_vars + mode.spectator_vars
+    bdt_vars = mode.bdt_vars + mode.spectator_vars + mode.just_plot
     df = mode.get_data([v.var for v in bdt_vars])
     add_variables.append_angle(df)
     sel = selection.full_selection()
