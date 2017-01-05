@@ -9,6 +9,4 @@ if __name__ == '__main__':
         fit()
         plot_fit()
         fit_parameters()
-        # Call the get sweights function to cache the sweights
-        mode = modes.gcm()
-        get_sweights(mode, False)
+        get_sweights(use_buffered=False)
