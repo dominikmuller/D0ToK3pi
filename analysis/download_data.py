@@ -54,7 +54,7 @@ def download(mode, polarity, year, full, test=False):
                      addvariables=add_vars)
         return temp_file
 
-    pool = ProcessingPool(6)
+    pool = ProcessingPool(8)
     temp_files = []
     for r in tqdm.tqdm(pool.uimap(run_splitter, chunked),
                        leave=True, total=length, smoothing=0):

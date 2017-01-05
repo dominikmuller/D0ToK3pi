@@ -56,7 +56,13 @@ def dst_d0_delta_mass_bkg(species, workspace):
         '{1}, threshold_dm_{0}, c_dm_{0}, a_dm_{0}, b_dm_{0}'
         ')'
     ).format(species, dmass_var))
-    return 'pdf_dm_{0}'.format(species)
+    vs = [
+        ('threshold_dm_{0}'.format(species), r'$\Delta m^0_{{{}}}$'.format(species)),  # NOQA
+        ('a_dm_{0}'.format(species), r'$a_{{\Delta m, {}}}$'.format(species)),
+        ('b_dm_{0}'.format(species), r'$a_{{\Delta m, {}}}$'.format(species)),
+        ('c_dm_{0}'.format(species), r'$a_{{\Delta m, {}}}$'.format(species)),
+    ]
+    return 'pdf_dm_{0}'.format(species), vs
 
 
 def dst_d0_pid_bkg(species, workspace):
@@ -75,7 +81,10 @@ def dst_d0_pid_bkg(species, workspace):
         '{1}, a_dm_{0}'
         ')'
     ).format(species, dmass_var))
-    return 'pdf_dm_{0}'.format(species)
+    vs = [
+        ('a_dm_{0}'.format(species), r'$a_{{\Delta m, {}}}$'.format(species)),
+    ]
+    return 'pdf_dm_{0}'.format(species), vs
 
 
 def dst_d0_delta_mass_bkg_two(species, workspace):
@@ -96,7 +105,12 @@ def dst_d0_delta_mass_bkg_two(species, workspace):
         '{{{1}, threshold_dm_{0}, a_dm_{0}, b_dm_{0}}}'
         ')'
     ).format(species, dmass_var))
-    return 'pdf_dm_{0}'.format(species)
+    vs = [
+        ('threshold_dm_{0}'.format(species), r'$\Delta m^0_{{{}}}$'.format(species)),  # NOQA
+        ('a_dm_{0}'.format(species), r'$a_{{\Delta m, {}}}$'.format(species)),
+        ('b_dm_{0}'.format(species), r'$a_{{\Delta m, {}}}$'.format(species)),
+    ]
+    return 'pdf_dm_{0}'.format(species), vs
 
 
 def dst_d0_power_bkg(species, workspace):
@@ -118,7 +132,13 @@ def dst_d0_power_bkg(species, workspace):
         '{1}, threshold_dm_{0}, a_dm_{0}, b_dm_{0}, c_dm_{0}'
         ')'
     ).format(species, dmass_var))
-    return 'pdf_dm_{0}'.format(species)
+    vs = [
+        ('threshold_dm_{0}'.format(species), r'$\Delta m^0_{{{}}}$'.format(species)),  # NOQA
+        ('a_dm_{0}'.format(species), r'$a_{{\Delta m, {}}}$'.format(species)),
+        ('b_dm_{0}'.format(species), r'$a_{{\Delta m, {}}}$'.format(species)),
+        ('c_dm_{0}'.format(species), r'$a_{{\Delta m, {}}}$'.format(species)),
+    ]
+    return 'pdf_dm_{0}'.format(species), vs
 
 
 def dst_d0_cruijff(species, workspace, mode):
@@ -139,7 +159,14 @@ def dst_d0_cruijff(species, workspace, mode):
         'RooCruijff::pdf_dm_sig{0}({1}, mu_dm{0}, sigma_dm_L{0},'
         ' sigma_dm_R{0}, alpha_dm_L{0}, alpha_dm_R{0})'
     ).format(species, dmass_var))
-    return 'pdf_dm_sig{0}'.format(species)
+    vs = [
+        ('mu_dm{0}'.format(species), r'$\mu_{\Delta m}$'),
+        ('sigma_dm_L{0}'.format(species), r'$\sigma^L_{\Delta m}$'),
+        ('sigma_dm_R{0}'.format(species), r'$\sigma^R_{\Delta m}$'),
+        ('alpha_dm_L{0}'.format(species), r'$\alpha^L_{\Delta m}$'),
+        ('alpha_dm_R{0}'.format(species), r'$\alpha^R_{\Delta m}$'),
+    ]
+    return 'pdf_dm_sig{0}'.format(species), vs
 
 
 def dst_d0_johnsonsu(species, workspace, mode):
@@ -161,7 +188,13 @@ def dst_d0_johnsonsu(species, workspace, mode):
         '{1},mu_dm{0},width_dm{0},nu_dm{0},tau_dm{0}'
         ')'
     ).format(species, dmass_var))
-    return 'pdf_dm_{0}'.format(species)
+    vs = [
+        ('mu_dm{0}'.format(species), r'$\mu_{\Delta m}$'),
+        ('width_dm{0}'.format(species), r'$\sigma_{\Delta m}$'),
+        ('nu_dm{0}'.format(species), r'$\nu_{\Delta m}$'),
+        ('tau_dm{0}'.format(species), r'$\tau_{\Delta m}$'),
+    ]
+    return 'pdf_dm_{0}'.format(species), vs
 
 
 def d0_johnsonsu(species, workspace, mode):
@@ -183,17 +216,43 @@ def d0_johnsonsu(species, workspace, mode):
         '{1},mu_m{0},width_m{0},nu_m{0},tau_m{0}'
         ')'
     ).format(species, mass_var))
-    return 'pdf_m_{0}'.format(species)
+    vs = {
+        ('mu_m{0}'.format(species), r'$\mu_{m}$'),
+        ('width_m{0}'.format(species), r'$\sigma_{m}$'),
+        ('nu_m{0}'.format(species), r'$\nu_{m}$'),
+        ('tau_m{0}'.format(species), r'$\tau_{m}$'),
+    }
+    return 'pdf_m_{0}'.format(species), vs
 
 
 def d0_double_johnsonsu(species, workspace, mode):
     mass_var = get_mass_var(workspace).GetName()
-    return double_johnsonsu('m', workspace, mode, mass_var)
+    vs = [
+        ('mu_m'.format(species), r'$\mu_{m}$'),
+        ('width_1_m'.format(species), r'$\sigma_{m,1}$'),
+        ('nu_1_m'.format(species), r'$\nu_{m,1}$'),
+        ('tau_1_m'.format(species), r'$\tau_{m,1}$'),
+        ('width_2_m'.format(species), r'$\sigma_{m,2}$'),
+        ('nu_2_m'.format(species), r'$\nu_{m,2}$'),
+        ('tau_2_m'.format(species), r'$\tau_{m,2}$'),
+        ('ds_fraction_m'.format(species), r'$f_{m}$'),
+    ]
+    return double_johnsonsu('m', workspace, mode, mass_var), vs
 
 
 def dst_d0_double_johnsonsu(species, workspace, mode):
     dmass_var = get_delta_mass_var(workspace).GetName()
-    return double_johnsonsu('dm', workspace, mode, dmass_var)
+    vs = [
+        ('mu_dm'.format(species), r'$\mu_{\Delta m}$'),
+        ('width_1_dm'.format(species), r'$\sigma_{\Delta m,1}$'),
+        ('nu_1_dm'.format(species), r'$\nu_{\Delta m,1}$'),
+        ('tau_1_dm'.format(species), r'$\tau_{\Delta m,1}$'),
+        ('width_2_dm'.format(species), r'$\sigma_{\Delta m,2}$'),
+        ('nu_2_dm'.format(species), r'$\nu_{\Delta m,2}$'),
+        ('tau_2_dm'.format(species), r'$\tau_{\Delta m,2}$'),
+        ('ds_fraction_dm'.format(species), r'$f_{\Delta m}$'),
+    ]
+    return double_johnsonsu('dm', workspace, mode, dmass_var), vs
 
 
 def double_johnsonsu(species, workspace, mode, var):
@@ -249,14 +308,24 @@ def d0_cruijff(species, workspace, mode):
         'RooCruijff::pdf_m_sig{0}({1}, mu_m{0}, sigma_m_L{0},'
         ' sigma_m_R{0}, alpha_m_L{0}, alpha_m_R{0})'
     ).format(species, mass_var))
-    return 'pdf_m_sig{0}'.format(species)
+    vs = [
+        ('mu_m{0}'.format(species), r'$\mu_{m}$'),
+        ('sigma_m_L{0}'.format(species), r'$\sigma^L_{m}$'),
+        ('sigma_m_R{0}'.format(species), r'$\sigma^R_{m}$'),
+        ('alpha_m_L{0}'.format(species), r'$\alpha^L_{m}$'),
+        ('alpha_m_R{0}'.format(species), r'$\alpha^R_{m}$'),
+    ]
+    return 'pdf_m_sig{0}'.format(species), vs
 
 
 def d0_bkg(species, workspace, mode):
     mass_var = get_mass_var(workspace).GetName()
     workspace.factory(mode.get_rf_vars('c{}'.format(species)))
     workspace.factory("Chebychev::m_bkg{0}({1},c{0})".format(species, mass_var))
-    return 'm_bkg{}'.format(species)
+    vs = [
+        ('c{0}'.format(species), r'$c_{m}$')
+    ]
+    return 'm_bkg{}'.format(species), vs
 
 
 dst_d0_shapes = {

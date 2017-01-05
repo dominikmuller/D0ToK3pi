@@ -88,6 +88,9 @@ var('maxdoca', '{part}_Loki_AMAXDOCA', True, False, r'DOCA$_{\text{max}}(PART)$'
 var('mindoca', '{part}_Loki_AMINDOCA', True, False, r'DOCA$_{\text{min}}(PART)$', mm)  # NOQA
 var('vdchi2', '{part}_Loki_BPVVDCHI2', True, False, r'$\chi^2_\text{VD}(PART)$')  # NOQA
 var('probnnk', '{part}_MC15TuneV1_ProbNNk', False, True, r'ProbNN$K(PART)$')
+var('probnne', '{part}_MC15TuneV1_ProbNNe', False, True, r'ProbNN$e(PART)$')
+var('probnnp', '{part}_MC15TuneV1_ProbNNp', False, True, r'ProbNN$p(PART)$')
+var('probnnmu', '{part}_MC15TuneV1_ProbNNmu', False, True, r'ProbNN$\mu(PART)$')
 var('probnnpi', '{part}_MC15TuneV1_ProbNNpi', False, True, r'ProbNN$\pi(PART)$')  # NOQA
 var('probnnghost', '{part}_MC15TuneV1_ProbNNghost', False, True, r'ProbNNghost$(PART)$')  # NOQA
 var('pidk', '{part}_PIDK', False, True, r'$\text{DLL}_{K^\pm-\pi^\pm}(PART)$')

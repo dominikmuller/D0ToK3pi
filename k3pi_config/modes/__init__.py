@@ -12,10 +12,12 @@ _thismodule = sys.modules[__name__]
 
 @contextmanager
 def MODE(polarity, year, mode):
+    global _current_mode
     if not hasattr(_thismodule, 'D0ToKpipipi_' + mode):
         raise ModeConfig('No mode {} -> {}'.format(
             mode, 'D0ToKpipipi_' + mode))
-    _current_mode = getattr(_thismodule, 'D0ToKpipipi_' + mode)(polarity, year)
+    _current_mode = getattr(
+        _thismodule, 'D0ToKpipipi_' + mode)(polarity, year)
     yield _current_mode
     _current_mode = None
 
