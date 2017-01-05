@@ -49,34 +49,27 @@ def train_bdts():
     (train, test, train_lbl, test_lbl), features, spectators = prep_data()
 
     uniform_features = [vars.ltime(gcm().D0)]
-    n_estimators = 200
+    n_estimators = 500
 
     classifiers = ClassifiersFactory()
     log.info('Configuring classifiers')
 
     base_ada = GradientBoostingClassifier(
-        max_depth=7, n_estimators=n_estimators, learning_rate=0.1,
+        max_depth=3, n_estimators=n_estimators, learning_rate=0.1,
         min_samples_leaf=2000)
     classifiers['Deviance'] = SklearnClassifier(base_ada, features=features)
 
     base_ada = GradientBoostingClassifier(
-        max_depth=7, n_estimators=n_estimators, learning_rate=0.1,
+        max_depth=3, n_estimators=n_estimators, learning_rate=0.1,
         min_samples_leaf=2000, loss='exponential')
     classifiers['Exponential'] = SklearnClassifier(base_ada, features=features)
 
     flatnessloss = ugb.KnnFlatnessLossFunction(
         uniform_features, fl_coefficient=3., power=1.3, uniform_label=1)
     ugbFL = ugb.UGradientBoostingClassifier(
-        loss=flatnessloss, max_depth=7, n_estimators=n_estimators,
+        loss=flatnessloss, max_depth=3, n_estimators=n_estimators,
         learning_rate=0.1, train_features=features, min_samples_leaf=2000)
     classifiers['KnnFlatnessWeak'] = SklearnClassifier(ugbFL)
-
-    flatnessloss = ugb.KnnFlatnessLossFunction(
-        uniform_features, fl_coefficient=5., power=3., uniform_label=1)
-    ugbFL = ugb.UGradientBoostingClassifier(
-        loss=flatnessloss, max_depth=7, n_estimators=n_estimators,
-        learning_rate=0.1, train_features=features, min_samples_leaf=2000)
-    classifiers['KnnFlatnessStrong'] = SklearnClassifier(ugbFL)
 
     log.info('Fitting classifiers')
 
@@ -138,6 +131,6 @@ def bdt_control_plots():
 if __name__ == '__main__':
     args = parser.create_parser(log)
     with MODE(args.polarity, args.year, args.mode):
-        # train_bdts()
+        train_bdts()
         plot_roc()
         plot_efficiencies()
