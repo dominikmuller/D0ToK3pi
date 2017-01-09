@@ -20,6 +20,8 @@ def create_parser(logger=None):
     parser.add_argument('-p', '--polarity', default=None,
                         choices=['MagDown', 'MagUp', 'MagBoth'],
                         help='Acticates testing mode')
+    parser.add_argument('-g', '--mc', default=None, choices=[None, 'mc', 'gen'],
+                        help='Can turn on MC instead of data.')
     parser.add_argument('-s', '--selections', nargs='+', default=None,
                         help='Run the specified selections')
     parser.add_argument(

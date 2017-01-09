@@ -65,7 +65,7 @@ class D0ToKpipipi_2tag_WS(mode_base):
     ])
     head = B0
 
-    def __init__(self, polarity=None, year=None):
-        super(D0ToKpipipi_2tag_WS, self).__init__(polarity, year)
+    def __init__(self, polarity=None, year=None, mc=None):
+        super(D0ToKpipipi_2tag_WS, self).__init__(polarity, year, mc)
 
 __all__ = ['D0ToKpipipi_2tag_WS']

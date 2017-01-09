@@ -1,5 +1,6 @@
 from k3pi_utilities import variables as vars
 from k3pi_utilities.selective_load import selective_load
+from k3pi_utilities.decorator_utils import pop_arg
 from k3pi_utilities.buffer import buffer_load
 from k3pi_utilities import parser
 from analysis import selection
@@ -25,7 +26,7 @@ def append_phsp(df):
 
 
 @buffer_load
-@selective_load
+@pop_arg(selective_load, allow_for=[None, 'mc'])
 @call_debug
 def _dstp_slowpi_angle(df):
 
@@ -43,7 +44,7 @@ def _dstp_slowpi_angle(df):
 
 
 @buffer_load
-@selective_load
+@pop_arg(selective_load, allow_for=[None, 'mc'])
 @call_debug
 def phsp_variables(df):
     """Returns m12, m34, cos1, cos2, phi1"""
@@ -64,10 +65,10 @@ def phsp_variables(df):
             df[vars.dtf_pt(mode.Pi_OS2)], df[vars.dtf_eta(mode.Pi_OS2)],
             df[vars.dtf_phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
         return pd.DataFrame({'m12': vals[0],
-                            'm34': vals[1],
-                            'cos1': vals[2],
-                            'cos2': vals[3],
-                            'phi1': vals[4]},
+                             'm34': vals[1],
+                             'cos1': vals[2],
+                             'cos2': vals[3],
+                             'phi1': vals[4]},
                             index=df.index)
     else:
         vals = (
@@ -83,7 +84,7 @@ def phsp_variables(df):
 
 
 @buffer_load
-@selective_load
+@pop_arg(selective_load, allow_for=[None, 'mc'])
 @call_debug
 def double_misid_d0(df):
     """Returns d0 mass with changed kaon and ss pion mass hypthesis"""
@@ -104,7 +105,7 @@ def double_misid_d0(df):
 
 
 @buffer_load
-@selective_load
+@pop_arg(selective_load, allow_for=[None, 'mc'])
 @call_debug
 def other_slowpi(df):
     """Returns d0 mass with changed kaon and ss pion mass hypthesis"""
@@ -129,7 +130,7 @@ def other_slowpi(df):
 
 
 @buffer_load
-@selective_load
+@pop_arg(selective_load, allow_for=[None, 'mc'])
 @call_debug
 def other_slowpi_ws(df):
     """Returns d0 mass with changed kaon and ss pion mass hypthesis"""

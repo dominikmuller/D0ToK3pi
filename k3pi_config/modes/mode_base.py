@@ -21,9 +21,10 @@ class mode_base(object):
     def specific_selection(self):
         pass
 
-    def __init__(self, polarity, year):
+    def __init__(self, polarity, year, mc=None):
         self.polarity = polarity
         self.year = year
+        self.mc = mc
         self.files = []
         if polarity == config.magboth:
             pols = [config.magup, config.magdown]
@@ -39,9 +40,13 @@ class mode_base(object):
         else:
             _fl_template = 'D0ToKpipipi_{}_{}'
 
+        if mc is not None:
+            _fl_template += '_MC'
+
         for p, y in product(pols, years):
-            self.files += getattr(filelists, _fl_template.format(
-                p, y)).paths
+            if hasattr(filelists, _fl_template.format(p, y)):
+                self.files += getattr(
+                    filelists, _fl_template.format(p, y)).paths
 
         # Set the default output location
         self.output_path = os.path.join(config.output_prefix, self.mode,
@@ -56,10 +61,13 @@ class mode_base(object):
             self.files = getattr(filelists, '{}_{}_{}'.format(
                 self.mode, polarity, year))
 
-    def get_tree_name(self, mc=False):
+    def get_file_list(self):
+        return self.files
+
+    def get_tree_name(self, mc=None):
         return config.ntuple_strip.format(self.mode)
 
-    def get_store_name(self, mc=False, polarity=None, year=None):
+    def get_store_name(self, polarity=None, year=None):
         if self.polarity == config.magboth and polarity is None:
             raise ModeConfig('Cannot get store for MagBoth mode. Need to'
                              ' specify polarity as an argument')
@@ -70,9 +78,12 @@ class mode_base(object):
             polarity = self.polarity
         if year is None:
             year = self.year
-        return config.store_name.format(self.mode, polarity, year)
+        if self.mc is not None:
+            return config.store_name.format(self.mode, polarity, year) + self.mc
+        else:
+            return config.store_name.format(self.mode, polarity, year)
 
-    def get_data(self, columns,  mc=False):
+    def get_data(self, columns):
         if self.polarity == config.magboth:
             pols = [config.magup, config.magdown]
         else:
@@ -86,12 +97,12 @@ class mode_base(object):
             for p, y in product(pols, years):
                 if df is not None:
                     df = df.append(store.select(
-                        self.get_store_name(mc, p, y), columns=columns),
+                        self.get_store_name(p, y), columns=columns),
                         ignore_index=True
                     )
                 else:
                     df = store.select(
-                        self.get_store_name(mc, p, y), columns=columns)
+                        self.get_store_name(p, y), columns=columns)
         return df
 
     def get_output_path(self, extra=None):

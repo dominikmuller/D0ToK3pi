@@ -2,6 +2,7 @@ from k3pi_utilities.variables import (eta, probnnk, probnnpi, p, m, dtf_dm,
                                       probnnmu)
 from k3pi_utilities.variables import ipchi2, probnnghost
 from k3pi_utilities.selective_load import selective_load
+from k3pi_utilities.decorator_utils import pop_arg
 from k3pi_utilities.buffer import buffer_load
 from k3pi_utilities.debugging import call_debug
 from k3pi_utilities import parser
@@ -11,7 +12,7 @@ import numpy as np
 
 
 @buffer_load
-@selective_load
+@pop_arg(selective_load, allow_for=[None, 'mc'])
 @call_debug
 def pid_selection(df):
     ret = True
@@ -23,7 +24,7 @@ def pid_selection(df):
 
 
 @buffer_load
-@selective_load
+@pop_arg(selective_load, allow_for=[None, 'mc'])
 @call_debug
 def pid_fiducial_selection(df):
     ret = True
@@ -37,7 +38,7 @@ def pid_fiducial_selection(df):
 
 
 @buffer_load
-@selective_load
+@pop_arg(selective_load, allow_for=[None, 'mc'])
 @call_debug
 def mass_fiducial_selection(df):
     ret = True
@@ -50,14 +51,14 @@ def mass_fiducial_selection(df):
 
 
 @buffer_load
-@selective_load
+@pop_arg(selective_load, allow_for=[None, 'mc'])
 @call_debug
 def remove_secondary(df):
     return np.log(df[ipchi2(gcm().D0)]) < 2.
 
 
 @buffer_load
-@selective_load
+@pop_arg(selective_load, allow_for=[None, 'mc'])
 @call_debug
 def slow_pion(df):
     ret = (df[probnnghost(gcm().Pislow)] < 0.3)

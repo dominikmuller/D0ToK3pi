@@ -21,8 +21,12 @@ class buffer_load():
     def __call__(self, mode=None, use_buffered=True):
         if mode is None:
             mode = modes.gcm()
+        # Build a string unique by combining function name, mode, polarity
+        # year and whether it is mc, gen or nominal (data)
         buffer_name = 'Cached/' + self._func_name + mode.mode + \
             mode.polarity + str(mode.year)
+        if mode.mc is not None:
+            buffer_name += mode.mc
         log.debug('Loading {} from {}'.format(
             buffer_name, config.data_store
         ))

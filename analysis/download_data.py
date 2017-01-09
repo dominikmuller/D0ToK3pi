@@ -14,23 +14,25 @@ import pandas as pd
 log = get_logger('download_data')
 
 
-def download(mode, polarity, year, full, test=False):
+def download(mode, polarity, year, full, test=False, mc=None):
     log.info('Getting data for {} {} {}'.format(
         mode, polarity, year))
     mode = get_mode(polarity, year, mode)
 
     sel = get_root_preselection.get(mode)
 
-    if full != 1:
+    # Always download the entire MC
+    if full != 1 and mc is None:
         ctr = int(1./float(full))
         sel = '({} % {} == 0) && '.format(evt_num(), ctr) + sel
         log.info('Using ({} % {} == 0)'.format(evt_num(), ctr))
 
     tempfile.mktemp('.root')
 
+    input_files = mode.get_file_list(mc)
     if test:
-        mode.files = mode.files[:4]
-    chunked = list(helpers.chunks(mode.files, 25))
+        input_files = input_files[:4]
+    chunked = list(helpers.chunks(input_files, 25))
     length = len(list(chunked))
 
     # While the code is in developement, just get any variables we can
@@ -66,7 +68,7 @@ def download(mode, polarity, year, full, test=False):
         try:
             store.remove(mode.get_store_name())
             log.info('Removing already existing data at {}'.format(
-                mode.get_store_name()))
+                mode.get_store_name(mc)))
         except KeyError:
             log.info('No previous data found. Nothing to delete.')
 
@@ -92,4 +94,4 @@ if __name__ == '__main__':
     else:
         years = [args.year]
     for p, y in product(pols, years):
-        download(args.mode, p, y, args.full, args.test)
+        download(args.mode, p, y, args.full, args.test, args.mc)
