@@ -9,3 +9,5 @@ root_pandas
 scipy
 seaborn
 tqdm
+rep
+scikit_learn
