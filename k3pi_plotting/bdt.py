@@ -50,5 +50,5 @@ def plot_eff(var, part, test, bdt, labels, weights, quantiles=None):
         ax.errorbar(x, y, yerr=yerr, xerr=xerr, label=label,
                     **dt_options)
     ax.legend(loc='best')
-    ax.set_xlabel(var.latex(part))
+    ax.set_xlabel(var.latex(part, with_unit=True))
     return fig
