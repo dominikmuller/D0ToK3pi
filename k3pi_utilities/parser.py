@@ -23,6 +23,8 @@ def create_parser(logger=None):
                         help='Acticates testing mode')
     parser.add_argument('-g', '--mc', default=None, choices=[None, 'mc', 'gen'],
                         help='Can turn on MC instead of data.')
+    parser.add_argument('--sweight', default=False, action='store_true',
+                        help='Use sWeights for something.')
     parser.add_argument('-s', '--selections', nargs='+', default=None,
                         help='Run the specified selections')
     parser.add_argument(
