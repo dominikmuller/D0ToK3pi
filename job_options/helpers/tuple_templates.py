@@ -7,6 +7,7 @@ from DecayTreeTuple.Configuration import *  # NOQA
 from Configurables import LoKi__Hybrid__DictOfFunctors
 from Configurables import LoKi__Hybrid__Dict2Tuple
 from Configurables import LoKi__Hybrid__DTFDict as DTFDict
+from Configurables import TupleToolMCBackgroundInfo
 
 
 def decay_tree_tuple(name, decay, mothers, intermediate,
@@ -48,17 +49,6 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
         "TupleToolPropertime",
     ]
 
-    if mc:
-        tools += [
-            'TupleToolMCBackgroundInfo'
-        ]
-    else:
-        # When running over MC produced without the trigger, EventInfo will
-        # fail because it can't find L0 information, so only run it over data
-        tools += [
-            'TupleToolEventInfo'
-        ]
-
     # Extra variables, added using LoKi hybrid tuple tools
     basic_loki_vars = {
         'ETA': 'ETA',
@@ -97,6 +87,13 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
 
     # Template DecayTreeTuple
     t = DecayTreeTuple(name)
+    if not mc:
+        # When running over MC produced without the trigger, EventInfo will
+        # fail because it can't find L0 information, so only run it over data
+        tools += [
+            'TupleToolEventInfo'
+        ]
+
     # Providing str will throw an exception, so wrap it in a list
     try:
         t.Inputs = inputs
@@ -115,6 +112,8 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
     # MC truth information
     if mc:
         t.addTupleTool('TupleToolMCTruth')
+        bkgcat = t.addTupleTool('TupleToolMCBackgroundInfo')
+        bkgcat.OutputLevel = -999
     # Extra information from LoKi
     hybrid_tt = t.addTupleTool(
         'LoKi::Hybrid::TupleTool/basicLoKiTT'
@@ -228,6 +227,12 @@ def charm_tuple(name, decay, mothers, intermediate,
     trigger.TriggerList = triggers_list
     trigger.Verbose = True
     # trigger.VerboseHlt1 = True
+
+    # from TeslaTools import TeslaTruthUtils
+    # relations = TeslaTruthUtils.getRelLoc("")
+    # TeslaTruthUtils.makeTruth(t, [relations], ['TupleToolMCBackgroundInfo'])
+    # TupleToolMCBackgroundInfo().Verbose = True
+
 
     if has_turbo_inputs(t):
         t.WriteP2PVRelations = False
