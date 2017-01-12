@@ -85,8 +85,8 @@ def full_selection():
 @call_debug
 def mass_signal_region(df):
     ret = True
-    ret &= np.abs(df[m(gcm().D0)] - config.pdg_masses['d0']) < 20.
-    ret &= np.abs(df[dtf_dm()] - config.pdg_masses['delta']) < 0.5
+    ret &= np.abs(df[m(gcm().D0)] - config.PDG_MASSES['D0']) < 20.
+    ret &= np.abs(df[dtf_dm()] - config.PDG_MASSES['delta']) < 0.5
     return ret
 
 
@@ -95,8 +95,8 @@ def mass_signal_region(df):
 @call_debug
 def mass_sideband_region(df):
     ret = True
-    ret &= np.abs(df[m(gcm().D0)] - config.pdg_masses['d0']) > 30.
-    ret &= np.abs(df[dtf_dm()] - config.pdg_masses['delta']) > 2.0
+    ret &= np.abs(df[m(gcm().D0)] - config.PDG_MASSES['D0']) > 30.
+    ret &= np.abs(df[dtf_dm()] - config.PDG_MASSES['delta']) > 2.0
     return ret
 
 
@@ -111,7 +111,9 @@ if __name__ == '__main__':
             'mass_fiducial_selection',
             'remove_secondary',
             'slow_pion',
-            'full_selection'
+            'full_selection',
+            'mass_signal_region',
+            'mass_sideband_region'
         ]
     else:
         sels = args.selections
