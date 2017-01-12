@@ -45,6 +45,7 @@ PDG_MASSES = {
     pion: 139.57,
     kaon: 493.677
 }
+PDG_MASSES['delta'] = PDG_MASSES['Dst'] - PDG_MASSES['D0']
 
 ntuple_strip = 'Tuple{0}/DecayTree'
 store_name = '{0}_{1}_{2}'

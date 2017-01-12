@@ -81,6 +81,26 @@ def full_selection():
     return sel
 
 
+@buffer_load
+@selective_load
+@call_debug
+def mass_signal_region(df):
+    ret = True
+    ret &= np.abs(df[m(gcm().D0)] - config.pdg_masses['d0']) < 20.
+    ret &= np.abs(df[dtf_dm()] - config.pdg_masses['delta']) < 0.5
+    return ret
+
+
+@buffer_load
+@selective_load
+@call_debug
+def mass_sideband_region(df):
+    ret = True
+    ret &= np.abs(df[m(gcm().D0)] - config.pdg_masses['d0']) > 30.
+    ret &= np.abs(df[dtf_dm()] - config.pdg_masses['delta']) > 2.0
+    return ret
+
+
 if __name__ == '__main__':
     import sys
     args = parser.create_parser()
