@@ -10,26 +10,25 @@ from analysis import selection
 from tqdm import tqdm
 
 
-def sig_bkg_normed(v, df):
-    sweights = get_sweights(gcm())
-    sig_wgt = sweights['sig']
-    bkg_wgt = sweights['rnd'] + sweights['comb']
+def sig_bkg_normed(v, sig_df, bkg_df, sig_wgt=1., bkg_wgt=1.):
     fig, ax = plt.subplots(figsize=(10, 10))
     if v.convert is None:
-        data = df[v.var]
+        sig_data = sig_df[v.var]
+        bkg_data = bkg_df[v.var]
     else:
-        data = v.convert(df[v.var])
+        sig_data = v.convert(sig_df[v.var])
+        bkg_data = v.convert(bkg_df[v.var])
 
     nbins, xmin, xmax = v.binning
 
     h_sig, edges = np.histogram(
-        data, bins=nbins, range=(xmin, xmax), weights=sig_wgt)
+        sig_data, bins=nbins, range=(xmin, xmax), weights=sig_wgt)
     h_bkg, _ = np.histogram(
-        data, bins=nbins, range=(xmin, xmax), weights=bkg_wgt)
+        bkg_data, bins=nbins, range=(xmin, xmax), weights=bkg_wgt)
     err_sig, _ = np.histogram(
-        data, bins=nbins, range=(xmin, xmax), weights=sig_wgt**2)
+        sig_data, bins=nbins, range=(xmin, xmax), weights=sig_wgt**2)
     err_bkg, _ = np.histogram(
-        data, bins=nbins, range=(xmin, xmax), weights=bkg_wgt**2)
+        bkg_data, bins=nbins, range=(xmin, xmax), weights=bkg_wgt**2)
     x_ctr = (edges[1:] + edges[:-1])/2.
     width = (edges[1:] - edges[:-1])
     x_err = width/2.
@@ -103,7 +102,7 @@ def sig_sec_comb_stack(v, df):
     return fig
 
 
-def plot_bdt_variables():
+def plot_bdt_variables(sw=False):
     mode = gcm()
     bdt_vars = mode.bdt_vars + mode.spectator_vars + mode.just_plot
     df = mode.get_data([v.var for v in bdt_vars])
@@ -112,10 +111,22 @@ def plot_bdt_variables():
     df = df[sel]
     add_variables.append_phsp(df)
 
+    if sw:
+        sweights = get_sweights(gcm())
+        sig_wgt = sweights['sig']
+        bkg_wgt = sweights['rnd'] + sweights['comb']
+        sig_df = df
+        bkg_df = df
+    else:
+        sig_df = df[selection.mass_signal_region()]
+        bkg_df = df[selection.mass_sideband_region()]
+        sig_wgt = np.ones(sig_df.index.size)
+        bkg_wgt = np.ones(bkg_df.index.size)
+
     outfile = mode.get_output_path('sweight_fit') + 'bdt_vars.pdf'
     with PdfPages(outfile) as pdf:
         for v in tqdm(bdt_vars, smoothing=0.3):
-            fig = sig_bkg_normed(v, df)
+            fig = sig_bkg_normed(v, sig_df, bkg_df, sig_wgt, bkg_wgt)
             pdf.savefig(fig)
             plt.close()
             fig = sig_sec_comb_stack(v, df)
@@ -126,4 +137,4 @@ def plot_bdt_variables():
 if __name__ == '__main__':
     args = parser.create_parser()
     with MODE(args.polarity, args.year, args.mode):
-        plot_bdt_variables()
+        plot_bdt_variables(args.sweight)
