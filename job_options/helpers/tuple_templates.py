@@ -7,7 +7,8 @@ from DecayTreeTuple.Configuration import *  # NOQA
 from Configurables import LoKi__Hybrid__DictOfFunctors
 from Configurables import LoKi__Hybrid__Dict2Tuple
 from Configurables import LoKi__Hybrid__DTFDict as DTFDict
-from Configurables import TupleToolMCBackgroundInfo
+from Configurables import TupleToolMCTruth, DaVinciSmartAssociator, P2MCPFromProtoP
+from Configurables import MCMatchObjP2MCRelator, TupleToolMCBackgroundInfo, BackgroundCategory
 
 
 def decay_tree_tuple(name, decay, mothers, intermediate,
@@ -47,6 +48,7 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
     # Define tuple tools to add
     tools = [
         "TupleToolPropertime",
+        'TupleToolEventInfo',
     ]
 
     # Extra variables, added using LoKi hybrid tuple tools
@@ -87,12 +89,6 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
 
     # Template DecayTreeTuple
     t = DecayTreeTuple(name)
-    if not mc:
-        # When running over MC produced without the trigger, EventInfo will
-        # fail because it can't find L0 information, so only run it over data
-        tools += [
-            'TupleToolEventInfo'
-        ]
 
     # Providing str will throw an exception, so wrap it in a list
     try:
@@ -101,7 +97,7 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
         t.Inputs = [inputs]
     t.Decay = decay
     # Merge the mother and daughter dictionaries
-    ALL = dict(mothers.items() + intermediate.items() + daughters.items())
+    dict(mothers.items() + intermediate.items() + daughters.items())
     t.addBranches(dict(mothers.items() + intermediate.items()
                        + daughters.items()))
     # Tools for all branches
@@ -111,9 +107,42 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
     # t.addTupleTool('TupleToolRecoStats')
     # MC truth information
     if mc:
-        t.addTupleTool('TupleToolMCTruth')
-        bkgcat = t.addTupleTool('TupleToolMCBackgroundInfo')
-        bkgcat.OutputLevel = -999
+        if has_turbo_inputs(t):
+            print 'Adding MC truth information for Turbo'
+            from TeslaTools import TeslaTruthUtils
+            relations = TeslaTruthUtils.getRelLoc("")
+            print 'relations = {}'.format(relations)
+            toollist = ['MCTupleToolPrompt']
+            rels = [relations]
+
+            MCTruth = TupleToolMCTruth()
+            #MCTruth.OutputLevel = 1
+            MCTruth = t.addTupleTool('TupleToolMCTruth')
+            MCTruth.ToolList = toollist
+            MCTruth.addTool(DaVinciSmartAssociator)
+            MCTruth.DaVinciSmartAssociator.RedoNeutral=False
+            MCTruth.DaVinciSmartAssociator.addTool(P2MCPFromProtoP)
+            MCTruth.DaVinciSmartAssociator.P2MCPFromProtoP.Locations = rels
+            MCTruth.addTool(MCMatchObjP2MCRelator)
+            MCTruth.MCMatchObjP2MCRelator.RelTableLocations = rels
+
+            MCTruth.DaVinciSmartAssociator.addTool(BackgroundCategory)
+            MCTruth.DaVinciSmartAssociator.BackgroundCategory.addTool(P2MCPFromProtoP)
+            MCTruth.DaVinciSmartAssociator.BackgroundCategory.vetoNeutralRedo=True
+            MCTruth.DaVinciSmartAssociator.BackgroundCategory.P2MCPFromProtoP.Locations = rels
+
+            bkgcat = t.addTupleTool('TupleToolMCBackgroundInfo')
+            bkgcat.addTool(BackgroundCategory)
+            bkgcat.OutputLevel=10
+            bkgcat.BackgroundCategory.vetoNeutralRedo=True
+            bkgcat.BackgroundCategory.addTool(P2MCPFromProtoP)
+            bkgcat.BackgroundCategory.P2MCPFromProtoP.Locations= rels
+
+            t.OutputLevel=10
+        else:
+            print 'Adding MC truth information'
+            t.addTupleTool('TupleToolMCTruth')
+            t.addTupleTool('TupleToolMCBackgroundInfo')
     # Extra information from LoKi
     hybrid_tt = t.addTupleTool(
         'LoKi::Hybrid::TupleTool/basicLoKiTT'
@@ -124,18 +153,11 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
     # Add mother-specific varaibles to each mother branch
     for mother in mothers:
         branch = getattr(t, mother)
-        loki_vars = mother_loki_vars.copy()
         branch.addTupleTool(
             'LoKi::Hybrid::TupleTool/{0}LoKiTT'.format(mother)
         ).Variables = mother_loki_vars
         # For some unknown reason this doesn't work with Turbo candidates, so
         # the information for them has to be added to every branch
-        if mc and not has_turbo_inputs(t):
-            # Does the particle ancestry contain a particle with a lifetime
-            # above 1e-7 ns? Record the secondaries info if so
-            branch.addTupleTool('TupleToolMCTruth').ToolList = [
-                'MCTupleToolPrompt'
-            ]
         DictTuple = branch.addTupleTool(LoKi__Hybrid__Dict2Tuple,
                                         name="DTFTuple")
         DictTuple.addTool(DTFDict, name="DTF")
@@ -177,12 +199,6 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
         ).Variables = mom_int
         # For some unknown reason this doesn't work with Turbo candidates, so
         # the information for them has to be added to every branch
-        if mc and not has_turbo_inputs(t):
-            # Does the particle ancestry contain a particle with a lifetime
-            # above 1e-7 ns? Record the secondaries info if so
-            branch.addTupleTool('TupleToolMCTruth').ToolList = [
-                'MCTupleToolPrompt'
-            ]
 
     for daughter in daughters:
         branch = getattr(t, daughter)
@@ -227,12 +243,6 @@ def charm_tuple(name, decay, mothers, intermediate,
     trigger.TriggerList = triggers_list
     trigger.Verbose = True
     # trigger.VerboseHlt1 = True
-
-    # from TeslaTools import TeslaTruthUtils
-    # relations = TeslaTruthUtils.getRelLoc("")
-    # TeslaTruthUtils.makeTruth(t, [relations], ['TupleToolMCBackgroundInfo'])
-    # TupleToolMCBackgroundInfo().Verbose = True
-
 
     if has_turbo_inputs(t):
         t.WriteP2PVRelations = False

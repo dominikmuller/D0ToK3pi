@@ -1,8 +1,7 @@
 from k3pi_config.modes.D0ToKpipipi_RS import D0ToKpipipi_RS as RS
 from helpers import tuple_templates
 from helpers.config import (
-    inputs_template,
-    simulation
+    inputs_template
 )
 
 
@@ -28,7 +27,7 @@ def get(mc=False):
             RS.Pislow.name: '[D*(2010)+ --> (D0 --> K- pi- pi+  pi+) ^pi+]CC',
         },
         inputs_template().format(line),
-        simulation
+        mc
     )
     if mc:
         d['gen'] = tuple_templates.mc_decay_tree_tuple(
