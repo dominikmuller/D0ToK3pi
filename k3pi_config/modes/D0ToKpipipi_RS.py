@@ -75,7 +75,7 @@ class D0ToKpipipi_RS(mode_base):
         PlotConfig(vars.vdchi2, D0, (50, 0, 10), np.log, r'$\ln(\text{{{}}})$'),
         PlotConfig(vars.mindoca, D0, (50, 0, 0.5)),
         PlotConfig(vars.maxdoca, D0, (50, 0, 0.5)),
-        PlotConfig(vars.dtf_chi2, head, (50, 0, 60)),
+        # PlotConfig(vars.dtf_chi2, head, (50, 0, 60)),
         PlotConfig(vars.vchi2, head, (50, 0, 20)),
         PlotConfig(vars.vchi2, D0, (50, 0, 20)),
         # PlotConfig(vars.angle, None, (50, 0, 0.03))
@@ -112,6 +112,8 @@ class D0ToKpipipi_RS(mode_base):
         PlotConfig(vars.probnnp, Pislow, (50, 0., 1.0)),
         PlotConfig(vars.probnne, Pislow, (50, 0., 1.0)),
         PlotConfig(vars.probnnmu, Pislow, (50, 0., 1.0)),
+        PlotConfig(vars.m, D0, (100, 1810., 1920.)),
+        PlotConfig(vars.dtf_dm, None, (100, 140.5, 160.5)),
     ]
 
 __all__ = ['D0ToKpipipi_RS']

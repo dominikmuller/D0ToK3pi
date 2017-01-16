@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 from rep import utils
 import palettable
 
+from k3pi_utilities.logger import get_logger
+log = get_logger('k3pi_plotting/bdt')
+
 
 def roc(test, bdt, labels, weights):
     # Get the probabilities for class 1 (signal)
@@ -28,15 +31,16 @@ def plot_eff(var, part, test, bdt, labels, weights, quantiles=None):
     if quantiles is None:
         quantiles = [0.2, 0.4, 0.6, 0.8]
     varname = var(part)
+    log.info('Doing efficiency for {}'.format(varname))
     colours = palettable.tableau.TableauMedium_10.hex_colors
     fig, ax = plt.subplots(figsize=(10, 10))
 
     probs = bdt.predict_proba(test).transpose()[1]
-    thresholds = [utils.weighted_quantile(probs[labels], quantiles=1-eff,
+    thresholds = [utils.weighted_quantile(probs[labels.values], quantiles=1-eff,
                                           sample_weight=test.weights[labels])
-                  for eff in quantiles]
+                for eff in quantiles]
     ret = utils.get_efficiencies(
-        probs[labels], test[varname][labels], bins_number=15,
+        probs[labels.values], test[varname][labels], bins_number=15,
         sample_weight=test.weights[labels], errors=True, thresholds=thresholds)
 
     dt_options = dict(
@@ -51,4 +55,5 @@ def plot_eff(var, part, test, bdt, labels, weights, quantiles=None):
                     **dt_options)
     ax.legend(loc='best')
     ax.set_xlabel(var.latex(part, with_unit=True))
+
     return fig

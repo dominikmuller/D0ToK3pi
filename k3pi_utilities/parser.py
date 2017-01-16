@@ -25,6 +25,8 @@ def create_parser(logger=None):
                         help='Can turn on MC instead of data.')
     parser.add_argument('--sweight', default=False, action='store_true',
                         help='Use sWeights for something.')
+    parser.add_argument('--train', default=False, action='store_true',
+                        help='Train the BDT.')
     parser.add_argument('-s', '--selections', nargs='+', default=None,
                         help='Run the specified selections')
     parser.add_argument(
