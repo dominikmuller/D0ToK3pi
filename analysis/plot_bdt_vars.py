@@ -1,23 +1,18 @@
 import matplotlib.pyplot as plt
 import palettable
 from k3pi_utilities import parser
+from analysis import bdt_data
 from matplotlib.backends.backend_pdf import PdfPages
 from analysis.mass_fitting import get_sweights
-from analysis import add_variables
 import numpy as np
 from k3pi_config.modes import gcm, MODE
-from analysis import selection
 from tqdm import tqdm
 
 
 def sig_bkg_normed(v, sig_df, bkg_df, sig_wgt=1., bkg_wgt=1.):
     fig, ax = plt.subplots(figsize=(10, 10))
-    if v.convert is None:
-        sig_data = sig_df[v.var]
-        bkg_data = bkg_df[v.var]
-    else:
-        sig_data = v.convert(sig_df[v.var])
-        bkg_data = v.convert(bkg_df[v.var])
+    sig_data = sig_df[v.var]
+    bkg_data = bkg_df[v.var]
 
     nbins, xmin, xmax = v.binning
 
@@ -103,35 +98,18 @@ def sig_sec_comb_stack(v, df):
 
 
 def plot_bdt_variables(sw=False):
-    mode = gcm()
-    bdt_vars = mode.bdt_vars + mode.spectator_vars + mode.just_plot
-    df = mode.get_data([v.var for v in bdt_vars])
-    add_variables.append_angle(df)
-    sel = selection.full_selection()
-    df = df[sel]
-    add_variables.append_phsp(df)
+    sig_df, bkg_df, sig_wgt, bkg_wgt = bdt_data.get_bdt_data(sklearn=False)
+    bdt_vars = gcm().bdt_vars + gcm().spectator_vars + gcm().just_plot
 
-    if sw:
-        sweights = get_sweights(gcm())
-        sig_wgt = sweights['sig']
-        bkg_wgt = sweights['rnd'] + sweights['comb']
-        sig_df = df
-        bkg_df = df
-    else:
-        sig_df = df[selection.mass_signal_region()]
-        bkg_df = df[selection.mass_sideband_region()]
-        sig_wgt = np.ones(sig_df.index.size)
-        bkg_wgt = np.ones(bkg_df.index.size)
-
-    outfile = mode.get_output_path('sweight_fit') + 'bdt_vars.pdf'
+    outfile = gcm().get_output_path('sweight_fit') + 'bdt_vars.pdf'
     with PdfPages(outfile) as pdf:
         for v in tqdm(bdt_vars, smoothing=0.3):
             fig = sig_bkg_normed(v, sig_df, bkg_df, sig_wgt, bkg_wgt)
             pdf.savefig(fig)
             plt.close()
-            fig = sig_sec_comb_stack(v, df)
-            pdf.savefig(fig)
-            plt.close()
+            # fig = sig_sec_comb_stack(v, df)
+            # pdf.savefig(fig)
+            # plt.close()
 
 
 if __name__ == '__main__':

@@ -7,8 +7,10 @@ def dump_bdt(bdt):
     helpers.dump(bdt, outfile)
 
 
-def load_bdt():
-    outfile = gcm().get_output_path('bdt') + 'bdt.p'
+def load_bdt(mode=None):
+    if mode is None:
+        mode = gcm()
+    outfile = mode.get_output_path('bdt') + 'bdt.p'
     return helpers.load(outfile)
 
 
@@ -17,6 +19,8 @@ def dump_classifiers(classifiers):
     helpers.dump(classifiers, outfile)
 
 
-def load_classifiers():
-    outfile = gcm().get_output_path('bdt') + 'classifiers.p'
+def load_classifiers(mode=None):
+    if mode is None:
+        mode = gcm()
+    outfile = mode.get_output_path('bdt') + 'classifiers.p'
     return helpers.load(outfile)
