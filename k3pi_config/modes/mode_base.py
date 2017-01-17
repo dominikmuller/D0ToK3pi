@@ -35,13 +35,13 @@ class mode_base(object):
         else:
             years = [2015, 2016]
 
-        if self.mode in config.twotag_modes:
-            _fl_template = 'D0ToKpipipi_2tag_{}_{}'
-        else:
-            _fl_template = 'D0ToKpipipi_{}_{}'
-
         if mc is not None:
-            _fl_template += '_MC'
+            _fl_template = self.mode + '_{}_{}_MC'
+        else:
+            if self.mode in config.twotag_modes:
+                _fl_template = 'D0ToKpipipi_2tag_{}_{}'
+            else:
+                _fl_template = 'D0ToKpipipi_{}_{}'
 
         for p, y in product(pols, years):
             if hasattr(filelists, _fl_template.format(p, y)):
