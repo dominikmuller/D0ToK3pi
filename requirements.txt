@@ -1,0 +1,13 @@
+decorator
+hep_ml
+matplotlib
+numpy
+palettable
+pandas
+pathos
+root_pandas
+scipy
+seaborn
+tqdm
+rep
+scikit_learn
