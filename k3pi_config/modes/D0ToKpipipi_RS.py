@@ -9,6 +9,7 @@ from .mode_base import mode_base
 
 class D0ToKpipipi_RS(mode_base):
     mode = config.D0ToKpipipi_RS
+    mode_short = 'RS'
     tpl = config.ntuple_strip.format(mode)
     shapes = ('CRU', 'DJSU', 'PID')
     mass_fit_pars = dict(

@@ -17,7 +17,7 @@ log = get_logger('download_data')
 def download(mode, polarity, year, full, test=False, mc=None):
     log.info('Getting data for {} {} {}'.format(
         mode, polarity, year))
-    mode = get_mode(polarity, year, mode)
+    mode = get_mode(polarity, year, mode, mc)
 
     sel = get_root_preselection.get(mode)
 
@@ -29,7 +29,7 @@ def download(mode, polarity, year, full, test=False, mc=None):
 
     tempfile.mktemp('.root')
 
-    input_files = mode.get_file_list(mc)
+    input_files = mode.get_file_list()
     if test:
         input_files = input_files[:4]
     chunked = list(helpers.chunks(input_files, 25))
@@ -48,11 +48,15 @@ def download(mode, polarity, year, full, test=False, mc=None):
         'delta_m': '{} - {}'.format(m(mode.Dstp), m(mode.D0)),
         'delta_m_dtf': '{} - {}'.format(dtf_m(mode.Dstp), dtf_m(mode.D0))
     }
+    variables_needed = list(variables.all_ever_used)
+
+    if mc == 'mc':
+        variables_needed.append('Dstp_BKGCAT')
 
     def run_splitter(fns):
         temp_file = tempfile.mktemp('.root')
         treesplitter(files=fns, treename=mode.get_tree_name(), output=temp_file,
-                     variables=list(variables.all_ever_used), selection=sel,
+                     variables=variables_needed, selection=sel,
                      addvariables=add_vars)
         return temp_file
 
