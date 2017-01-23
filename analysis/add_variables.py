@@ -71,6 +71,25 @@ def bdt_variable(df):
 @buffer_load
 @selective_load
 @call_debug
+def bdt_variable(df):
+    year = gcm().year
+    polarity = gcm().polarity
+    # Make sure it reads to necessary variables
+    if isinstance(df, collections.defaultdict):
+        [df[f.functor(f.particle)] for f in gcm().bdt_vars + gcm().spectator_vars]
+        return 1.
+    # For now, we always use the RS BDT, even when looking at WS
+    mode = get_mode(polarity, year, 'RS')
+    bdt = bdt_utils.load_classifiers(mode)['KnnFlatnessWeak']
+
+    probs = bdt.predict_proba(df).transpose()[1]
+
+    return pd.Series(probs, name='BDT', index=df.index)
+
+
+@buffer_load
+@selective_load
+@call_debug
 def phsp_variables(df):
     """Returns m12, m34, cos1, cos2, phi1"""
     mode = gcm()
