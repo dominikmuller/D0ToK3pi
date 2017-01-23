@@ -7,6 +7,29 @@ import pandas as pd
 accumulated_per_mode = defaultdict(lambda: set())
 
 
+def remove_buffer_for_function(func):
+    """This will trigger the deletion of buffered values matching the function
+    so they are automatically refreshed when needed."""
+    with pd.get_store(config.data_store) as store:
+        for a in store:
+            if 'Cached' not in a:
+                continue
+            if func.__name__ in a:
+                log.info('Removing {} from store'.format(a))
+                store.remove(a)
+
+
+def remove_buffer_for_mode():
+    """Cleans out the cache for everything belonging to a certain mode."""
+    with pd.get_store(config.data_store) as store:
+        try:
+            store.remove(mode.get_store_name())
+            log.info('Removing already existing data at {}'.format(
+                mode.get_store_name()))
+        except KeyError:
+            log.info('No previous data found. Nothing to delete.')
+
+
 class buffer_load():
     def __init__(self, function):
         try:

@@ -1,3 +1,5 @@
+import os
+
 magup = 'MagUp'
 magdown = 'MagDown'
 magboth = 'MagBoth'
@@ -52,3 +54,5 @@ store_name = '{0}_{1}_{2}'
 output_prefix = 'output'
 output_mode = output_prefix + '/{}_{}_{}/'
 data_store = output_prefix + '/data/store.h5'
+
+devnull = open(os.devnull, 'wb')

@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import os
+from k3pi_config import config
 import subprocess
 import shutil
 import tempfile
@@ -82,7 +83,7 @@ def make_tex(packages, texfile, sansserif=False):
     return document
 
 
-def convert_tex_to_pdf(texfile, packages=None, **kwargs):
+def convert_tex_to_pdf(texfile, packages=None, shut_up=True, **kwargs):
     """Convert the .tex file to a .pdf file.
 
     **kwargs are passed to make_tex.
@@ -105,15 +106,17 @@ def convert_tex_to_pdf(texfile, packages=None, **kwargs):
     header_file.write(make_tex(packages, texfile, **kwargs))
     header_file.close()
 
-    compile_tex(header_filename, temp_dir, texfile.replace('.tex', '.pdf'))
+    compile_tex(header_filename, temp_dir, texfile.replace('.tex', '.pdf'),
+                shut_up)
 
     # remove temporary directory
     shutil.rmtree(temp_dir)
 
 
-def compile_tex(headerFileName, working_dir, output_name):
+def compile_tex(headerFileName, working_dir, output_name, shut_up=True):
 
-    proc = subprocess.Popen(['lualatex', headerFileName], cwd=working_dir)
+    proc = subprocess.Popen(['lualatex', headerFileName],
+                            cwd=working_dir, stdout=config.devnull)
     proc.communicate()
 
     retVal = proc.returncode

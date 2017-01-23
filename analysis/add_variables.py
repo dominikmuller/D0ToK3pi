@@ -3,7 +3,6 @@ from k3pi_utilities.selective_load import selective_load
 from k3pi_utilities.decorator_utils import pop_arg
 from k3pi_utilities.buffer import buffer_load
 from k3pi_utilities import parser
-from analysis import selection
 import collections
 from k3pi_utilities.debugging import call_debug
 from k3pi_config.modes import gcm, MODE
@@ -79,8 +78,6 @@ def phsp_variables(df):
     # implementation using pybind11::array requires some special treatment
     # here, otherwise the passed arrays are of non-matching type.
     if not isinstance(df, collections.defaultdict):
-        sel = selection.full_selection(mode)
-        df = df[sel]
         vals = vec_phsp_variables(
             df[vars.dtf_pt(mode.K)], df[vars.dtf_eta(mode.K)],
             df[vars.dtf_phi(mode.K)], config.PDG_MASSES['K'],
