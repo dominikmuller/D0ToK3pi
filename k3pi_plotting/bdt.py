@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from rep import utils
 import palettable
+from k3pi_utilities import variables as vars
 
 from k3pi_utilities.logger import get_logger
 log = get_logger('k3pi_plotting/bdt')
@@ -56,4 +57,72 @@ def plot_eff(var, part, test, bdt, labels, weights, quantiles=None):
     ax.legend(loc='best')
     ax.set_xlabel(var.latex(part, with_unit=True))
 
+    return fig
+
+def plot_bdt_discriminant(train, test):
+    fig, ax = plt.subplots(figsize=(10, 10))
+    xmin, xmax = 0, 1
+    nbins = 40
+
+    # Plot train signal and background
+
+    h_sig_train, edges = np.histogram(
+        train.query('labels==1')['bdt'], bins=nbins,
+        range=(xmin, xmax), weights=train.query('labels==1').weights)
+    h_bkg_train, _ = np.histogram(
+        train.query('labels==0')['bdt'], bins=nbins,
+        range=(xmin, xmax), weights=train.query('labels==0').weights)
+    x_ctr = (edges[1:] + edges[:-1])/2.
+    width = (edges[1:] - edges[:-1])
+    x_err = width/2.
+
+    h_bkg_train /= np.max(h_bkg_train)
+    h_sig_train /= np.max(h_sig_train)
+
+    ax.bar(x_ctr-x_err, h_bkg_train, width, color='#11073B',
+           label='Train background', linewidth=0, alpha=0.50)
+    ax.bar(x_ctr-x_err, h_sig_train, width, color='#5F5293',
+           label='Train signal', linewidth=0, alpha=0.50)
+
+    options = dict(
+        fmt='o', markersize=5, capthick=1, capsize=0, elinewidth=2,
+        alpha=1)
+
+    h_sig_test, _ = np.histogram(
+        test.query('labels==1')['bdt'], bins=nbins,
+        range=(xmin, xmax), weights=test.query('labels==1').weights)
+    h_bkg_test, _ = np.histogram(
+        test.query('labels==0')['bdt'], bins=nbins,
+        range=(xmin, xmax), weights=test.query('labels==0').weights)
+    err_sig_test, _ = np.histogram(
+        test.query('labels==1')['bdt'], bins=nbins,
+        range=(xmin, xmax), weights=test.query('labels==1').weights**2)
+    err_bkg_test, _ = np.histogram(
+        test.query('labels==0')['bdt'], bins=nbins,
+        range=(xmin, xmax), weights=test.query('labels==0').weights**2)
+
+    n_sig_test = h_sig_test.max()
+    n_bkg_test = h_bkg_test.max()
+
+    err_bkg_test = np.sqrt(err_bkg_test)
+    err_sig_test = np.sqrt(err_sig_test)
+
+    h_bkg_test = h_bkg_test*1./float(n_bkg_test)
+    err_bkg_test /= float(n_bkg_test)
+
+    h_sig_test = h_sig_test*1./float(n_sig_test)
+    err_sig_test /= float(n_sig_test)
+
+    ax.errorbar(
+        x_ctr, h_sig_test, xerr=x_err, yerr=err_sig_test,
+        label='Test signal',
+        color='#5F5293', markeredgecolor='#5F5293',**options)
+    ax.errorbar(
+        x_ctr, h_bkg_test, xerr=x_err, yerr=err_bkg_test,
+        label='Test background',
+        color='#11073B', markeredgecolor='#11073B',**options)
+
+    ax.set_ylim((0,1.2))
+    ax.legend(loc='best')
+    ax.set_xlabel(vars.bdt.latex())
     return fig

@@ -1,6 +1,6 @@
-from . import config,  modes
+from k3pi_config import config,  modes
 
-__all__ = [config, modes]
+__all__ = ['config', 'modes']
 
 def get_mode(polarity, year, mode):
     return getattr(modes, 'D0ToKpipipi_' + mode)(polarity, year)

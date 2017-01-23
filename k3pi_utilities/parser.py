@@ -1,4 +1,5 @@
 import argparse
+from k3pi_config import config
 import logging as log
 
 
@@ -41,6 +42,7 @@ def create_parser(logger=None):
     elif args.verbose == 2:
         logger.setLevel(log.DEBUG)
     else:
+        config.devnull = None
         import ROOT
         ROOT.RooMsgService.instance().setSilentMode(False)
         ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.DEBUG)

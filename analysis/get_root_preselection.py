@@ -60,7 +60,7 @@ def get(mode):
     if mode.mode in config.twotag_modes:
         _cuts += [pt(mode.D0) + ' >= 1800.']
     else:
-        _cuts += [pt(mode.D0) + ' >= 5000.']
+        _cuts += [pt(mode.D0) + ' >= 3000.']
         _cuts += ['TMath::Log(' + ipchi2(mode.D0) + ') < 2.']
 
     return ' && '.join(['({})'.format(x) for x in _cuts])

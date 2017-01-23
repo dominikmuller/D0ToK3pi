@@ -1,5 +1,5 @@
 from k3pi_utilities.variables import (eta, probnnk, probnnpi, p, m, dtf_dm,
-                                      probnnmu)
+                                      probnnmu, dtf_chi2)
 from k3pi_utilities.variables import ipchi2, probnnghost
 from k3pi_utilities.selective_load import selective_load
 from k3pi_utilities.buffer import buffer_load
@@ -53,7 +53,7 @@ def mass_fiducial_selection(df):
 @selective_load
 @call_debug
 def remove_secondary(df):
-    return np.log(df[ipchi2(gcm().D0)]) < 2.
+    return np.log(df[ipchi2(gcm().D0)]) < 1.
 
 
 @buffer_load
@@ -69,6 +69,14 @@ def slow_pion(df):
 
 
 @buffer_load
+@selective_load
+@call_debug
+def dtf_cuts(df):
+    ret = (df[dtf_chi2(gcm().head)] < 60.)
+    return ret
+
+
+@buffer_load
 @call_debug
 def full_selection():
     sel = pid_selection()
@@ -77,6 +85,7 @@ def full_selection():
     if gcm().mode not in config.twotag_modes:
         sel &= remove_secondary()
     sel &= slow_pion()
+    sel &= dtf_cuts()
     return sel
 
 
@@ -113,7 +122,8 @@ if __name__ == '__main__':
             'slow_pion',
             'full_selection',
             'mass_signal_region',
-            'mass_sideband_region'
+            'mass_sideband_region',
+            'dtf_cuts'
         ]
     else:
         sels = args.selections
