@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import os
+import sys
 import pwd
 import getpass
 import argparse
@@ -16,6 +17,11 @@ from Ganga.GPI import (
     LocalFile,
     Notifier,
     SplitByFiles
+)
+
+sys.path.append(os.getcwd())
+from simulation_config import (  # NOQA
+    configs_file
 )
 
 
@@ -83,6 +89,7 @@ twotag = args.twotag
 OPTIONS = [
     '{0}/add_helpers.py',
     '{0}/davinci_collision.py',
+    '{0}/configs.py',
 ]
 if twotag:
     OPTIONS += ['{0}/decaytreetuples_2tag.py']
@@ -92,6 +99,7 @@ else:
     OPTIONS += ['{0}/decaytreetuples.py']
     ROOT = 'None'
     JNAME = 'D0ToK3Pi_{0}_{1}'
+MODES = "['RS', 'WS']"
 
 bkq = BKQuery(bookkeeping_path(polarity, year, twotag))
 dataset = bkq.getDataset()
@@ -113,6 +121,13 @@ with open('{0}/davinci_collision.py'.format(basedir), 'w') as f:
         "n_events={2}, root={3}, tfn='{4}')\n"
     ).format(input_type, year, 25000 if args.test else -1, ROOT, tfn))
 
+# Make the file for setting the access functions for ntuple settings
+with open('{0}/configs.py'.format(basedir), 'w+') as f:
+    f.write(configs_file.format(
+        modes=MODES,
+        turbo=not args.twotag,
+        mc='False'
+    ))
 j = Job(name=JNAME.format(polarity, year))
 j.application = DaVinci(version='v40r2')
 j.application.optsfile = [path.format(basedir) for path in OPTIONS]

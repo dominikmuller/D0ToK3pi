@@ -17,6 +17,13 @@ all_modes = [
     D0ToKpipipi_2tag_WS
 ]
 
+all_modes_short = [
+    'RS',
+    'WS',
+    '2tag_RS',
+    '2tag_WS'
+]
+
 twotag_modes = [
     D0ToKpipipi_2tag_RS,
     D0ToKpipipi_2tag_WS

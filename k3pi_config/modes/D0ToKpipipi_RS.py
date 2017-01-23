@@ -9,6 +9,7 @@ from .mode_base import mode_base
 
 class D0ToKpipipi_RS(mode_base):
     mode = config.D0ToKpipipi_RS
+    mode_short = 'RS'
     tpl = config.ntuple_strip.format(mode)
     shapes = ('CRU', 'DJSU', 'PID')
     mass_fit_pars = dict(
@@ -65,8 +66,8 @@ class D0ToKpipipi_RS(mode_base):
     ])
     head = Dstp
 
-    def __init__(self, polarity=None, year=None):
-        super(D0ToKpipipi_RS, self).__init__(polarity, year)
+    def __init__(self, polarity=None, year=None, mc=None):
+        super(D0ToKpipipi_RS, self).__init__(polarity, year, mc)
 
     bdt_vars = [
         PlotConfig(vars.pt, D0, (50, 0, 15000)),
