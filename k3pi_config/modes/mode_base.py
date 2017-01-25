@@ -127,3 +127,5 @@ class mode_base(object):
         return identifier + '[{}]'.format(val)
 
     bdt_vars = []
+    spectator_vars = []
+    just_plot = []

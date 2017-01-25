@@ -73,31 +73,19 @@ class D0ToKpipipi_RS(mode_base):
         PlotConfig(vars.pt, D0, (50, 0, 15000)),
         PlotConfig(vars.ipchi2, D0, (50, -7, 2.), np.log, r'$\ln(\text{{{}}})$'),
         PlotConfig(vars.vdchi2, D0, (50, 0, 10), np.log, r'$\ln(\text{{{}}})$'),
-        # PlotConfig(vars.mindoca, D0, (50, 0, 0.5)),
         PlotConfig(vars.maxdoca, D0, (50, 0, 0.5)),
-        # PlotConfig(vars.dtf_chi2, head, (50, 0, 60)),
         PlotConfig(vars.vchi2, head, (50, 0, 20)),
         PlotConfig(vars.vchi2, D0, (50, 0, 20)),
         PlotConfig(vars.angle, None, (50, 0, 0.03))
     ]
-    # for d in Dstp.all_daughters():
-    # bdt_vars += [
-    # PlotConfig(vars.ipchi2, d, (50, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),
-    # PlotConfig(vars.pt, d, (50, 0, 8000)),
-    # ]
     for d in [4]:
         bdt_vars += [
             PlotConfig(getattr(vars, 'ipchi2{}'.format(d)), None, (50, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),  # NOQA
-            # PlotConfig(getattr(vars, 'pt{}'.format(d)), None, (50, 0, 8000.)),  # NOQA
         ]
     for d in [Pislow]:
         bdt_vars += [
             PlotConfig(vars.pt, d, (50, 0, 3000)),
             PlotConfig(vars.ipchi2, d, (50, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),
-            # PlotConfig(vars.probnnghost, d, (50, 0., 0.3)),
-            # PlotConfig(vars.probnnp, d, (50, 0., 1.0)),
-            # PlotConfig(vars.probnne, d, (50, 0., 1.0)),
-            # PlotConfig(vars.probnnmu, d, (50, 0., 1.0)),
         ]
     spectator_vars = [
         PlotConfig(vars.ltime, D0, (50, 0, 0.001)),

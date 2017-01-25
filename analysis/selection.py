@@ -11,16 +11,35 @@ from k3pi_config import config
 import numpy as np
 
 
-@buffer_load
 @pop_arg(selective_load, allow_for=[None, 'mc'])
 @call_debug
-def pid_selection(df):
+def _apply_pid_cut(df, min_pi_nnpi=0.3, max_pi_nnk=0.7,
+                   min_k_nnk=0.3, max_k_nnpi=0.7):
     ret = True
     for kaon in gcm().head.all_pid(config.kaon):
-        ret &= (df[probnnk(kaon)] > 0.3) & (df[probnnpi(kaon)] < 0.7)
+        ret &= (df[probnnk(kaon)] > min_k_nnk) & (df[probnnpi(kaon)] < max_k_nnpi)  # NOQA
     for pion in gcm().head.all_pid(config.pion):
-        ret &= (df[probnnpi(pion)] > 0.3) & (df[probnnk(pion)] < 0.7)
+        ret &= (df[probnnpi(pion)] > min_pi_nnpi) & (df[probnnk(pion)] < max_pi_nnk)  # NOQA
+
     return ret
+
+
+@pop_arg(selective_load, allow_for=[None, 'mc'])
+@call_debug
+def _apply_slow_pion_cut(df, min_spi_nnpi=0.3, max_spi_nnk=0.7,
+                         max_spi_nnghost=0.3):
+    ret = True
+    ret = (df[probnnghost(gcm().Pislow)] < max_spi_nnghost)
+    ret &= (df[probnnpi(gcm().Pislow)] > min_spi_nnpi)
+    ret &= (df[probnnk(gcm().Pislow)] < max_spi_nnk)
+    ret &= (df[probnnmu(gcm().Pislow)] < 0.1)
+
+    return ret
+
+
+@buffer_load
+def pid_selection():
+    return _apply_pid_cut()
 
 
 @buffer_load
@@ -58,15 +77,8 @@ def remove_secondary(df):
 
 
 @buffer_load
-@pop_arg(selective_load, allow_for=[None, 'mc'])
-@call_debug
-def slow_pion(df):
-    ret = (df[probnnghost(gcm().Pislow)] < 0.3)
-    ret &= (df[probnnpi(gcm().Pislow)] > 0.3)
-    ret &= (df[probnnk(gcm().Pislow)] < 0.7)
-    ret &= (df[probnnmu(gcm().Pislow)] < 0.1)
-
-    return ret
+def slow_pion():
+    return _apply_slow_pion_cut
 
 
 @buffer_load

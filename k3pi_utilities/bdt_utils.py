@@ -1,5 +1,6 @@
 from k3pi_utilities import helpers
 from k3pi_config.modes import gcm
+from k3pi_config import config, get_mode
 
 
 def dump_bdt(bdt):
@@ -22,5 +23,12 @@ def dump_classifiers(classifiers):
 def load_classifiers(mode=None):
     if mode is None:
         mode = gcm()
+    # Hard coded check here: Use the RS mode if WS is supplied. Also get a new
+    # mode object to remove possible MC flags.
+    if mode.mode == config.D0ToKpipipi_WS:
+        name = 'RS'
+    if mode.mode == config.D0ToKpipipi_2tag_WS:
+        name = '2tag_RS'
+    mode = get_mode(mode.polarity, mode.year, name)
     outfile = mode.get_output_path('bdt') + 'classifiers.p'
     return helpers.load(outfile)

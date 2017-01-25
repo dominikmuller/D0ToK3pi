@@ -1,8 +1,10 @@
 from collections import defaultdict
-import logging as log
 from k3pi_config import config, modes
+from k3pi_utilities.logger import get_logger
 from inspect import getargspec
 import pandas as pd
+
+log = get_logger('buffer_load')
 
 accumulated_per_mode = defaultdict(lambda: set())
 
@@ -19,15 +21,16 @@ def remove_buffer_for_function(func):
                 store.remove(a)
 
 
-def remove_buffer_for_mode():
+def remove_buffer_for_mode(modename):
     """Cleans out the cache for everything belonging to a certain mode."""
     with pd.get_store(config.data_store) as store:
-        try:
-            store.remove(mode.get_store_name())
-            log.info('Removing already existing data at {}'.format(
-                mode.get_store_name()))
-        except KeyError:
-            log.info('No previous data found. Nothing to delete.')
+        for a in store:
+            if 'Cached' not in a:
+                continue
+            if modename not in a:
+                continue
+            log.info('Removing {} from store'.format(a))
+            store.remove(a)
 
 
 class buffer_load():
@@ -50,7 +53,7 @@ class buffer_load():
             mode.polarity + str(mode.year)
         if mode.mc is not None:
             buffer_name += mode.mc
-        log.debug('Loading {} from {}'.format(
+        log.info('Loading {} from {}'.format(
             buffer_name, config.data_store
         ))
         with pd.get_store(config.data_store) as store:
@@ -59,7 +62,7 @@ class buffer_load():
                     return store.select(buffer_name)
                 except KeyError:
                     pass
-        log.debug('Caching into {}'.format(buffer_name))
+        log.info('Caching into {}'.format(buffer_name))
         if self._wants_mode:
             ret = self._func(mode)
         else:

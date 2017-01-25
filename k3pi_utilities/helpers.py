@@ -27,6 +27,38 @@ import numpy
 numbered_branch_prefixes = ['First', 'Second', 'Third', 'Fourth', 'Fifth']
 
 
+def check_fit_result(fit_result, logger=None):
+    """Check for poor fit quality using the error matrix status.
+
+    Logs a warning and returns False for a bad fit.
+    Keyword arguments:
+    fit_result -- Instance of RooFitResult
+    """
+    # Values of the covariance matrix error status from http://cern.ch/go/6PwR
+    if logger is None:
+        logger = log
+    fit_quality = fit_result.covQual()
+    good_fit = True
+    if fit_quality < 2:
+        logger.warning('{0}: {1}'.format(fit_result.GetTitle(), fit_quality))
+        good_fit = False
+    return good_fit
+
+
+def quiet_mode(silence_roofit=False):
+    import ROOT
+    """Enables ROOT batch mode (no X windows) and sets no INFO logging."""
+    # Enable batch mode -> no X windows
+    ROOT.gROOT.SetBatch(True)
+    # Disable INFO level logging, i.e. WARNING and up
+    ROOT.gErrorIgnoreLevel = ROOT.kWarning
+    # Disable INFO level RooFit logging
+    ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.WARNING)
+    # *Really* shut up, RooFit
+    if silence_roofit:
+        ROOT.RooMsgService.instance().setSilentMode(True)
+
+
 def random_string(length=8):
     """Return a string of randomly chosen ASCII characters."""
     return ''.join(
@@ -309,5 +341,3 @@ def rounder(num, l_for_sig_dgt, is_unc=False, sig_prec=1):
         sig_digit -= sig_prec
     prec = [0, -sig_digit][sig_digit < 0]
     return round(num, -sig_digit), prec
-
-

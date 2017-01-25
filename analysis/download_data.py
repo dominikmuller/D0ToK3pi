@@ -4,6 +4,7 @@ import os
 from k3pi_config import get_mode, config
 from k3pi_utilities import variables, helpers, parser, get_logger
 from k3pi_utilities.variables import m, dtf_m, evt_num, ipchi2, pt
+from k3pi_utilities.buffer import remove_buffer_for_mode
 from k3pi_cpp import treesplitter
 import root_pandas
 import tempfile
@@ -99,6 +100,8 @@ def download(mode, polarity, year, full, test=False, mc=None):
                   mode='a', format='t', append=True)
     for f in temp_files:
         os.remove(f)
+    # Loop and delete everything in the datastore that needs to be recached
+    remove_buffer_for_mode(mode.mode)
 
 
 if __name__ == '__main__':

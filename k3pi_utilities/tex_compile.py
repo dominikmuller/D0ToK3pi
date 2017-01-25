@@ -5,7 +5,6 @@ from k3pi_config import config
 import subprocess
 import shutil
 import tempfile
-import logging as log
 
 from . import helpers
 
@@ -91,7 +90,6 @@ def convert_tex_to_pdf(texfile, packages=None, shut_up=True, **kwargs):
     texfile -- Name of the .tex file (including the extension)
     packages -- List of LaTeX packages to pass to make_tex (default: [])
     """
-    log.debug('Converting {0}'.format(texfile))
     patch_buffer_bug(texfile)
     if not packages:
         packages = []
@@ -100,7 +98,6 @@ def convert_tex_to_pdf(texfile, packages=None, shut_up=True, **kwargs):
     temp_dir = tempfile.mkdtemp('', 'rootTeX-')
 
     header_filename = os.path.join(temp_dir, 'rootTeX-header.tex')
-    log.debug('Header file : {0}'.format(header_filename))
 
     header_file = open(header_filename, 'w')
     header_file.write(make_tex(packages, texfile, **kwargs))
@@ -121,9 +118,7 @@ def compile_tex(headerFileName, working_dir, output_name, shut_up=True):
 
     retVal = proc.returncode
 
-    if retVal is not 0:
-        log.warn('Error compiling document {0}'.format(output_name))
-    else:
+    if retVal is 0:
         src = '{0}.pdf'.format(os.path.splitext(headerFileName)[0])
         helpers.move_file(src, output_name)
 

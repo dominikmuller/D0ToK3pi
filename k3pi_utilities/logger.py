@@ -1,5 +1,10 @@
 import logging
-logging.basicConfig()
+
+import colorlog
+
+handler = colorlog.StreamHandler()
+handler.setFormatter(colorlog.ColoredFormatter(
+    '%(log_color)s%(levelname)s:%(name)s:%(message)s'))
 
 __all__ = ['get_logger', 'update_level']
 __loggers__ = []
@@ -11,6 +16,7 @@ def get_logger(name, level=__default_level__):
     logger = logging.getLogger(name)
     __loggers__.append(name)
     logger.setLevel(level)
+    logger.addHandler(handler)
     return logger
 
 

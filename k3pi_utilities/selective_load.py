@@ -44,7 +44,7 @@ class selective_load():
         self.__name__ = function.__name__
         self.__doc__ = function.__doc__
 
-    def __call__(self, mode=None):
+    def __call__(self, mode=None, *args, **kwargs):
         if mode is None:
             mode = gcm()
         if mode.mc not in self.allow_for:
@@ -60,8 +60,8 @@ class selective_load():
                     self.requested_columns[look_up])))
         df = mode.get_data(self.requested_columns[look_up])
         if self._wants_mode:
-            ret = self._func(df, mode)
+            ret = self._func(df, mode, *args, **kwargs)
         else:
-            ret = self._func(df)
+            ret = self._func(df, *args, **kwargs)
         del df
         return ret

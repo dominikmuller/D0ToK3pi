@@ -1,6 +1,5 @@
 import argparse
 from k3pi_config import config
-import logging as log
 from k3pi_utilities.logger import update_level
 
 
@@ -35,23 +34,17 @@ def create_parser(logger=None):
         help='Set logging level: v - WARN, vv - INFO, vvv - DEBUG'
     )
 
-    if logger is None:
-        logger = log.getLogger()
     args = parser.parse_args()
     if args.verbose == 0:
-        logger.setLevel(log.WARN)
-        update_level(log.WARN)
+        update_level(30)
     elif args.verbose == 1:
-        logger.setLevel(log.INFO)
-        update_level(log.INFO)
+        update_level(20)
     elif args.verbose == 2:
-        logger.setLevel(log.DEBUG)
-        update_level(log.DEBUG)
+        update_level(10)
     else:
         config.devnull = None
         import ROOT
         ROOT.RooMsgService.instance().setSilentMode(False)
         ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.DEBUG)
-        logger.setLevel(log.DEBUG)
-        update_level(log.DEBUG)
+        update_level(10)
     return args

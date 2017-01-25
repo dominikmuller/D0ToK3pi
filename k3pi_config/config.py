@@ -19,6 +19,11 @@ all_modes = [
     D0ToKpipipi_2tag_WS
 ]
 
+wrong_sign_modes = [
+    D0ToKpipipi_WS,
+    D0ToKpipipi_2tag_WS
+]
+
 all_modes_short = [
     'RS',
     'WS',
