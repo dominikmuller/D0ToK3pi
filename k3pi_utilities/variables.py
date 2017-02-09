@@ -119,3 +119,4 @@ var('cos1', 'cos1', False, False, r'$\cos\theta_1$', None, append=False)
 var('cos2', 'cos2', False, False, r'$\cos\theta_2$', None, append=False)
 var('phi1', 'phi1', False, False, r'$\phi_1$', None, append=False)
 var('bdt', 'bdt', False, False, r'BDT discriminant', None, append=False)
+var('dtf_ip_diff', 'dtf_ip_diff', False, False, r'DTF $\chi^2 - \chi^2_\text{IP}(D^0)$', None, append=False)  # NOQA

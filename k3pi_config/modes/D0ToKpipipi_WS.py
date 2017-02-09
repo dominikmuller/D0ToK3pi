@@ -8,7 +8,7 @@ from .mode_base import mode_base
 
 
 class D0ToKpipipi_WS(mode_base):
-    shapes = ('CRU', 'JSU', 'PID')
+    shapes = ('JSU', 'JSU', 'PID')
     mode_short = 'WS'
     mass_fit_pars = dict(
         # Dst - D0 mass fit
@@ -76,7 +76,7 @@ class D0ToKpipipi_WS(mode_base):
         PlotConfig(vars.maxdoca, D0, (50, 0, 0.5)),
         PlotConfig(vars.vchi2, head, (50, 0, 20)),
         PlotConfig(vars.vchi2, D0, (50, 0, 20)),
-        PlotConfig(vars.angle, None, (50, 0, 0.03))
+        # PlotConfig(vars.angle, None, (50, 0, 0.03))
     ]
     for d in [4]:
         bdt_vars += [
@@ -103,6 +103,13 @@ class D0ToKpipipi_WS(mode_base):
         PlotConfig(vars.m, D0, (100, 1810., 1920.)),
         PlotConfig(vars.dtf_dm, None, (100, 140.5, 160.5)),
     ]
+    for d in D0.all_daughters():
+        just_plot += [
+            PlotConfig(vars.probnnghost, d, (50, 0., 0.3)),
+            PlotConfig(vars.probnnp, d, (50, 0., 0.3)),
+            PlotConfig(vars.probnne, d, (50, 0., 0.3)),
+            PlotConfig(vars.probnnmu, d, (50, 0., 0.3)),
+        ]
 
 
 __all__ = ['D0ToKpipipi_WS']

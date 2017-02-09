@@ -1,6 +1,6 @@
 from k3pi_config.modes import gcm
 from analysis.mass_fitting import get_sweights
-from analysis import add_variables, selection
+from analysis import add_variables, selection, extended_selection
 import numpy as np
 from hep_ml.commonutils import train_test_split
 
@@ -28,22 +28,26 @@ def get_bdt_data(sw=False, sklearn=True):
     bdt_vars = gcm().bdt_vars + gcm().spectator_vars + gcm().just_plot
     df = gcm().get_data([v.var for v in bdt_vars])
     add_variables.append_angle(df)
-    sel = selection.full_selection()
+    sel = extended_selection.get_complete_selection()
     add_variables.append_phsp(df)
+    add_variables.append_dtf_ip_diff(df)
 
     for f in gcm().bdt_vars:
         if f.convert is not None:
             df[f.var] = f.convert(df[f.var])
 
     if sw:
-        df = df[sel]
         sweights = get_sweights(gcm())
 
         np.random.seed(42)
-        df['labels'] = (np.random.rand(len(df.index.size)) < 0.5).astype(np.int)
+        df['labels'] = (np.random.rand(df.index.size) < 0.5).astype(np.int)
         sweights['bkg'] = sweights.rnd + sweights.comb
-        df['weights'] = (df.labels)*sweights.sig
-        df['weights'] += (~df.labels)*(sweights['rnd'] + sweights['comb'])
+        df['weights'] = (df['labels'] == 1)*sweights.sig
+        df['weights'] += (df['labels'] == 0)*(sweights['rnd'] + sweights['comb'])  # NOQA
+
+        # Weights are only present for those rows that are selected,
+        # so we select
+        df = df.loc[~np.isnan(df['weights'])]
     else:
         df['weights'] = np.ones(df.index.size)
         df.loc[selection.mass_signal_region() & sel, 'labels'] = 1

@@ -68,6 +68,9 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
     }
     daughter_loki_vars = {
         'PIDK': 'PIDK',
+        'PIDe': 'PIDe',
+        'PIDmu': 'PIDmu',
+        'PIDp': 'PIDp',
         'Loki_TRACKCHI2NDOF': 'TRCHI2DOF',
         'Loki_TRACKGHOSTPROB': 'TRGHOSTPROB',
     }

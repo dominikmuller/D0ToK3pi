@@ -26,9 +26,8 @@ def load_classifiers(mode=None):
     # Hard coded check here: Use the RS mode if WS is supplied. Also get a new
     # mode object to remove possible MC flags.
     if mode.mode == config.D0ToKpipipi_WS:
-        name = 'RS'
+        mode = get_mode(mode.polarity, mode.year, 'RS')
     if mode.mode == config.D0ToKpipipi_2tag_WS:
-        name = '2tag_RS'
-    mode = get_mode(mode.polarity, mode.year, name)
+        mode = get_mode(mode.polarity, mode.year, '2tag_RS')
     outfile = mode.get_output_path('bdt') + 'classifiers.p'
     return helpers.load(outfile)

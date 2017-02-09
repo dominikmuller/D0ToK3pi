@@ -38,31 +38,31 @@ def train_bdts(sw=False):
     min_samples = 2000 if sw else 1
 
     base_ada = GradientBoostingClassifier(
-        max_depth=5, n_estimators=n_estimators, learning_rate=0.05,
+        max_depth=5, n_estimators=n_estimators, learning_rate=0.1,
         min_samples_leaf=min_samples)
     classifiers['Deviance'] = SklearnClassifier(base_ada, features=features)
 
     base_ada = GradientBoostingClassifier(
-        max_depth=5, n_estimators=n_estimators, learning_rate=0.05,
+        max_depth=5, n_estimators=n_estimators, learning_rate=0.1,
         min_samples_leaf=min_samples, loss='exponential')
     classifiers['Exponential'] = SklearnClassifier(base_ada, features=features)
 
     flatnessloss = ugb.KnnFlatnessLossFunction(
         uniform_features, fl_coefficient=5., power=1.3, uniform_label=1)
     ugbFL = ugb.UGradientBoostingClassifier(
-        loss=flatnessloss, max_depth=3, n_estimators=n_estimators,
-        learning_rate=0.05, train_features=features, min_samples_leaf=min_samples)
+        loss=flatnessloss, max_depth=5, n_estimators=n_estimators,
+        learning_rate=0.1, train_features=features, min_samples_leaf=min_samples)
     classifiers['KnnFlatnessWeak'] = SklearnClassifier(ugbFL)
 
     log.info('Fitting classifiers')
 
     classifiers.fit(
         train[features + uniform_features], train_lbl,
-        sample_weight=train.weights, parallel_profile='threads-2')
+        sample_weight=train.weights, parallel_profile='threads-3')
 
     log.info('Pickling the thing')
     bdt_utils.dump_classifiers(classifiers)
-    buffer.remove_buffer_for_function(plot_bdt_discriminant)
+    buffer.remove_buffer_for_function(get_bdt_discriminant)
 
 
 def plot_roc(sw=False):
@@ -154,6 +154,10 @@ def plot_efficiencies(sw=False):
                 fig = bdt.plot_eff(var.functor, var.particle,
                                    test, classifiers[bdt_name],
                                    test_lbl, test.weights)
+                pdf.savefig(fig)
+                fig = bdt.plot_eff(var.functor, var.particle,
+                                   test, classifiers[bdt_name],
+                                   ~test_lbl, test.weights)
                 pdf.savefig(fig)
                 plt.clf()
 

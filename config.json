@@ -13,13 +13,13 @@
         "max_pi_nnk" : {
             "type" : "FLOAT",
             "size" : 1,
-            "min"  : 0.1,
+            "min"  : 0.02,
             "max"  : 0.7
         },
         "max_k_nnpi" : {
             "type" : "FLOAT",
             "size" : 1,
-            "min"  : 0.1,
+            "min"  : 0.02,
             "max"  : 0.7
         },
         "min_k_nnk" : {
@@ -37,14 +37,20 @@
         "max_spi_nnk" : {
             "type" : "FLOAT",
             "size" : 1,
-            "min"  : 0.1,
+            "min"  : 0.02,
             "max"  : 0.7
         },
         "max_spi_nnghost" : {
             "type" : "FLOAT",
             "size" : 1,
-            "min"  : 0.1,
+            "min"  : 0.02,
             "max"  : 0.3
+        },
+        "max_spi_nnp" : {
+            "type" : "FLOAT",
+            "size" : 1,
+            "min"  : 0.02,
+            "max"  : 0.15
         },
         "BDT_CUT" : {
             "type" : "FLOAT",

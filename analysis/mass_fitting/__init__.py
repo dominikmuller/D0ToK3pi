@@ -2,17 +2,18 @@ from __future__ import print_function
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import pandas as pd
-from k3pi_config import config
-from . import shapes
-from k3pi_utilities.buffer import buffer_load
-from k3pi_utilities.debugging import call_debug
-from k3pi_utilities import helpers, get_logger
+
 from k3pi_config.modes import gcm
 
 from k3pi_utilities import tex_compile
 from k3pi_utilities.variables import dtf_dm, m
-from .. import selection
+from k3pi_utilities.buffer import buffer_load
+from k3pi_utilities.debugging import call_debug
+from k3pi_utilities import helpers, get_logger
+
+from analysis import extended_selection as selection
 from analysis.mass_fitting.metrics import get_metric
+from analysis.mass_fitting import shapes
 log = get_logger('mass_fitting')
 
 
@@ -27,7 +28,7 @@ def run_spearmint_fit(spearmint_selection=None, metric='punzi'):
     shapes.load_shape_class('RooBackground')
     mode = gcm()
     wsp = fit_config.load_workspace(mode)
-    sel = selection.full_selection()
+    sel = selection.get_complete_selection()
 
     # Get the data
     df = mode.get_data([dtf_dm(), m(mode.D0)])
@@ -59,7 +60,7 @@ def run_spearmint_fit(spearmint_selection=None, metric='punzi'):
     return metric()
 
 
-def fit(spearmint_selection=None, metric='punzi'):
+def fit():
     """Runs the mass fit. Either nominal with making pretty plots or
     in spearmint mode which does not save the workspace and returns a
     metric."""
@@ -69,11 +70,9 @@ def fit(spearmint_selection=None, metric='punzi'):
     # Get the data
     # TODO: rewrite selection to use gcm itself
     mode = gcm()
-    sel = selection.full_selection()
+    sel = selection.get_complete_selection()
 
     df = mode.get_data([dtf_dm(), m(mode.D0)])
-    if spearmint_selection:
-        sel = sel & spearmint_selection
     df = df[sel]
 
     wsp, _ = setup_workspace()
@@ -87,9 +86,7 @@ def fit(spearmint_selection=None, metric='punzi'):
 
     if not helpers.check_fit_result(result, log):
         log.error('Bad fit quality')
-
-    if spearmint_selection is None:
-        fit_config.dump_workspace(mode, wsp)
+    fit_config.dump_workspace(mode, wsp)
 
 
 def plot_fit(suffix=None, wsp=None):
@@ -101,12 +98,7 @@ def plot_fit(suffix=None, wsp=None):
     mode = gcm()
     if wsp is None:
         wsp = fit_config.load_workspace(mode)
-    sel = selection.pid_selection(mode)
-    sel &= selection.pid_fiducial_selection(mode)
-    sel &= selection.mass_fiducial_selection(mode)
-    if mode.mode not in config.twotag_modes:
-        sel &= selection.remove_secondary(mode)
-    sel &= selection.slow_pion(mode)
+    sel = selection.get_complete_selection()
 
     df = mode.get_data([dtf_dm(), m(mode.D0)])
     df = df[sel]
@@ -177,7 +169,7 @@ def get_sweights():
     shapes.load_shape_class('RooBackground')
     wsp = fit_config.load_workspace(gcm())
 
-    sel = selection.full_selection()
+    sel = selection.get_complete_selection()
 
     df = df[sel]
 
@@ -195,4 +187,32 @@ def get_sweights():
                          index=df.index)
     probs = probs.div(probs.sum(axis=1), axis=0)
 
-    return splot.compute_sweights(probs)
+    sweights = splot.compute_sweights(probs)
+    sweights.index = probs.index
+    return sweights
+
+
+def run_spearmint_sweights(spearmint_selection=None):
+    """Runs the mass fit. Either nominal with making pretty plots or
+    in spearmint mode which does not save the workspace and returns a
+    metric."""
+    from . import fit_config
+    mode = gcm()
+    sel = selection.get_complete_selection()
+
+    sweights = get_sweights(gcm())
+
+    sweights['bkg'] = sweights.rnd + sweights.comb
+
+    df = sweights[sel.reindex(sweights.index)]
+    sig0 = np.sum(df.sig)
+
+    if spearmint_selection is not None:
+        sel = sel & spearmint_selection
+    df = sweights[sel.reindex(sweights.index)]
+    sig = np.sum(df.sig)
+    bkg = np.sum(df.bkg)
+    if bkg < 0:
+        bkg = 0
+
+    return -(sig/sig0)/(0.5 + np.sqrt(bkg))

@@ -29,12 +29,16 @@ def create_parser(logger=None):
                         help='Train the BDT.')
     parser.add_argument('-s', '--selections', nargs='+', default=None,
                         help='Run the specified selections')
+    parser.add_argument('--spearmint', default=False, action='store_true',
+                        help='Activate something spearmint related.')
     parser.add_argument(
         '-v', '--verbose', action='count', default=0,
         help='Set logging level: v - WARN, vv - INFO, vvv - DEBUG'
     )
 
     args = parser.parse_args()
+    if args.spearmint:
+        config.optimised_selection = True
     if args.verbose == 0:
         update_level(30)
     elif args.verbose == 1:

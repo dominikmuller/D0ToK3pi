@@ -26,6 +26,11 @@ def append_phsp(df):
         df[c] = extra[c]
 
 
+def append_dtf_ip_diff(df):
+    extra = _dtf_ip_diff()
+    df['dtf_ip_diff'] = extra
+
+
 def append_bdt(df):
     extra = bdt_variable()
     df['bdt'] = extra
@@ -51,25 +56,6 @@ def _dstp_slowpi_angle(df):
 
 @buffer_load
 @pop_arg(selective_load, allow_for=[None, 'mc'])
-@call_debug
-def bdt_variable(df):
-    year = gcm().year
-    polarity = gcm().polarity
-    # Make sure it reads to necessary variables
-    if isinstance(df, collections.defaultdict):
-        [df[f.functor(f.particle)] for f in gcm().bdt_vars + gcm().spectator_vars]
-        return 1.
-    # For now, we always use the RS BDT, even when looking at WS
-    mode = get_mode(polarity, year, 'RS')
-    bdt = bdt_utils.load_classifiers(mode)['KnnFlatnessWeak']
-
-    probs = bdt.predict_proba(df).transpose()[1]
-
-    return pd.Series(probs, name='BDT', index=df.index)
-
-
-@buffer_load
-@selective_load
 @call_debug
 def bdt_variable(df):
     year = gcm().year
@@ -196,13 +182,19 @@ def other_slowpi_ws(df):
     return 1
 
 
+@selective_load
+@call_debug
+def _dtf_ip_diff(df):
+    return df[vars.dtf_chi2(gcm().head)] - df[vars.ipchi2(gcm().D0)]
+
+
 if __name__ == '__main__':
     import sys
     args = parser.create_parser()
 
     funcs = [
         'phsp_variables',
-        '_dstp_slowpi_angle'
+        '_dstp_slowpi_angle',
     ]
 
     with MODE(args.polarity, args.year, args.mode):

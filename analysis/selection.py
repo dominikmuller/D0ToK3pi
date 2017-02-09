@@ -1,5 +1,6 @@
 from k3pi_utilities.variables import (eta, probnnk, probnnpi, p, m, dtf_dm,
-                                      probnnmu, dtf_chi2)
+                                      probnnmu, dtf_chi2, probnnp, pt, vchi2,
+                                      maxdoca)
 from k3pi_utilities.variables import ipchi2, probnnghost
 from k3pi_utilities.selective_load import selective_load
 from k3pi_utilities.decorator_utils import pop_arg
@@ -27,12 +28,13 @@ def _apply_pid_cut(df, min_pi_nnpi=0.3, max_pi_nnk=0.7,
 @pop_arg(selective_load, allow_for=[None, 'mc'])
 @call_debug
 def _apply_slow_pion_cut(df, min_spi_nnpi=0.3, max_spi_nnk=0.7,
-                         max_spi_nnghost=0.3):
+                         max_spi_nnghost=0.05, max_spi_nnp=0.05):
     ret = True
     ret = (df[probnnghost(gcm().Pislow)] < max_spi_nnghost)
     ret &= (df[probnnpi(gcm().Pislow)] > min_spi_nnpi)
     ret &= (df[probnnk(gcm().Pislow)] < max_spi_nnk)
     ret &= (df[probnnmu(gcm().Pislow)] < 0.1)
+    ret &= (df[probnnp(gcm().Pislow)] < max_spi_nnp)
 
     return ret
 
@@ -77,8 +79,20 @@ def remove_secondary(df):
 
 
 @buffer_load
+@pop_arg(selective_load, allow_for=[None, 'mc'])
+@call_debug
+def d0_selection(df):
+    ret = True
+    ret &= np.log(df[ipchi2(gcm().D0)]) < 1.
+    ret &= df[pt(gcm().D0)] > 4000.
+    ret &= df[vchi2(gcm().D0)] < 4.
+    ret &= df[maxdoca(gcm().D0)] < .2
+    return ret
+
+
+@buffer_load
 def slow_pion():
-    return _apply_slow_pion_cut
+    return _apply_slow_pion_cut()
 
 
 @buffer_load
@@ -95,10 +109,9 @@ def full_selection():
     sel = pid_selection()
     sel &= pid_fiducial_selection()
     sel &= mass_fiducial_selection()
-    if gcm().mode not in config.twotag_modes:
-        sel &= remove_secondary()
+    sel &= d0_selection()
     sel &= slow_pion()
-    sel &= dtf_cuts()
+    # sel &= dtf_cuts()
     return sel
 
 
@@ -132,11 +145,12 @@ if __name__ == '__main__':
             'pid_fiducial_selection',
             'mass_fiducial_selection',
             'remove_secondary',
+            'd0_selection',
             'slow_pion',
-            'full_selection',
             'mass_signal_region',
             'mass_sideband_region',
-            'dtf_cuts'
+            'dtf_cuts',
+            'full_selection',
         ]
     else:
         sels = args.selections

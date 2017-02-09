@@ -98,7 +98,8 @@ def sig_sec_comb_stack(v, df):
 
 
 def plot_bdt_variables(sw=False):
-    sig_df, bkg_df, sig_wgt, bkg_wgt = bdt_data.get_bdt_data(sklearn=False)
+    sig_df, bkg_df, sig_wgt, bkg_wgt = bdt_data.get_bdt_data(
+        sw=sw, sklearn=False)
     bdt_vars = gcm().bdt_vars + gcm().spectator_vars + gcm().just_plot
 
     outfile = gcm().get_output_path('sweight_fit') + 'bdt_vars.pdf'
