@@ -30,6 +30,7 @@ def run_spearmint_fit(spearmint_selection=None, metric='punzi'):
     wsp = fit_config.load_workspace(mode)
     sel = selection.get_complete_selection()
 
+
     # Get the data
     df = mode.get_data([dtf_dm(), m(mode.D0)])
     if spearmint_selection is not None:
@@ -73,6 +74,7 @@ def fit():
     sel = selection.get_complete_selection()
 
     df = mode.get_data([dtf_dm(), m(mode.D0)])
+    import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
     df = df[sel]
 
     wsp, _ = setup_workspace()

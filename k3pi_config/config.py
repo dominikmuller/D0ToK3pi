@@ -59,6 +59,7 @@ store_name = '{0}_{1}_{2}'
 output_prefix = 'output'
 output_mode = output_prefix + '/{}_{}_{}/'
 data_store = output_prefix + '/data/store.h5'
+bcolz_locations = output_prefix + '/data/{}.bcolz'
 optimised_selection = False
 
 devnull = open(os.devnull, 'wb')

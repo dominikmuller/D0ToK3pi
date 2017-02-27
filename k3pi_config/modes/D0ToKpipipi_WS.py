@@ -5,6 +5,7 @@ import numpy as np
 from math import pi
 from k3pi_config import config
 from .mode_base import mode_base
+from .D0ToKpipipi_RS import D0ToKpipipi_RS
 
 
 class D0ToKpipipi_WS(mode_base):
@@ -69,47 +70,11 @@ class D0ToKpipipi_WS(mode_base):
     def __init__(self, polarity=None, year=None, mc=None):
         super(D0ToKpipipi_WS, self).__init__(polarity, year, mc)
 
-    bdt_vars = [
-        PlotConfig(vars.pt, D0, (50, 0, 15000)),
-        PlotConfig(vars.ipchi2, D0, (50, -7, 2.), np.log, r'$\ln(\text{{{}}})$'),
-        PlotConfig(vars.vdchi2, D0, (50, 0, 10), np.log, r'$\ln(\text{{{}}})$'),
-        PlotConfig(vars.maxdoca, D0, (50, 0, 0.5)),
-        PlotConfig(vars.vchi2, head, (50, 0, 20)),
-        PlotConfig(vars.vchi2, D0, (50, 0, 20)),
-        # PlotConfig(vars.angle, None, (50, 0, 0.03))
-    ]
-    for d in [4]:
-        bdt_vars += [
-            PlotConfig(getattr(vars, 'ipchi2{}'.format(d)), None, (50, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),  # NOQA
-        ]
-    for d in [Pislow]:
-        bdt_vars += [
-            PlotConfig(vars.pt, d, (50, 0, 3000)),
-            PlotConfig(vars.ipchi2, d, (50, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),
-        ]
-    spectator_vars = [
-        PlotConfig(vars.ltime, D0, (50, 0, 0.001)),
-        PlotConfig(vars.m12, None, (100, 0, 1600.)),
-        PlotConfig(vars.m34, None, (100, 0, 1400.)),
-        PlotConfig(vars.cos1, None, (50, -1, 1)),
-        PlotConfig(vars.cos2, None, (50, -1, 1)),
-        PlotConfig(vars.phi1, None, (50, -pi, pi)),
-    ]
-    just_plot = [
-        PlotConfig(vars.probnnghost, Pislow, (50, 0., 0.3)),
-        PlotConfig(vars.probnnp, Pislow, (50, 0., 1.0)),
-        PlotConfig(vars.probnne, Pislow, (50, 0., 1.0)),
-        PlotConfig(vars.probnnmu, Pislow, (50, 0., 1.0)),
-        PlotConfig(vars.m, D0, (100, 1810., 1920.)),
-        PlotConfig(vars.dtf_dm, None, (100, 140.5, 160.5)),
-    ]
-    for d in D0.all_daughters():
-        just_plot += [
-            PlotConfig(vars.probnnghost, d, (50, 0., 0.3)),
-            PlotConfig(vars.probnnp, d, (50, 0., 0.3)),
-            PlotConfig(vars.probnne, d, (50, 0., 0.3)),
-            PlotConfig(vars.probnnmu, d, (50, 0., 0.3)),
-        ]
+    bdt_vars = D0ToKpipipi_RS.bdt_vars
+
+    spectator_vars = D0ToKpipipi_RS.spectator_vars
+
+    just_plot = D0ToKpipipi_RS.just_plot
 
 
 __all__ = ['D0ToKpipipi_WS']

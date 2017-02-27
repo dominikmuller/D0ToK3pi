@@ -16,6 +16,9 @@ def sig_bkg_normed(v, sig_df, bkg_df, sig_wgt=1., bkg_wgt=1.):
 
     nbins, xmin, xmax = v.binning
 
+    xmin = min(np.min(sig_data), np.min(bkg_data))
+    xmax = max(np.max(sig_data), np.max(bkg_data))
+
     h_sig, edges = np.histogram(
         sig_data, bins=nbins, range=(xmin, xmax), weights=sig_wgt)
     h_bkg, _ = np.histogram(
@@ -26,7 +29,6 @@ def sig_bkg_normed(v, sig_df, bkg_df, sig_wgt=1., bkg_wgt=1.):
         bkg_data, bins=nbins, range=(xmin, xmax), weights=bkg_wgt**2)
     x_ctr = (edges[1:] + edges[:-1])/2.
     width = (edges[1:] - edges[:-1])
-    x_err = width/2.
 
     err_sig = np.sqrt(err_sig)
     err_bkg = np.sqrt(err_bkg)
@@ -40,9 +42,9 @@ def sig_bkg_normed(v, sig_df, bkg_df, sig_wgt=1., bkg_wgt=1.):
     h_sig = h_sig*1./float(n_sig)
     err_sig /= float(n_sig)
 
-    ax.bar(x_ctr-x_err, h_bkg, width, color='#11073B',
+    ax.bar(x_ctr, h_bkg, width, color='#11073B', linewidth=0,
            label='Background', edgecolor='#11073B', alpha=0.80)
-    ax.bar(x_ctr-x_err, h_sig, width, color='#5F5293',
+    ax.bar(x_ctr, h_sig, width, color='#5F5293', linewidth=0,
            label='Signal', edgecolor='#5F5293', alpha=0.80)
 
     handles, labels = ax.get_legend_handles_labels()

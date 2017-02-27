@@ -30,7 +30,7 @@ def train_bdts(sw=False):
     (train, test, train_lbl, test_lbl), features, spectators = bdt_data.prep_data_for_sklearn(sw)  # NOQA
 
     uniform_features = [vars.ltime(gcm().D0)]
-    n_estimators = 800
+    n_estimators = 500
 
     classifiers = ClassifiersFactory()
     log.info('Configuring classifiers')
@@ -38,19 +38,19 @@ def train_bdts(sw=False):
     min_samples = 2000 if sw else 1
 
     base_ada = GradientBoostingClassifier(
-        max_depth=5, n_estimators=n_estimators, learning_rate=0.1,
+        max_depth=3, n_estimators=n_estimators, learning_rate=0.1,
         min_samples_leaf=min_samples)
     classifiers['Deviance'] = SklearnClassifier(base_ada, features=features)
 
     base_ada = GradientBoostingClassifier(
-        max_depth=5, n_estimators=n_estimators, learning_rate=0.1,
+        max_depth=3, n_estimators=n_estimators, learning_rate=0.1,
         min_samples_leaf=min_samples, loss='exponential')
     classifiers['Exponential'] = SklearnClassifier(base_ada, features=features)
 
     flatnessloss = ugb.KnnFlatnessLossFunction(
-        uniform_features, fl_coefficient=5., power=1.3, uniform_label=1)
+        uniform_features, fl_coefficient=6., power=5., uniform_label=1)
     ugbFL = ugb.UGradientBoostingClassifier(
-        loss=flatnessloss, max_depth=5, n_estimators=n_estimators,
+        loss=flatnessloss, max_depth=3, n_estimators=n_estimators,
         learning_rate=0.1, train_features=features, min_samples_leaf=min_samples)
     classifiers['KnnFlatnessWeak'] = SklearnClassifier(ugbFL)
 
@@ -72,12 +72,15 @@ def plot_roc(sw=False):
     log.info('Plotting ROCs for {} {} {}'.format(gcm().mode, gcm().polarity,
                                                  gcm().year))
     (train, test, train_lbl, test_lbl), features, spectators = bdt_data.prep_data_for_sklearn(sw)  # NOQA
-    bdt.plot_roc(ax, 'Deviance', colours[0], test, classifiers['Deviance'],
-                 test_lbl, test.weights)
-    bdt.plot_roc(ax, 'Exponential', colours[1], test,
-                 classifiers['Exponential'], test_lbl, test.weights)
-    bdt.plot_roc(ax, 'KnnFlatness', colours[2], test,
-                 classifiers['KnnFlatnessWeak'], test_lbl, test.weights)
+    # bdt.plot_roc(ax, 'Deviance', colours[0], test, classifiers['Deviance'],
+                 # test_lbl, test.weights)
+    # bdt.plot_roc(ax, 'Exponential', colours[1], test,
+                 # classifiers['Exponential'], test_lbl, test.weights)
+    # bdt.plot_roc(ax, 'KnnFlatness', colours[2], test,
+                 # classifiers['KnnFlatnessWeak'], test_lbl, test.weights)
+    for var in gcm().bdt_vars:
+        bdt.plot_roc_for_feature(ax, var.var, var.xlabel, colours[0],
+                                 test, test_lbl, test.weights)
 
     ax.set_xlim((0, 1))
     ax.set_ylim((0, 1))
@@ -95,14 +98,14 @@ def plot_roc(sw=False):
 @selective_load.selective_load
 def get_bdt_discriminant(df):
     # Trigger the loading of the needed objects
-    if isinstance(df, collections.defaultdict):
+    if selective_load.is_dummy_run(df):
         [df[f.functor(f.particle)] for f in gcm().bdt_vars]
         return 1
 
     features = [f.functor(f.particle) for f in gcm().bdt_vars]
-    if 'dstp_slowpi_angle' in features:
-        add_variables.append_angle(df)
+
     classifiers = bdt_utils.load_classifiers()
+    assert False not in (features == df.columns), 'Mismatching feature order'
     bdt = classifiers['KnnFlatnessWeak']
     probs = bdt.clf.predict_proba(df).transpose()[1]
     return pd.Series(probs, index=df.index)
@@ -170,7 +173,7 @@ if __name__ == '__main__':
     with MODE(args.polarity, args.year, args.mode):
         if args.train:
             train_bdts(args.sweight)
-        plot_bdt_discriminant()
-        create_feature_importance()
+        # plot_bdt_discriminant()
+        # create_feature_importance()
         plot_roc(args.sweight)
         plot_efficiencies(args.sweight)

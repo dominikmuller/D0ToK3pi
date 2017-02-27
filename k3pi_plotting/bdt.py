@@ -30,6 +30,25 @@ def plot_roc(ax, name, colour, test, bdt, labels, weights):
     ax.plot(x, y, color=colour, label=legend, linewidth=3)
 
 
+def plot_roc_for_feature(ax, feature, legend, colour, test, labels, weights=1.):
+    data = test[feature]
+    import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
+
+    # if data[labels].median() > data[~labels]
+    thresholds = [utils.weighted_quantile(
+        data, quantiles=1-eff, sample_weight=weights)
+        for eff in np.arange(0., 1., 1./200)]
+    true_positive = []
+    false_positive = []
+    total_true = data[labels].sum()
+    total_false = data[~labels].sum()
+    # for thr in thresholds:
+        # true_positive.append(np.sum(data[labels] > ))
+    x, y, auc = roc(test, bdt, labels, weights)
+    legend = '{} ({:.2f})'.format(name, auc)
+    ax.plot(x, y, color=colour, label=legend, linewidth=3)
+
+
 def plot_eff(var, part, test, bdt, labels, weights, quantiles=None):
     if quantiles is None:
         quantiles = [0.2, 0.4, 0.6, 0.8]
@@ -116,15 +135,15 @@ def plot_bdt_discriminant(train, test):
     # Make a seperation here. WS modes haven't trained a BDT, so remove
     # so only plot the combined distributions
     if gcm().mode in config.wrong_sign_modes:
-        ax.bar(x_ctr-x_err, h_bkg_comb, width, color='#11073B',
-               label='Background', linewidth=0, alpha=0.50)
-        ax.bar(x_ctr-x_err, h_sig_comb, width, color='#5F5293',
-               label='Signal', linewidth=0, alpha=0.50)
+        ax.bar(x_ctr-x_err, h_bkg_comb, 2.*x_err,
+               color='#11073B', label='Background', linewidth=0, alpha=0.50)
+        ax.bar(x_ctr-x_err, h_sig_comb, 2.*x_err,
+               color='#5F5293', label='Signal', linewidth=0, alpha=0.50)
     else:
-        ax.bar(x_ctr-x_err, h_bkg_train, width, color='#11073B',
-               label='Train background', linewidth=0, alpha=0.50)
-        ax.bar(x_ctr-x_err, h_sig_train, width, color='#5F5293',
-               label='Train signal', linewidth=0, alpha=0.50)
+        ax.bar(x_ctr, h_bkg_train, 2.*x_err,
+               color='#11073B', label='Train background', linewidth=0, alpha=0.50)
+        ax.bar(x_ctr, h_sig_train, 2.*x_err,
+               color='#5F5293', label='Train signal', linewidth=0, alpha=0.50)
 
         options = dict(
             fmt='o', markersize=5, capthick=1, capsize=0, elinewidth=2,

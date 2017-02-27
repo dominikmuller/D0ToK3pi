@@ -76,11 +76,11 @@ class D0ToKpipipi_RS(mode_base):
         PlotConfig(vars.maxdoca, D0, (50, 0, 0.5)),
         PlotConfig(vars.vchi2, head, (50, 0, 20)),
         PlotConfig(vars.vchi2, D0, (50, 0, 20)),
-        PlotConfig(vars.probnnghost, Pislow, (50, 0., 0.3)),
+        # PlotConfig(vars.probnnghost, Pislow, (50, 0., 0.3)),
         # PlotConfig(vars.angle, None, (50, 0, 0.03))
-        PlotConfig(vars.dtf_chi2, Dstp, (100, 0, 100)),
+        # PlotConfig(vars.dtf_chi2, Dstp, (100, 0, 100)),
     ]
-    for d in [1, 4]:
+    for d in [4]:
         bdt_vars += [
             PlotConfig(getattr(vars, 'ipchi2{}'.format(d)), None, (50, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),  # NOQA
         ]
@@ -103,14 +103,14 @@ class D0ToKpipipi_RS(mode_base):
         PlotConfig(vars.probnne, Pislow, (50, 0., 0.3)),
         PlotConfig(vars.probnnmu, Pislow, (50, 0., 0.3)),
         PlotConfig(vars.m, D0, (100, 1810., 1920.)),
-        PlotConfig(vars.dtf_ip_diff, Dstp, (100, 0, 100)),
+        PlotConfig(vars.dtf_chi2, Dstp, (100, 0, 100)),
     ]
     for d in D0.all_daughters():
         just_plot += [
-            PlotConfig(vars.probnnghost, d, (50, 0., 0.3)),
-            PlotConfig(vars.probnnp, d, (50, 0., 0.3)),
-            PlotConfig(vars.probnne, d, (50, 0., 0.3)),
-            PlotConfig(vars.probnnmu, d, (50, 0., 0.3)),
+            PlotConfig(vars.probnnghost, d, (50, 0., 1.)),
+            PlotConfig(vars.probnnp, d, (50, 0., 1.)),
+            PlotConfig(vars.probnne, d, (50, 0., 1.)),
+            PlotConfig(vars.probnnmu, d, (50, 0., 1.)),
         ]
 
 __all__ = ['D0ToKpipipi_RS']

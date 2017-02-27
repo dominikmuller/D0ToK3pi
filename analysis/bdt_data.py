@@ -26,13 +26,15 @@ def get_bdt_data(sw=False, sklearn=True):
               if sklearn is False: sig_df, bkg_df, sig_wgt, bkg_wgt
     """
     bdt_vars = gcm().bdt_vars + gcm().spectator_vars + gcm().just_plot
-    df = gcm().get_data([v.var for v in bdt_vars])
+
+    df = gcm().get_data(
+        [v.var for v in bdt_vars if v.functor.additional is False])
     add_variables.append_angle(df)
     sel = extended_selection.get_complete_selection()
     add_variables.append_phsp(df)
     add_variables.append_dtf_ip_diff(df)
 
-    for f in gcm().bdt_vars:
+    for f in bdt_vars:
         if f.convert is not None:
             df[f.var] = f.convert(df[f.var])
 

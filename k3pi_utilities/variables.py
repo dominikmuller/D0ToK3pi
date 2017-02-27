@@ -28,7 +28,8 @@ mevcc = r'${\mathrm{\,Me\kern -0.1em V\!/}c^2}$'
 
 
 class var(object):
-    def __init__(self, name, fmt, mom, kid, pretty=None, unit=None, append=True):  # NOQA
+    def __init__(self, name, fmt, mom, kid, pretty=None,
+                 unit=None, append=True, additional=False):
         self.name = name
         self.fmt = fmt
         self.mom = mom
@@ -38,8 +39,9 @@ class var(object):
         else:
             self.pretty = fmt
         self.unit = unit
+        self.additional = additional
         setattr(thismodule, name, self)
-        if append:
+        if append and not additional:
             __all__.append(name)
 
     def __call__(self, part=None):
@@ -104,19 +106,19 @@ var('dtf_chi2', '{head}_DTF_CHI2', True, False, r'DTF $\chi^2$')
 var('dtf_ndof', '{head}_DTF_NDOF', True, False, r'DTF dof')
 var('dm', 'delta_m', False, False, '$\Delta m$', mevcc, append=False)
 var('dtf_dm', 'delta_m_dtf', False, False, 'DTF $\Delta m$', mevcc, append=False)  # NOQA
-var('ipchi21', '1ipchi2', False, False, r'$1^\text{st} \chi^2_\text{IP}$', append=False)  # NOQA
-var('ipchi22', '2ipchi2', False, False, r'$2^\text{nd} \chi^2_\text{IP}$', append=False)  # NOQA
-var('ipchi23', '3ipchi2', False, False, r'$3^\text{rd} \chi^2_\text{IP}$', append=False)  # NOQA
-var('ipchi24', '4ipchi2', False, False, r'$4^\text{th} \chi^2_\text{IP}$', append=False)  # NOQA
-var('pt1', '1pt', False, False, r'$1^\text{st} p_{\text{T}}$', mevc, append=False)  # NOQA
-var('pt2', '2pt', False, False, r'$2^\text{nd} p_{\text{T}}$', mevc, append=False)  # NOQA
-var('pt3', '3pt', False, False, r'$3^\text{rd} p_{\text{T}}$', mevc, append=False)  # NOQA
-var('pt4', '4pt', False, False, r'$4^\text{th} p_{\text{T}}$', mevc, append=False)  # NOQA
-var('angle', 'dstp_slowpi_angle', False, False, r'$\Delta\Phi$', append=False)  # NOQA
-var('m12', 'm12', False, False, r'$m_{K^\pm\pi^\mp}$', mevcc, append=False)
-var('m34', 'm34', False, False, r'$m_{\pi^\pm\pi^\mp}$', mevcc, append=False)
-var('cos1', 'cos1', False, False, r'$\cos\theta_1$', None, append=False)
-var('cos2', 'cos2', False, False, r'$\cos\theta_2$', None, append=False)
-var('phi1', 'phi1', False, False, r'$\phi_1$', None, append=False)
-var('bdt', 'bdt', False, False, r'BDT discriminant', None, append=False)
-var('dtf_ip_diff', 'dtf_ip_diff', False, False, r'DTF $\chi^2 - \chi^2_\text{IP}(D^0)$', None, append=False)  # NOQA
+var('ipchi21', 'ipchi2_1', False, False, r'$1^\text{st} \chi^2_\text{IP}$', append=False)  # NOQA
+var('ipchi22', 'ipchi2_2', False, False, r'$2^\text{nd} \chi^2_\text{IP}$', append=False)  # NOQA
+var('ipchi23', 'ipchi2_3', False, False, r'$3^\text{rd} \chi^2_\text{IP}$', append=False)  # NOQA
+var('ipchi24', 'ipchi2_4', False, False, r'$4^\text{th} \chi^2_\text{IP}$', append=False)  # NOQA
+var('pt1', 'pt_1', False, False, r'$1^\text{st} p_{\text{T}}$', mevc, append=False)  # NOQA
+var('pt2', 'pt_2', False, False, r'$2^\text{nd} p_{\text{T}}$', mevc, append=False)  # NOQA
+var('pt3', 'pt_3', False, False, r'$3^\text{rd} p_{\text{T}}$', mevc, append=False)  # NOQA
+var('pt4', 'pt_4', False, False, r'$4^\text{th} p_{\text{T}}$', mevc, append=False)  # NOQA
+var('angle', 'dstp_slowpi_angle', False, False, r'$\Delta\Phi$', append=False, additional=True)  # NOQA
+var('m12', 'm12', False, False, r'$m_{K^\pm\pi^\mp}$', mevcc, append=False, additional=True)  # NOQA
+var('m34', 'm34', False, False, r'$m_{\pi^\pm\pi^\mp}$', mevcc, append=False, additional=True)  # NOQA
+var('cos1', 'cos1', False, False, r'$\cos\theta_1$', None, append=False, additional=True)  # NOQA
+var('cos2', 'cos2', False, False, r'$\cos\theta_2$', None, append=False, additional=True)  # NOQA
+var('phi1', 'phi1', False, False, r'$\phi_1$', None, append=False, additional=True)  # NOQA
+var('bdt', 'bdt', False, False, r'BDT discriminant', None, append=False, additional=True)  # NOQA
+var('dtf_ip_diff', 'dtf_ip_diff', False, False, r'DTF $\chi^2 - \chi^2_\text{IP}(D^0)$', None, append=False, additional=True)  # NOQA

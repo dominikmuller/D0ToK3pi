@@ -1,6 +1,7 @@
 from collections import defaultdict
 from k3pi_config import config
 from k3pi_utilities import get_logger
+from k3pi_utilities import DefaultOrderedDict
 from k3pi_config import modes, get_mode
 from k3pi_config.modes import gcm
 from itertools import product
@@ -8,6 +9,11 @@ import inspect
 
 
 accumulated_per_mode = defaultdict(lambda: set())
+
+
+def is_dummy_run(thing):
+    """Function to test if the argument is a dummy run."""
+    return isinstance(thing, DefaultOrderedDict)
 
 
 class selective_load():
@@ -24,7 +30,7 @@ class selective_load():
         self._wants_mode = 'mode' in inspect.getargspec(function).args
         self.log = get_logger(function.__name__)
         for m, mc in product(config.all_modes_short, self.allow_for):
-            d = defaultdict(lambda: 1)
+            d = DefaultOrderedDict(lambda: 1)
             # Dummy call the selection classes with the mode classes to get
             # the different variables needed.
             if self._wants_mode:
