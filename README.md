@@ -13,6 +13,8 @@ lb-run LCG/84 $SHELL
 
 where `$SHELL` is your shell of choice. If you are not in this environment for setup, the `mkvirtualenv` step will fail with a `libpython` error.
 
+Recently, on LXPlus, I have also had to add `LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/afs/cern.ch/sw/lcg/releases/LCG_87/Python/2.7.10/x86_64-slc6-gcc49-opt/lib` to get things to work.
+
 Make sure `.local/bin` is near the beginning of your path.
 
 ```

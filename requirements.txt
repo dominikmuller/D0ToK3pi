@@ -11,3 +11,5 @@ seaborn
 tqdm
 rep
 scikit_learn
+colorlog
+bcolz
