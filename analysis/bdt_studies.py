@@ -2,7 +2,6 @@ from __future__ import print_function
 from k3pi_utilities import parser
 import pandas as pd
 from matplotlib.backends.backend_pdf import PdfPages
-import collections
 import matplotlib.pyplot as plt
 import palettable
 from sklearn.ensemble import GradientBoostingClassifier
@@ -12,7 +11,6 @@ from k3pi_plotting import bdt
 from k3pi_utilities import buffer, selective_load
 
 from hep_ml import uboost, gradientboosting as ugb, losses  # NOQA
-from analysis import add_variables
 from k3pi_utilities import variables as vars
 from k3pi_config.modes import MODE, gcm
 from k3pi_utilities import bdt_utils
@@ -27,32 +25,42 @@ log = get_logger('bdt_studies')
 def train_bdts(sw=False):
     log.info('Training BDTs for {} {} {}'.format(gcm().mode, gcm().polarity,
                                                  gcm().year))
-    (train, test, train_lbl, test_lbl), features, spectators = bdt_data.prep_data_for_sklearn(sw)  # NOQA
+    (train, test, train_lbl, test_lbl), features, spectators = bdt_data.prep_data_for_sklearn(sw=sw, same_weight=True)  # NOQA
 
     uniform_features = [vars.ltime(gcm().D0)]
-    n_estimators = 500
+    n_estimators = 300
 
     classifiers = ClassifiersFactory()
     log.info('Configuring classifiers')
 
     min_samples = 2000 if sw else 1
 
-    base_ada = GradientBoostingClassifier(
-        max_depth=3, n_estimators=n_estimators, learning_rate=0.1,
-        min_samples_leaf=min_samples)
-    classifiers['Deviance'] = SklearnClassifier(base_ada, features=features)
+    # base_ada = GradientBoostingClassifier(
+    # max_depth=3, n_estimators=n_estimators, learning_rate=0.1,
+    # min_samples_leaf=min_samples)
+    # classifiers['Deviance'] = SklearnClassifier(base_ada, features=features)
 
     base_ada = GradientBoostingClassifier(
         max_depth=3, n_estimators=n_estimators, learning_rate=0.1,
         min_samples_leaf=min_samples, loss='exponential')
     classifiers['Exponential'] = SklearnClassifier(base_ada, features=features)
 
+    # flatnessada = ugb.KnnAdaLossFunction(
+    # uniform_features, uniform_label=1, knn=50)
+    # ugbFL = ugb.UGradientBoostingClassifier(
+    # loss=flatnessada, max_depth=3, n_estimators=n_estimators,
+    # learning_rate=0.1, train_features=features,
+    # min_samples_leaf=min_samples)
+    # classifiers['KnnAdaFlatness'] = SklearnClassifier(ugbFL)
+
     flatnessloss = ugb.KnnFlatnessLossFunction(
-        uniform_features, fl_coefficient=6., power=5., uniform_label=1)
+        uniform_features, fl_coefficient=3., power=1.5, uniform_label=1,
+        max_groups=10000)
     ugbFL = ugb.UGradientBoostingClassifier(
         loss=flatnessloss, max_depth=3, n_estimators=n_estimators,
-        learning_rate=0.1, train_features=features, min_samples_leaf=min_samples)
-    classifiers['KnnFlatnessWeak'] = SklearnClassifier(ugbFL)
+        learning_rate=0.1, train_features=features,
+        min_samples_leaf=min_samples)
+    classifiers['KnnFlatness'] = SklearnClassifier(ugbFL)
 
     log.info('Fitting classifiers')
 
@@ -71,22 +79,24 @@ def plot_roc(sw=False):
     colours = palettable.tableau.TableauMedium_10.hex_colors
     log.info('Plotting ROCs for {} {} {}'.format(gcm().mode, gcm().polarity,
                                                  gcm().year))
-    (train, test, train_lbl, test_lbl), features, spectators = bdt_data.prep_data_for_sklearn(sw)  # NOQA
-    # bdt.plot_roc(ax, 'Deviance', colours[0], test, classifiers['Deviance'],
-                 # test_lbl, test.weights)
-    # bdt.plot_roc(ax, 'Exponential', colours[1], test,
-                 # classifiers['Exponential'], test_lbl, test.weights)
-    # bdt.plot_roc(ax, 'KnnFlatness', colours[2], test,
-                 # classifiers['KnnFlatnessWeak'], test_lbl, test.weights)
-    for var in gcm().bdt_vars:
-        bdt.plot_roc_for_feature(ax, var.var, var.xlabel, colours[0],
-                                 test, test_lbl, test.weights)
+    (train, test, train_lbl, test_lbl), features, spectators = bdt_data.prep_data_for_sklearn(sw=sw)  # NOQA
+    bdt.plot_roc(ax, 'Exponential', colours[0], test,
+                 classifiers['Exponential'],
+                 test_lbl, test.weights)
+    # bdt.plot_roc(ax, 'KnnAdaFlatness', colours[1], test,
+    # classifiers['KnnAdaFlatness'], test_lbl, test.weights)
+    bdt.plot_roc(ax, 'KnnFlatness', colours[2], test,
+                 classifiers['KnnFlatness'], test_lbl, test.weights)
+    for i, var in enumerate(gcm().bdt_vars):
+        bdt.plot_roc_for_feature(
+            ax, test[var.var], var.functor.latex(var.particle),
+            colours[i], test_lbl, test.weights)
 
     ax.set_xlim((0, 1))
     ax.set_ylim((0, 1))
     ax.set_xlabel('False positive rate')
     ax.set_ylabel('True positive rate')
-    ax.legend(loc='best')
+    ax.legend(loc='best', fontsize=14, ncol=2)
 
     outfile = gcm().get_output_path('bdt') + 'ROC.pdf'
 
@@ -95,8 +105,12 @@ def plot_roc(sw=False):
 
 
 @buffer.buffer_load
+def get_bdt_discriminant():
+    return get_named_bdt_discriminant()
+
+
 @selective_load.selective_load
-def get_bdt_discriminant(df):
+def get_named_bdt_discriminant(df, name='KnnFlatness'):
     # Trigger the loading of the needed objects
     if selective_load.is_dummy_run(df):
         [df[f.functor(f.particle)] for f in gcm().bdt_vars]
@@ -106,26 +120,27 @@ def get_bdt_discriminant(df):
 
     classifiers = bdt_utils.load_classifiers()
     assert False not in (features == df.columns), 'Mismatching feature order'
-    bdt = classifiers['KnnFlatnessWeak']
+    bdt = classifiers[name]
     probs = bdt.clf.predict_proba(df).transpose()[1]
     return pd.Series(probs, index=df.index)
 
 
 def plot_bdt_discriminant(sw=False):
-    (train, test, train_lbl, test_lbl), features, spectators = bdt_data.prep_data_for_sklearn(sw)  # NOQA
-    bdt_probs = get_bdt_discriminant()
-    train[vars.bdt()] = bdt_probs
-    test[vars.bdt()] = bdt_probs
-    fig = bdt.plot_bdt_discriminant(train, test)
-
+    train, test = bdt_data.just_the_labels(sw)  # NOQA
     outfile = gcm().get_output_path('bdt') + 'DISCRIMINANT.pdf'
-    fig.savefig(outfile)
-    plt.clf()
+    with PdfPages(outfile) as pdf:
+        for bdt_name in ['Exponential', 'KnnFlatness']:
+            bdt_probs = get_named_bdt_discriminant(name=bdt_name)
+            train[vars.bdt()] = bdt_probs
+            test[vars.bdt()] = bdt_probs
+            fig = bdt.plot_bdt_discriminant(train, test)
+            pdf.savefig(fig)
+            plt.clf()
 
 
 def create_feature_importance():
     classifiers = bdt_utils.load_classifiers()
-    bdt = classifiers['KnnFlatnessWeak']
+    bdt = classifiers['KnnFlatness']
     features = [f.functor.latex(f.particle) for f in gcm().bdt_vars]
     paired = sorted(zip(features, bdt.feature_importances_),
                     key=lambda x: -x[1])
@@ -148,16 +163,16 @@ def plot_efficiencies(sw=False):
     classifiers = bdt_utils.load_classifiers()
     log.info('Plotting efficiencies for {} {} {}'.format(
         gcm().mode, gcm().polarity, gcm().year))
-    (train, test, train_lbl, test_lbl), features, spectators = bdt_data.prep_data_for_sklearn(sw)  # NOQA
+    (train, test, train_lbl, test_lbl), features, spectators = bdt_data.prep_data_for_sklearn(sw=sw)  # NOQA
     outfile = gcm().get_output_path('bdt') + 'effs.pdf'
     with PdfPages(outfile) as pdf:
         for var in gcm().spectator_vars:
-            for bdt_name in ['Deviance', 'Exponential',
-                             'KnnFlatnessWeak']:
+            for bdt_name in ['Exponential', 'KnnFlatness']:
                 fig = bdt.plot_eff(var.functor, var.particle,
                                    test, classifiers[bdt_name],
                                    test_lbl, test.weights)
                 pdf.savefig(fig)
+                plt.clf()
                 fig = bdt.plot_eff(var.functor, var.particle,
                                    test, classifiers[bdt_name],
                                    ~test_lbl, test.weights)
@@ -170,10 +185,10 @@ def bdt_control_plots():
 
 if __name__ == '__main__':
     args = parser.create_parser(log)
-    with MODE(args.polarity, args.year, args.mode):
+    with MODE(args.polarity, args.year, args.mode, args.mc):
         if args.train:
             train_bdts(args.sweight)
-        # plot_bdt_discriminant()
-        # create_feature_importance()
+        plot_bdt_discriminant()
+        create_feature_importance()
         plot_roc(args.sweight)
         plot_efficiencies(args.sweight)

@@ -74,7 +74,6 @@ def fit():
     sel = selection.get_complete_selection()
 
     df = mode.get_data([dtf_dm(), m(mode.D0)])
-    import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
     df = df[sel]
 
     wsp, _ = setup_workspace()
@@ -198,8 +197,6 @@ def run_spearmint_sweights(spearmint_selection=None):
     """Runs the mass fit. Either nominal with making pretty plots or
     in spearmint mode which does not save the workspace and returns a
     metric."""
-    from . import fit_config
-    mode = gcm()
     sel = selection.get_complete_selection()
 
     sweights = get_sweights(gcm())
@@ -214,6 +211,7 @@ def run_spearmint_sweights(spearmint_selection=None):
     df = sweights[sel.reindex(sweights.index)]
     sig = np.sum(df.sig)
     bkg = np.sum(df.bkg)
+    log.info('sig={}, bkg={}, sig0={}'.format(sig, bkg, sig0))
     if bkg < 0:
         bkg = 0
 

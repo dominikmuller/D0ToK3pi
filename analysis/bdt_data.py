@@ -1,27 +1,37 @@
-from k3pi_config.modes import gcm
+from k3pi_config.modes import gcm, opposite_mode
 from analysis.mass_fitting import get_sweights
 from analysis import add_variables, selection, extended_selection
 import numpy as np
 from hep_ml.commonutils import train_test_split
+from k3pi_config import config
 
 
-def prep_data_for_sklearn(sw=False):
+def prep_data_for_sklearn(**kwargs):
     features = [f.functor(f.particle) for f in gcm().bdt_vars]
     spectators = [f.functor(f.particle) for f in gcm().spectator_vars]
 
-    data = get_bdt_data(sklearn=True)
+    kwargs.update({'sklearn': True})
+    data = get_bdt_data(**kwargs)
 
     train, test = train_test_split(data, random_state=43)
     return (train, test, train['labels'].astype(np.bool),
             test['labels'].astype(np.bool)), features, spectators
 
 
-def get_bdt_data(sw=False, sklearn=True):
+def just_the_labels(sw=False):
+    data = get_bdt_data(sw=sw, sklearn=True)
+
+    train, test = train_test_split(data, random_state=43)
+    return train[['labels', 'weights']], test[['labels', 'weights']]
+
+
+def get_bdt_data(sw=False, sklearn=True, same_weight=False):
     """Returns the data for the bdt training, containing all the necessary
     variables and weights.
 
     :sw: Use sweights instead of sidebands and signal region
     :sklearn: return sklearn compatible dataframe
+    :same_weight: Changes the weights to have identical normalisation
     :returns: if sklearn is True:  DataFrame
               if sklearn is False: sig_df, bkg_df, sig_wgt, bkg_wgt
     """
@@ -56,6 +66,17 @@ def get_bdt_data(sw=False, sklearn=True):
         df.loc[selection.mass_sideband_region() & sel, 'labels'] = 0
 
         df = df.loc[~np.isnan(df['labels'])]
+
+    if config.add_wrongsign and gcm().mode not in config.wrong_sign_modes:
+        with opposite_mode():
+            df_op = get_bdt_data(sw, sklearn=True)
+        df = df.append(df_op.query('labels == 0'), ignore_index=True)
+
+    # Weight the label 1 sample to have same total than label 0
+    if same_weight:
+        tot0 = np.sum(df.query('labels == 0').weights)
+        tot1 = np.sum(df.query('labels == 1').weights)
+        df.loc[df['labels'] == 1, 'weights'] = float(tot0)/tot1
 
     if sklearn:
         return df

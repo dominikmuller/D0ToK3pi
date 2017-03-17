@@ -47,15 +47,18 @@ def get(mode):
         _cuts += [p(daug) + ' >= 3000.']
         _cuts += [p(daug) + ' < 100000.']
     for kaon in mode.head.all_pid(config.kaon):
-        _cuts += [probnnk(kaon) + ' > 0.3']
-        _cuts += [probnnpi(kaon) + ' < 0.7']
+        if mode.mc is None:
+            _cuts += [probnnk(kaon) + ' > 0.3']
+            _cuts += [probnnpi(kaon) + ' < 0.7']
     for pion in mode.head.all_pid(config.pion):
-        _cuts += [probnnpi(pion) + ' > 0.3']
-        _cuts += [probnnk(pion) + ' < 0.7']
+        if mode.mc is None:
+            _cuts += [probnnpi(pion) + ' > 0.3']
+            _cuts += [probnnk(pion) + ' < 0.7']
     for pion in mode.head.all_pid(config.slowpion):
         _cuts += [probnnghost(mode.Pislow) + ' < 0.3']
-        _cuts += [probnnpi(mode.Pislow) + ' > 0.3']
-        _cuts += [probnnk(mode.Pislow) + ' < 0.7']
+        if mode.mc is None:
+            _cuts += [probnnpi(mode.Pislow) + ' > 0.3']
+            _cuts += [probnnk(mode.Pislow) + ' < 0.7']
 
     if mode.mode in config.twotag_modes:
         _cuts += [pt(mode.D0) + ' >= 1800.']

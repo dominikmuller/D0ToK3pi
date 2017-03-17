@@ -108,6 +108,8 @@ class mode_base(object):
 
     def get_output_path(self, extra=None):
         path = config.output_mode.format(self.mode, self.year, self.polarity)
+        if self.mc is not None:
+            path += self.mc + '/'
         if extra is not None:
             path += extra
         if path[-1] != '/':

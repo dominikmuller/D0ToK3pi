@@ -31,6 +31,8 @@ def create_parser(logger=None):
                         help='Run the specified selections')
     parser.add_argument('--spearmint', default=False, action='store_true',
                         help='Activate something spearmint related.')
+    parser.add_argument('--addwrongsign', default=False, action='store_true',
+                        help='BDT data will add the WS sidebands to the  data')
     parser.add_argument(
         '-v', '--verbose', action='count', default=0,
         help='Set logging level: v - WARN, vv - INFO, vvv - DEBUG'
@@ -39,6 +41,8 @@ def create_parser(logger=None):
     args = parser.parse_args()
     if args.spearmint:
         config.optimised_selection = True
+    if args.addwrongsign:
+        config.add_wrongsign = True
     if args.verbose == 0:
         update_level(30)
     elif args.verbose == 1:

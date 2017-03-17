@@ -25,6 +25,8 @@ def load_classifiers(mode=None):
         mode = gcm()
     # Hard coded check here: Use the RS mode if WS is supplied. Also get a new
     # mode object to remove possible MC flags.
+    # Just recreate the mode here to get rid of potential MC flags
+    mode = get_mode(mode.polarity, mode.year, mode.mode_short)
     if mode.mode == config.D0ToKpipipi_WS:
         mode = get_mode(mode.polarity, mode.year, 'RS')
     if mode.mode == config.D0ToKpipipi_2tag_WS:

@@ -4,10 +4,10 @@ from k3pi_utilities.variables import (eta, probnnk, probnnpi, p, m, dtf_dm,
 from k3pi_utilities.variables import ipchi2, probnnghost
 from k3pi_utilities.selective_load import selective_load
 from k3pi_utilities.decorator_utils import pop_arg
-from k3pi_utilities.buffer import buffer_load
+from k3pi_utilities.buffer import buffer_load, remove_buffer_for_function
 from k3pi_utilities.debugging import call_debug
 from k3pi_utilities import parser
-from k3pi_config.modes import gcm, MODE
+from k3pi_config.modes import gcm
 from k3pi_config import config
 import numpy as np
 
@@ -31,10 +31,11 @@ def _apply_slow_pion_cut(df, min_spi_nnpi=0.3, max_spi_nnk=0.7,
                          max_spi_nnghost=0.05, max_spi_nnp=0.05):
     ret = True
     ret = (df[probnnghost(gcm().Pislow)] < max_spi_nnghost)
-    ret &= (df[probnnpi(gcm().Pislow)] > min_spi_nnpi)
-    ret &= (df[probnnk(gcm().Pislow)] < max_spi_nnk)
-    ret &= (df[probnnmu(gcm().Pislow)] < 0.1)
-    ret &= (df[probnnp(gcm().Pislow)] < max_spi_nnp)
+    if gcm().mc is None:
+        ret &= (df[probnnpi(gcm().Pislow)] > min_spi_nnpi)
+        ret &= (df[probnnk(gcm().Pislow)] < max_spi_nnk)
+        ret &= (df[probnnmu(gcm().Pislow)] < 0.1)
+        ret &= (df[probnnp(gcm().Pislow)] < max_spi_nnp)
 
     return ret
 
@@ -106,8 +107,9 @@ def dtf_cuts(df):
 @buffer_load
 @call_debug
 def full_selection():
-    sel = pid_selection()
-    sel &= pid_fiducial_selection()
+    sel = pid_fiducial_selection()
+    if gcm().mc is False:
+        sel &= pid_selection()
     sel &= mass_fiducial_selection()
     sel &= d0_selection()
     sel &= slow_pion()
@@ -136,6 +138,7 @@ def mass_sideband_region(df):
 
 
 if __name__ == '__main__':
+    """Run this to reset all buffered selection."""
     import sys
     args = parser.create_parser()
 
@@ -155,6 +158,5 @@ if __name__ == '__main__':
     else:
         sels = args.selections
 
-    with MODE(args.polarity, args.year, args.mode):
-        for sel in sels:
-            getattr(sys.modules[__name__], sel)(use_buffered=False)
+    for sel in sels:
+        remove_buffer_for_function(getattr(sys.modules[__name__], sel))

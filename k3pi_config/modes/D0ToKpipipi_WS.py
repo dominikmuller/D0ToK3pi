@@ -20,7 +20,7 @@ class D0ToKpipipi_WS(mode_base):
         alpha_dm_R=0.2, error_alpha_dm_R=0.02, limit_alpha_dm_R=(0.0001, 1.),
         a_bkg=1.2, error_a_bkg=0.1, limit_a_bkg=(0.0001, 5.),
         p_bkg=-0.03, error_p_bkg=0.01, limit_p_bkg=(-0.5, 0.5),
-        NSig=10000, error_NSig=10000, limit_NSig=(100, 100000),
+        NSig=500., error_NSig=10, limit_NSig=(100, 100000),
         NBkg=20000, error_NBkg=5000, limit_NBkg=(100, 600000),
         NSPi=20000, error_NSPi=5000, limit_NSPi=(100, 600000),
         width_dm=0.4, error_width_dm=0.02, limit_width_dm=(0.0001, 1.),

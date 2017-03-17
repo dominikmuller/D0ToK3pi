@@ -74,13 +74,13 @@ class D0ToKpipipi_RS(mode_base):
         PlotConfig(vars.ipchi2, D0, (50, -7, 2.), np.log, r'$\ln(\text{{{}}})$'),
         PlotConfig(vars.vdchi2, D0, (50, 0, 10), np.log, r'$\ln(\text{{{}}})$'),
         PlotConfig(vars.maxdoca, D0, (50, 0, 0.5)),
-        PlotConfig(vars.vchi2, head, (50, 0, 20)),
+        # PlotConfig(vars.vchi2, head, (50, 0, 20)),
         PlotConfig(vars.vchi2, D0, (50, 0, 20)),
         # PlotConfig(vars.probnnghost, Pislow, (50, 0., 0.3)),
         # PlotConfig(vars.angle, None, (50, 0, 0.03))
         # PlotConfig(vars.dtf_chi2, Dstp, (100, 0, 100)),
     ]
-    for d in [4]:
+    for d in [3, 4]:
         bdt_vars += [
             PlotConfig(getattr(vars, 'ipchi2{}'.format(d)), None, (50, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),  # NOQA
         ]

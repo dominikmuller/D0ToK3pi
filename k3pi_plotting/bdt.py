@@ -30,23 +30,34 @@ def plot_roc(ax, name, colour, test, bdt, labels, weights):
     ax.plot(x, y, color=colour, label=legend, linewidth=3)
 
 
-def plot_roc_for_feature(ax, feature, legend, colour, test, labels, weights=1.):
-    data = test[feature]
-    import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
+def plot_roc_for_feature(ax, data, legend, colour, labels, weights=1.):
 
-    # if data[labels].median() > data[~labels]
+    # If signal is higher than background, do a minimum cut, otherwise
+    # a maximum
+
+    if data[labels].median() > data[~labels].median():
+        def n_selected(d, c):
+            return np.sum(d > c)
+    else:
+        def n_selected(d, c):
+            return np.sum(d < c)
+
     thresholds = [utils.weighted_quantile(
         data, quantiles=1-eff, sample_weight=weights)
         for eff in np.arange(0., 1., 1./200)]
     true_positive = []
     false_positive = []
-    total_true = data[labels].sum()
-    total_false = data[~labels].sum()
-    # for thr in thresholds:
-        # true_positive.append(np.sum(data[labels] > ))
-    x, y, auc = roc(test, bdt, labels, weights)
-    legend = '{} ({:.2f})'.format(name, auc)
-    ax.plot(x, y, color=colour, label=legend, linewidth=3)
+    total_true = len(data[labels])
+    total_false = len(data[~labels])
+    for thr in thresholds:
+        true_positive.append(float(n_selected(data[labels], thr))/total_true)
+        false_positive.append(float(n_selected(data[~labels], thr))/total_false)
+    # sort for correct plotting
+    true_positive, false_positive = zip(*sorted(
+        zip(true_positive, false_positive), key=lambda x:-x[0]))
+
+    ax.plot(false_positive, true_positive, color=colour,
+            label=legend, linewidth=3, linestyle='--')
 
 
 def plot_eff(var, part, test, bdt, labels, weights, quantiles=None):
@@ -134,7 +145,7 @@ def plot_bdt_discriminant(train, test):
 
     # Make a seperation here. WS modes haven't trained a BDT, so remove
     # so only plot the combined distributions
-    if gcm().mode in config.wrong_sign_modes:
+    if gcm().mode in config.wrong_sign_modes or gcm().mc is not None:
         ax.bar(x_ctr-x_err, h_bkg_comb, 2.*x_err,
                color='#11073B', label='Background', linewidth=0, alpha=0.50)
         ax.bar(x_ctr-x_err, h_sig_comb, 2.*x_err,
