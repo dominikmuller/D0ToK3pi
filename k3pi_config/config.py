@@ -1,3 +1,5 @@
+import os
+
 magup = 'MagUp'
 magdown = 'MagDown'
 magboth = 'MagBoth'
@@ -14,6 +16,11 @@ all_modes = [
     D0ToKpipipi_RS,
     D0ToKpipipi_WS,
     D0ToKpipipi_2tag_RS,
+    D0ToKpipipi_2tag_WS
+]
+
+wrong_sign_modes = [
+    D0ToKpipipi_WS,
     D0ToKpipipi_2tag_WS
 ]
 
@@ -45,9 +52,15 @@ PDG_MASSES = {
     pion: 139.57,
     kaon: 493.677
 }
+PDG_MASSES['delta'] = PDG_MASSES['Dst'] - PDG_MASSES['D0']
 
 ntuple_strip = 'Tuple{0}/DecayTree'
 store_name = '{0}_{1}_{2}'
 output_prefix = 'output'
 output_mode = output_prefix + '/{}_{}_{}/'
 data_store = output_prefix + '/data/store.h5'
+bcolz_locations = output_prefix + '/data/{}.bcolz'
+optimised_selection = False
+add_wrongsign = False
+
+devnull = open(os.devnull, 'wb')

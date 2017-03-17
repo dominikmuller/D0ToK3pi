@@ -1,10 +1,10 @@
 from __future__ import print_function
 
 import os
+from k3pi_config import config
 import subprocess
 import shutil
 import tempfile
-import logging as log
 
 from . import helpers
 
@@ -82,7 +82,7 @@ def make_tex(packages, texfile, sansserif=False):
     return document
 
 
-def convert_tex_to_pdf(texfile, packages=None, **kwargs):
+def convert_tex_to_pdf(texfile, packages=None, shut_up=True, **kwargs):
     """Convert the .tex file to a .pdf file.
 
     **kwargs are passed to make_tex.
@@ -90,7 +90,6 @@ def convert_tex_to_pdf(texfile, packages=None, **kwargs):
     texfile -- Name of the .tex file (including the extension)
     packages -- List of LaTeX packages to pass to make_tex (default: [])
     """
-    log.debug('Converting {0}'.format(texfile))
     patch_buffer_bug(texfile)
     if not packages:
         packages = []
@@ -99,28 +98,27 @@ def convert_tex_to_pdf(texfile, packages=None, **kwargs):
     temp_dir = tempfile.mkdtemp('', 'rootTeX-')
 
     header_filename = os.path.join(temp_dir, 'rootTeX-header.tex')
-    log.debug('Header file : {0}'.format(header_filename))
 
     header_file = open(header_filename, 'w')
     header_file.write(make_tex(packages, texfile, **kwargs))
     header_file.close()
 
-    compile_tex(header_filename, temp_dir, texfile.replace('.tex', '.pdf'))
+    compile_tex(header_filename, temp_dir, texfile.replace('.tex', '.pdf'),
+                shut_up)
 
     # remove temporary directory
     shutil.rmtree(temp_dir)
 
 
-def compile_tex(headerFileName, working_dir, output_name):
+def compile_tex(headerFileName, working_dir, output_name, shut_up=True):
 
-    proc = subprocess.Popen(['lualatex', headerFileName], cwd=working_dir)
+    proc = subprocess.Popen(['lualatex', headerFileName],
+                            cwd=working_dir, stdout=config.devnull)
     proc.communicate()
 
     retVal = proc.returncode
 
-    if retVal is not 0:
-        log.warn('Error compiling document {0}'.format(output_name))
-    else:
+    if retVal is 0:
         src = '{0}.pdf'.format(os.path.splitext(headerFileName)[0])
         helpers.move_file(src, output_name)
 

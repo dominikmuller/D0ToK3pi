@@ -1,38 +1,34 @@
 import matplotlib.pyplot as plt
 import palettable
 from k3pi_utilities import parser
+from analysis import bdt_data
 from matplotlib.backends.backend_pdf import PdfPages
 from analysis.mass_fitting import get_sweights
-from analysis import add_variables
 import numpy as np
 from k3pi_config.modes import gcm, MODE
-from analysis import selection
 from tqdm import tqdm
 
 
-def sig_bkg_normed(v, df):
-    sweights = get_sweights(gcm())
-    sig_wgt = sweights['sig']
-    bkg_wgt = sweights['rnd'] + sweights['comb']
+def sig_bkg_normed(v, sig_df, bkg_df, sig_wgt=1., bkg_wgt=1.):
     fig, ax = plt.subplots(figsize=(10, 10))
-    if v.convert is None:
-        data = df[v.var]
-    else:
-        data = v.convert(df[v.var])
+    sig_data = sig_df[v.var]
+    bkg_data = bkg_df[v.var]
 
     nbins, xmin, xmax = v.binning
 
+    xmin = min(np.min(sig_data), np.min(bkg_data))
+    xmax = max(np.max(sig_data), np.max(bkg_data))
+
     h_sig, edges = np.histogram(
-        data, bins=nbins, range=(xmin, xmax), weights=sig_wgt)
+        sig_data, bins=nbins, range=(xmin, xmax), weights=sig_wgt)
     h_bkg, _ = np.histogram(
-        data, bins=nbins, range=(xmin, xmax), weights=bkg_wgt)
+        bkg_data, bins=nbins, range=(xmin, xmax), weights=bkg_wgt)
     err_sig, _ = np.histogram(
-        data, bins=nbins, range=(xmin, xmax), weights=sig_wgt**2)
+        sig_data, bins=nbins, range=(xmin, xmax), weights=sig_wgt**2)
     err_bkg, _ = np.histogram(
-        data, bins=nbins, range=(xmin, xmax), weights=bkg_wgt**2)
+        bkg_data, bins=nbins, range=(xmin, xmax), weights=bkg_wgt**2)
     x_ctr = (edges[1:] + edges[:-1])/2.
     width = (edges[1:] - edges[:-1])
-    x_err = width/2.
 
     err_sig = np.sqrt(err_sig)
     err_bkg = np.sqrt(err_bkg)
@@ -46,9 +42,9 @@ def sig_bkg_normed(v, df):
     h_sig = h_sig*1./float(n_sig)
     err_sig /= float(n_sig)
 
-    ax.bar(x_ctr-x_err, h_bkg, width, color='#11073B',
+    ax.bar(x_ctr, h_bkg, width, color='#11073B', linewidth=0,
            label='Background', edgecolor='#11073B', alpha=0.80)
-    ax.bar(x_ctr-x_err, h_sig, width, color='#5F5293',
+    ax.bar(x_ctr, h_sig, width, color='#5F5293', linewidth=0,
            label='Signal', edgecolor='#5F5293', alpha=0.80)
 
     handles, labels = ax.get_legend_handles_labels()
@@ -103,27 +99,23 @@ def sig_sec_comb_stack(v, df):
     return fig
 
 
-def plot_bdt_variables():
-    mode = gcm()
-    bdt_vars = mode.bdt_vars + mode.spectator_vars
-    df = mode.get_data([v.var for v in bdt_vars])
-    add_variables.append_angle(df)
-    sel = selection.full_selection()
-    df = df[sel]
-    add_variables.append_phsp(df)
+def plot_bdt_variables(sw=False):
+    sig_df, bkg_df, sig_wgt, bkg_wgt = bdt_data.get_bdt_data(
+        sw=sw, sklearn=False)
+    bdt_vars = gcm().bdt_vars + gcm().spectator_vars + gcm().just_plot
 
-    outfile = mode.get_output_path('sweight_fit') + 'bdt_vars.pdf'
+    outfile = gcm().get_output_path('sweight_fit') + 'bdt_vars.pdf'
     with PdfPages(outfile) as pdf:
         for v in tqdm(bdt_vars, smoothing=0.3):
-            fig = sig_bkg_normed(v, df)
+            fig = sig_bkg_normed(v, sig_df, bkg_df, sig_wgt, bkg_wgt)
             pdf.savefig(fig)
             plt.close()
-            fig = sig_sec_comb_stack(v, df)
-            pdf.savefig(fig)
-            plt.close()
+            # fig = sig_sec_comb_stack(v, df)
+            # pdf.savefig(fig)
+            # plt.close()
 
 
 if __name__ == '__main__':
     args = parser.create_parser()
     with MODE(args.polarity, args.year, args.mode):
-        plot_bdt_variables()
+        plot_bdt_variables(args.sweight)

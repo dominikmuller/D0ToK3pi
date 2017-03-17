@@ -2,12 +2,15 @@ from k3pi_utilities import Particle
 from k3pi_utilities import PlotConfig
 from k3pi_utilities import variables as vars
 import numpy as np
+from math import pi
 from k3pi_config import config
 from .mode_base import mode_base
+from .D0ToKpipipi_RS import D0ToKpipipi_RS
 
 
 class D0ToKpipipi_WS(mode_base):
-    shapes = ('CRU', 'JSU', 'PID')
+    shapes = ('JSU', 'JSU', 'PID')
+    mode_short = 'WS'
     mass_fit_pars = dict(
         # Dst - D0 mass fit
         mu_dm=145.5, error_2_mu_dm=2, limit_mu_dm=(140, 150),
@@ -17,7 +20,7 @@ class D0ToKpipipi_WS(mode_base):
         alpha_dm_R=0.2, error_alpha_dm_R=0.02, limit_alpha_dm_R=(0.0001, 1.),
         a_bkg=1.2, error_a_bkg=0.1, limit_a_bkg=(0.0001, 5.),
         p_bkg=-0.03, error_p_bkg=0.01, limit_p_bkg=(-0.5, 0.5),
-        NSig=10000, error_NSig=10000, limit_NSig=(100, 100000),
+        NSig=500., error_NSig=10, limit_NSig=(100, 100000),
         NBkg=20000, error_NBkg=5000, limit_NBkg=(100, 600000),
         NSPi=20000, error_NSPi=5000, limit_NSPi=(100, 600000),
         width_dm=0.4, error_width_dm=0.02, limit_width_dm=(0.0001, 1.),
@@ -67,32 +70,11 @@ class D0ToKpipipi_WS(mode_base):
     def __init__(self, polarity=None, year=None, mc=None):
         super(D0ToKpipipi_WS, self).__init__(polarity, year, mc)
 
-    bdt_vars = [
-        PlotConfig(vars.pt, D0, (50, 0, 15000)),
-        PlotConfig(vars.ipchi2, D0, (50, -7, 2.), np.log, r'$\ln(\text{{{}}})$'),
-        PlotConfig(vars.dira, D0, (50, 0.9998, 1)),
-        PlotConfig(vars.vdchi2, D0, (50, 0, 10), np.log, r'$\ln(\text{{{}}})$'),
-        PlotConfig(vars.mindoca, D0, (50, 0, 0.1)),
-        PlotConfig(vars.maxdoca, D0, (50, 0, 0.5)),
-        PlotConfig(vars.dtf_chi2, head, (50, 0, 60)),
-        # PlotConfig(vars.angle, None, (50, 0, 0.03))
-    ]
-    for d in Dstp.all_daughters():
-        bdt_vars += [
-            PlotConfig(vars.ipchi2, d, (50, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),
-        ]
-    for d in [Pislow]:
-        bdt_vars += [
-            PlotConfig(vars.pt, d, (50, 0, 8000)),
-            PlotConfig(vars.probnnghost, d, (50, 0., 0.3)),
-            PlotConfig(vars.probnnp, d, (50, 0., 1.0)),
-            PlotConfig(vars.probnne, d, (50, 0., 1.0)),
-            PlotConfig(vars.probnnmu, d, (50, 0., 1.0)),
-        ]
-    spectator_vars = [
-        PlotConfig(vars.pt, d, (50, 0, 8000)),
-        PlotConfig(vars.ltime, D0, (50, 0, 0.001)),
-    ]
+    bdt_vars = D0ToKpipipi_RS.bdt_vars
+
+    spectator_vars = D0ToKpipipi_RS.spectator_vars
+
+    just_plot = D0ToKpipipi_RS.just_plot
 
 
 __all__ = ['D0ToKpipipi_WS']

@@ -3,8 +3,8 @@ import os
 
 from k3pi_config import filelists, config
 from itertools import product
-import pandas as pd
 from k3pi_utilities import helpers
+import bcolz
 
 
 class ModeConfig(Exception):
@@ -93,20 +93,23 @@ class mode_base(object):
         else:
             years = [self.year]
         df = None
-        with pd.get_store(config.data_store) as store:
-            for p, y in product(pols, years):
-                if df is not None:
-                    df = df.append(store.select(
-                        self.get_store_name(p, y), columns=columns),
-                        ignore_index=True
-                    )
-                else:
-                    df = store.select(
-                        self.get_store_name(p, y), columns=columns)
+        for p, y in product(pols, years):
+            bcolz_folder = config.bcolz_locations.format(
+                self.get_store_name(p, y))
+            if df is not None:
+                df = df.append(
+                    bcolz.open(bcolz_folder).todataframe(columns=columns),
+                    ignore_index=True
+                )
+            else:
+                df = bcolz.open(bcolz_folder).todataframe(
+                    columns=columns)
         return df
 
     def get_output_path(self, extra=None):
         path = config.output_mode.format(self.mode, self.year, self.polarity)
+        if self.mc is not None:
+            path += self.mc + '/'
         if extra is not None:
             path += extra
         if path[-1] != '/':
@@ -127,3 +130,5 @@ class mode_base(object):
         return identifier + '[{}]'.format(val)
 
     bdt_vars = []
+    spectator_vars = []
+    just_plot = []

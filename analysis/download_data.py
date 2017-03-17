@@ -3,9 +3,12 @@ from analysis import get_root_preselection
 import os
 from k3pi_config import get_mode, config
 from k3pi_utilities import variables, helpers, parser, get_logger
-from k3pi_utilities.variables import m, dtf_m, evt_num
+from k3pi_utilities.variables import m, dtf_m, evt_num, ipchi2, pt
+from k3pi_utilities.buffer import remove_buffer_for_mode
 from k3pi_cpp import treesplitter
 import root_pandas
+import shutil
+import bcolz
 import tempfile
 import tqdm
 from itertools import product
@@ -44,9 +47,23 @@ def download(mode, polarity, year, full, test=False, mc=None):
             except variables.AccessorUsage:
                 pass
 
+    # Make some sorted variables. Saves the hassle when later training BDTs
+    arg_sorted_ip = '{},{},{},{}'.format(
+        *[ipchi2(p) for p in mode.D0.all_daughters()])
+    arg_sorted_pt = '{},{},{},{}'.format(
+        *[pt(p) for p in mode.D0.all_daughters()])
+
     add_vars = {
         'delta_m': '{} - {}'.format(m(mode.Dstp), m(mode.D0)),
-        'delta_m_dtf': '{} - {}'.format(dtf_m(mode.Dstp), dtf_m(mode.D0))
+        'delta_m_dtf': '{} - {}'.format(dtf_m(mode.Dstp), dtf_m(mode.D0)),
+        'ipchi2_1': 'ROOTex::Leading({})'.format(arg_sorted_ip),
+        'ipchi2_2': 'ROOTex::SecondLeading({})'.format(arg_sorted_ip),
+        'ipchi2_3': 'ROOTex::ThirdLeading({})'.format(arg_sorted_ip),
+        'ipchi2_4': 'ROOTex::FourthLeading({})'.format(arg_sorted_ip),
+        'pt_1': 'ROOTex::Leading({})'.format(arg_sorted_pt),
+        'pt_2': 'ROOTex::SecondLeading({})'.format(arg_sorted_pt),
+        'pt_3': 'ROOTex::ThirdLeading({})'.format(arg_sorted_pt),
+        'pt_4': 'ROOTex::FourthLeading({})'.format(arg_sorted_pt),
     }
     variables_needed = list(variables.all_ever_used)
 
@@ -67,24 +84,33 @@ def download(mode, polarity, year, full, test=False, mc=None):
         temp_files.append(r)
 
     log.info('Created {} temporary files.'.format(len(temp_files)))
+    bcolz_folder = config.bcolz_locations.format(mode.get_store_name())
 
-    with pd.get_store(config.data_store) as store:
-        try:
-            store.remove(mode.get_store_name())
-            log.info('Removing already existing data at {}'.format(
-                mode.get_store_name(mc)))
-        except KeyError:
-            log.info('No previous data found. Nothing to delete.')
+    try:
+        log.info('Removing already existing data at {}'.format(
+            bcolz_folder))
+        shutil.rmtree(bcolz_folder)
+    except OSError:
+        log.info('No previous data found. Nothing to delete.')
 
     df_gen = root_pandas.read_root(temp_files, mode.get_tree_name(),
-                                   chunksize=[50000, 100][args.test])
+                                   chunksize=[500000, 100][args.test])
+
+    # New storage using bcolz because better
+    ctuple = None
+
     for df in df_gen:
         log.info('Adding {} events of {} to store {}.'.format(
-            len(df), mode.get_tree_name(), config.data_store))
-        df.to_hdf(config.data_store, mode.get_store_name(),
-                  mode='a', format='t', append=True)
+            len(df), mode.get_tree_name(), bcolz_folder))
+        if ctuple is None:
+            ctuple = bcolz.ctable.fromdataframe(df, rootdir=bcolz_folder)
+        else:
+            ctuple.append(df.to_records(index=False))
+
     for f in temp_files:
         os.remove(f)
+    # Loop and delete everything in the datastore that needs to be recached
+    remove_buffer_for_mode(mode.mode)
 
 
 if __name__ == '__main__':

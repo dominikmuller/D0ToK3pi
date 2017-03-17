@@ -2,31 +2,76 @@ from __future__ import print_function
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import pandas as pd
-from k3pi_config import config
-from . import shapes
-from k3pi_utilities.buffer import buffer_load
-from k3pi_utilities.debugging import call_debug
-from k3pi_utilities import helpers
+
 from k3pi_config.modes import gcm
 
 from k3pi_utilities import tex_compile
 from k3pi_utilities.variables import dtf_dm, m
-from .. import selection
+from k3pi_utilities.buffer import buffer_load
+from k3pi_utilities.debugging import call_debug
+from k3pi_utilities import helpers, get_logger
+
+from analysis import extended_selection as selection
+from analysis.mass_fitting.metrics import get_metric
+from analysis.mass_fitting import shapes
+log = get_logger('mass_fitting')
+
+
+def run_spearmint_fit(spearmint_selection=None, metric='punzi'):
+    """Runs the mass fit. Either nominal with making pretty plots or
+    in spearmint mode which does not save the workspace and returns a
+    metric."""
+    from . import fit_config
+    from ROOT import RooFit as RF
+    shapes.load_shape_class('RooCruijff')
+    shapes.load_shape_class('RooJohnsonSU')
+    shapes.load_shape_class('RooBackground')
+    mode = gcm()
+    wsp = fit_config.load_workspace(mode)
+    sel = selection.get_complete_selection()
+
+
+    # Get the data
+    df = mode.get_data([dtf_dm(), m(mode.D0)])
+    if spearmint_selection is not None:
+        sel = sel & spearmint_selection
+    df = df[sel]
+
+    data = fit_config.pandas_to_roodataset(df, wsp.set('datavars'))
+    model = wsp.pdf('total')
+
+    metric = get_metric(metric)(wsp)
+
+    if spearmint_selection is not None:
+        result = model.fitTo(data, RF.NumCPU(4), RF.Save(True), RF.Strategy(2),
+                             RF.Extended(True))
+
+        if not helpers.check_fit_result(result, log):
+            result = model.fitTo(data, RF.NumCPU(4), RF.Save(True),
+                                 RF.Strategy(1), RF.Extended(True))
+
+        if not helpers.check_fit_result(result, log):
+            result = model.fitTo(data, RF.NumCPU(4), RF.Save(True),
+                                 RF.Strategy(0), RF.Extended(True))
+
+        if not helpers.check_fit_result(result, log):
+            log.warn('Bad fit quality')
+            return 0.0
+
+    return metric()
 
 
 def fit():
+    """Runs the mass fit. Either nominal with making pretty plots or
+    in spearmint mode which does not save the workspace and returns a
+    metric."""
     from . import fit_config
     from ROOT import RooFit as RF
     from .fit_setup import setup_workspace
     # Get the data
     # TODO: rewrite selection to use gcm itself
     mode = gcm()
-    sel = selection.pid_selection(mode)
-    sel &= selection.pid_fiducial_selection(mode)
-    sel &= selection.mass_fiducial_selection(mode)
-    if mode.mode not in config.twotag_modes:
-        sel &= selection.remove_secondary(mode)
-    sel &= selection.slow_pion(mode)
+    sel = selection.get_complete_selection()
 
     df = mode.get_data([dtf_dm(), m(mode.D0)])
     df = df[sel]
@@ -37,9 +82,11 @@ def fit():
     model = wsp.pdf('total')
 
     plot_fit('_start_values', wsp=wsp)
-    model.fitTo(data, RF.NumCPU(4), RF.Save(True), RF.Strategy(2),
-                RF.Extended(True))
+    result = model.fitTo(data, RF.NumCPU(4), RF.Save(True), RF.Strategy(2),
+                         RF.Extended(True))
 
+    if not helpers.check_fit_result(result, log):
+        log.error('Bad fit quality')
     fit_config.dump_workspace(mode, wsp)
 
 
@@ -52,12 +99,7 @@ def plot_fit(suffix=None, wsp=None):
     mode = gcm()
     if wsp is None:
         wsp = fit_config.load_workspace(mode)
-    sel = selection.pid_selection(mode)
-    sel &= selection.pid_fiducial_selection(mode)
-    sel &= selection.mass_fiducial_selection(mode)
-    if mode.mode not in config.twotag_modes:
-        sel &= selection.remove_secondary(mode)
-    sel &= selection.slow_pion(mode)
+    sel = selection.get_complete_selection()
 
     df = mode.get_data([dtf_dm(), m(mode.D0)])
     df = df[sel]
@@ -128,7 +170,7 @@ def get_sweights():
     shapes.load_shape_class('RooBackground')
     wsp = fit_config.load_workspace(gcm())
 
-    sel = selection.full_selection()
+    sel = selection.get_complete_selection()
 
     df = df[sel]
 
@@ -142,7 +184,35 @@ def get_sweights():
 
     probs = pd.DataFrame(dict(sig=sig_prob*wsp.var('NSig').getVal(),
                               rnd=rnd_prob*wsp.var('NSPi').getVal(),
-                              comb=comb_prob*wsp.var('NBkg').getVal()))
+                              comb=comb_prob*wsp.var('NBkg').getVal()),
+                         index=df.index)
     probs = probs.div(probs.sum(axis=1), axis=0)
 
-    return splot.compute_sweights(probs)
+    sweights = splot.compute_sweights(probs)
+    sweights.index = probs.index
+    return sweights
+
+
+def run_spearmint_sweights(spearmint_selection=None):
+    """Runs the mass fit. Either nominal with making pretty plots or
+    in spearmint mode which does not save the workspace and returns a
+    metric."""
+    sel = selection.get_complete_selection()
+
+    sweights = get_sweights(gcm())
+
+    sweights['bkg'] = sweights.rnd + sweights.comb
+
+    df = sweights[sel.reindex(sweights.index)]
+    sig0 = np.sum(df.sig)
+
+    if spearmint_selection is not None:
+        sel = sel & spearmint_selection
+    df = sweights[sel.reindex(sweights.index)]
+    sig = np.sum(df.sig)
+    bkg = np.sum(df.bkg)
+    log.info('sig={}, bkg={}, sig0={}'.format(sig, bkg, sig0))
+    if bkg < 0:
+        bkg = 0
+
+    return -(sig/sig0)/(0.5 + np.sqrt(bkg))

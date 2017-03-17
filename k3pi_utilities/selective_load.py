@@ -1,6 +1,7 @@
 from collections import defaultdict
 from k3pi_config import config
 from k3pi_utilities import get_logger
+from k3pi_utilities import DefaultOrderedDict
 from k3pi_config import modes, get_mode
 from k3pi_config.modes import gcm
 from itertools import product
@@ -8,6 +9,11 @@ import inspect
 
 
 accumulated_per_mode = defaultdict(lambda: set())
+
+
+def is_dummy_run(thing):
+    """Function to test if the argument is a dummy run."""
+    return isinstance(thing, DefaultOrderedDict)
 
 
 class selective_load():
@@ -24,7 +30,7 @@ class selective_load():
         self._wants_mode = 'mode' in inspect.getargspec(function).args
         self.log = get_logger(function.__name__)
         for m, mc in product(config.all_modes_short, self.allow_for):
-            d = defaultdict(lambda: 1)
+            d = DefaultOrderedDict(lambda: 1)
             # Dummy call the selection classes with the mode classes to get
             # the different variables needed.
             if self._wants_mode:
@@ -44,7 +50,7 @@ class selective_load():
         self.__name__ = function.__name__
         self.__doc__ = function.__doc__
 
-    def __call__(self, mode=None):
+    def __call__(self, mode=None, *args, **kwargs):
         if mode is None:
             mode = gcm()
         if mode.mc not in self.allow_for:
@@ -60,8 +66,8 @@ class selective_load():
                     self.requested_columns[look_up])))
         df = mode.get_data(self.requested_columns[look_up])
         if self._wants_mode:
-            ret = self._func(df, mode)
+            ret = self._func(df, mode, *args, **kwargs)
         else:
-            ret = self._func(df)
+            ret = self._func(df, *args, **kwargs)
         del df
         return ret
