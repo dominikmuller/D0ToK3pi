@@ -1,10 +1,12 @@
+bcolz
+colorlog
 decorator
 hep_ml
 matplotlib
 numpy
 palettable
-pandas
 pathos
+pandas
 root_pandas
 scipy
 seaborn
