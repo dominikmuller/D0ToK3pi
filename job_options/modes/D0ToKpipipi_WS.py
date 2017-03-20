@@ -1,4 +1,3 @@
-from k3pi_config.modes.D0ToKpipipi_WS import D0ToKpipipi_WS as WS
 from helpers import tuple_templates
 from helpers.config import (
     inputs_template,
@@ -15,17 +14,17 @@ def get():
         'Tuple{0}'.format(d['name']),
         '[D*(2010)+ -> ^(D~0 -> ^K+ ^pi- ^pi- ^pi+) ^pi+]CC',
         {
-            WS.Dst.name: '[D*(2010)+ -> (D~0 -> K+ pi- pi- pi+) pi+]CC',
+            'Dst': '[D*(2010)+ -> (D~0 -> K+ pi- pi- pi+) pi+]CC',
         },
         {
-            WS.D0.name: '[D*(2010)+ -> ^(D~0 -> K+ pi- pi- pi+) pi+]CC'
+            'D0': '[D*(2010)+ -> ^(D~0 -> K+ pi- pi- pi+) pi+]CC'
         },
         {
-            WS.K.name: '[D*(2010)+ -> (D~0 -> ^K+ pi- pi- pi+) pi+]CC',
-            WS.Pi_OS1.name: '[D*(2010)+ -> (D~0 -> K+ ^pi- pi- pi+) pi+]CC',
-            WS.Pi_OS2.name: '[D*(2010)+ -> (D~0 -> K+ pi- ^pi- pi+) pi+]CC',
-            WS.Pi_SS.name: '[D*(2010)+ -> (D~0 -> K+ pi- pi- ^pi+) pi+]CC',
-            WS.Pislow.name: '[D*(2010)+ -> (D~0 -> K+ pi- pi-  pi+) ^pi+]CC',
+            'K': '[D*(2010)+ -> (D~0 -> ^K+ pi- pi- pi+) pi+]CC',
+            'Pi_OS1': '[D*(2010)+ -> (D~0 -> K+ ^pi- pi- pi+) pi+]CC',
+            'Pi_OS2': '[D*(2010)+ -> (D~0 -> K+ pi- ^pi- pi+) pi+]CC',
+            'Pi_SS': '[D*(2010)+ -> (D~0 -> K+ pi- pi- ^pi+) pi+]CC',
+            'Pislow': '[D*(2010)+ -> (D~0 -> K+ pi- pi-  pi+) ^pi+]CC',
         },
         inputs_template.format(line),
         simulation

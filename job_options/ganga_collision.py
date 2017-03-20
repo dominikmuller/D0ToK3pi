@@ -56,13 +56,17 @@ def stream(twotag=False):
 def bookkeeping_path(polarity, year, twotag=False):
     """Return the bookkeeping path for the given parameters."""
     if twotag is False:
-        bkq_path = (
-            '/LHCb/Collision{year}/Beam6500GeV-VeloClosed-{polarity}/'
-            'Real Data/Turbo02/RawRemoved/94000000/TURBO.MDST'
-        )
+        if year == 2015:
+            bkq_path = (
+                '/LHCb/Collision15/Beam6500GeV-VeloClosed-{polarity}/'
+                'Real Data/Turbo02/RawRemoved/94000000/TURBO.MDST'
+            )
+        else:
+            bkq_path = (
+                '/LHCb/Collision16/Beam6500GeV-VeloClosed-{polarity}/'
+                'Real Data/Turbo03/94000000/CHARMMULTIBODY.MDST'
+            )
         bkq = bkq_path.format(
-            # Only use last two digits of the year
-            year=(year - 2000),
             polarity=polarity
         )
     else:
