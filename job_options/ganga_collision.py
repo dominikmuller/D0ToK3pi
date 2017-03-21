@@ -5,6 +5,7 @@ import sys
 import pwd
 import getpass
 import argparse
+from helpers import make_exec_app
 
 # Don't need to import these as Ganga does it for us, but silences flake8
 from Ganga.GPI import (
@@ -23,6 +24,7 @@ sys.path.append(os.getcwd())
 from simulation_config import (  # NOQA
     configs_file
 )
+
 
 
 def create_parser():
@@ -132,9 +134,11 @@ with open('{0}/configs.py'.format(basedir), 'w+') as f:
         turbo=not args.twotag,
         mc='False'
     ))
+
+
 j = Job(name=JNAME.format(polarity, year))
-j.application = DaVinci(version='v40r2')
-j.application.optsfile = [path.format(basedir) for path in OPTIONS]
+j.application = make_exec_app(version='v41r2p1')
+j.application.options = [path.format(basedir) for path in OPTIONS]
 
 # If testing, run over a couple of files locally, saving
 # the results to the sandbox.

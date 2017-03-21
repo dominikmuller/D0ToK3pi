@@ -9,7 +9,7 @@ def get():
     line = 'B02DstarMuNuDst2D0Pi_D2HHHHBeauty2CharmLine'
 
     d = dict()
-    d['name'] = WS.mode
+    d['name'] = 'D0ToKpipipi_2tag_WS'
     d['tuple'] = tuple_templates.charm_tuple(
         'Tuple{0}'.format(d['name']),
         '( ( B0  -> ^( D*(2010)+  -> ^( D0  -> ^K+  ^pi-  ^pi+  ^pi- )  ^pi+ )  ^mu- ) || ( B0  -> ^( D*(2010)-  -> ^( D0  -> ^K-  ^pi+  ^pi-  ^pi+ )  ^pi- )  ^mu+ ) )',
