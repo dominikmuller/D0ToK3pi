@@ -137,8 +137,12 @@ with open('{0}/configs.py'.format(basedir), 'w+') as f:
 
 
 j = Job(name=JNAME.format(polarity, year))
-j.application = make_exec_app(version='v41r2p1')
-j.application.options = [path.format(basedir) for path in OPTIONS]
+# j.application = make_exec_app(version='v41r2p1')
+# j.application.options = [path.format(basedir) for path in OPTIONS]
+
+# Old submission method
+j.application = DaVinci(version='v41r2p1')
+j.application.optsfile = [path.format(basedir) for path in OPTIONS]
 
 # If testing, run over a couple of files locally, saving
 # the results to the sandbox.
