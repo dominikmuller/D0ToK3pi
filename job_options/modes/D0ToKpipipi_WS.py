@@ -15,7 +15,7 @@ def get(mc=False):
         'Tuple{0}'.format(d['name']),
         '[D*(2010)+ -> ^(D~0 -> ^K+ ^pi- ^pi- ^pi+) ^pi+]CC',
         {
-            'Dst': '[D*(2010)+ -> (D~0 -> K+ pi- pi- pi+) pi+]CC',
+            'Dstp': '[D*(2010)+ -> (D~0 -> K+ pi- pi- pi+) pi+]CC',
         },
         {
             'D0': d0_dec

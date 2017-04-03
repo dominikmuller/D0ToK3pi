@@ -15,14 +15,21 @@ def load_bdt(mode=None):
     return helpers.load(outfile)
 
 
-def dump_classifiers(classifiers):
-    outfile = gcm().get_output_path('bdt') + 'classifiers.p'
+def dump_classifiers(classifiers, comb_bkg=False):
+    if comb_bkg:
+        bdt_folder = 'bdt_comb_bkg'
+    else:
+        bdt_folder = 'bdt_rand_spi'
+    outfile = gcm().get_output_path(bdt_folder) + 'classifiers.p'
     helpers.dump(classifiers, outfile)
 
 
-def load_classifiers(mode=None):
-    if mode is None:
-        mode = gcm()
+def load_classifiers(comb_bkg=False):
+    mode = gcm()
+    if comb_bkg:
+        bdt_folder = 'bdt_comb_bkg'
+    else:
+        bdt_folder = 'bdt_rand_spi'
     # Hard coded check here: Use the RS mode if WS is supplied. Also get a new
     # mode object to remove possible MC flags.
     # Just recreate the mode here to get rid of potential MC flags
@@ -31,5 +38,5 @@ def load_classifiers(mode=None):
         mode = get_mode(mode.polarity, mode.year, 'RS')
     if mode.mode == config.D0ToKpipipi_2tag_WS:
         mode = get_mode(mode.polarity, mode.year, '2tag_RS')
-    outfile = mode.get_output_path('bdt') + 'classifiers.p'
+    outfile = mode.get_output_path(bdt_folder) + 'classifiers.p'
     return helpers.load(outfile)

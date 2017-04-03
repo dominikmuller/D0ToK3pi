@@ -9,7 +9,10 @@ from k3pi_config.modes import MODE
 def bdt_selection():
     from analysis import bdt_studies
     # return bdt_studies.get_bdt_discriminant() > 0.5
-    return bdt_studies.get_bdt_discriminant() > 0.3843
+    bdt = bdt_studies.get_bdt_discriminant()
+    bdt_sel = bdt['comb_bkg_bdt'] > 0.000296
+    bdt_sel &= bdt['rand_spi_bdt'] > 0.484488
+    return bdt_sel
 
 
 @buffer_load
@@ -20,10 +23,14 @@ def spearmint_spi_selection():
         # min_spi_nnpi=0.3,
         # max_spi_nnk=0.7,
         # max_spi_nnp=0.05,
-        max_spi_nnghost=0.300000,
-        max_spi_nnk=0.305837,
-        min_spi_nnpi=0.300000,
-        max_spi_nnp=0.149998,
+        # max_spi_nnghost=0.300000,
+        # max_spi_nnk=0.305837,
+        # min_spi_nnpi=0.300000,
+        # max_spi_nnp=0.15,
+        max_spi_nnp=0.150000,
+        min_spi_nnpi=0.596740,
+        max_spi_nnghost=0.150000,
+        max_spi_nnk=0.700000,
     )
 
 
@@ -43,14 +50,14 @@ def spearmint_pid_selection():
 
 
 @call_debug
-def get_complete_selection():
+def get_complete_selection(ignore_flag=False):
     """Returns the full selection. Respects the spearmint flag."""
     from analysis.selection import full_selection
     sel = full_selection()
-    if config.optimised_selection:
+    if config.optimised_selection or ignore_flag:
         sel = sel & bdt_selection()
         sel = sel & spearmint_spi_selection()
-        sel = sel & spearmint_pid_selection()
+        # sel = sel & spearmint_pid_selection()
 
     return sel
 

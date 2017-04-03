@@ -21,8 +21,8 @@ class D0ToKpipipi_RS(mode_base):
         alpha_dm_R=0.02, error_alpha_dm_R=0.002, limit_alpha_dm_R=(0.0001, 0.05),
         a_bkg=1.2, error_a_bkg=0.1, limit_a_bkg=(0.0001, 5.),
         p_bkg=-0.03, error_p_bkg=0.01, limit_p_bkg=(-0.5, 0.5),
-        NSig=400000, error_NSig=10000, limit_NSig=(100000, 600000),
-        NBkg=40000, error_NBkg=5000, limit_NBkg=(1000, 600000),
+        NSig=400000, error_NSig=10000, limit_NSig=(100000, 1000000),
+        NBkg=0, error_NBkg=5000, limit_NBkg=(0, 600000),
         NSPi=40000, error_NSPi=5000, limit_NSPi=(1000, 600000),
         width_dm=0.4, error_width_dm=0.02, limit_width_dm=(0.0001, 1.),
         nu_dm=1.0, error_nu_dm=0.02, limit_nu_dm=(0.0001, 5.),
@@ -69,48 +69,68 @@ class D0ToKpipipi_RS(mode_base):
     def __init__(self, polarity=None, year=None, mc=None):
         super(D0ToKpipipi_RS, self).__init__(polarity, year, mc)
 
-    bdt_vars = [
-        PlotConfig(vars.pt, D0, (50, 0, 15000)),
-        PlotConfig(vars.ipchi2, D0, (50, -7, 2.), np.log, r'$\ln(\text{{{}}})$'),
-        PlotConfig(vars.vdchi2, D0, (50, 0, 10), np.log, r'$\ln(\text{{{}}})$'),
-        PlotConfig(vars.maxdoca, D0, (50, 0, 0.5)),
-        # PlotConfig(vars.vchi2, head, (50, 0, 20)),
-        PlotConfig(vars.vchi2, D0, (50, 0, 20)),
-        # PlotConfig(vars.probnnghost, Pislow, (50, 0., 0.3)),
-        # PlotConfig(vars.angle, None, (50, 0, 0.03))
-        # PlotConfig(vars.dtf_chi2, Dstp, (100, 0, 100)),
-    ]
-    for d in [3, 4]:
-        bdt_vars += [
-            PlotConfig(getattr(vars, 'ipchi2{}'.format(d)), None, (50, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),  # NOQA
-        ]
-    for d in [Pislow]:
-        bdt_vars += [
-            PlotConfig(vars.pt, d, (50, 0, 3000)),
-            PlotConfig(vars.ipchi2, d, (50, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),
-        ]
-    spectator_vars = [
-        PlotConfig(vars.ltime, D0, (50, 0, 0.001)),
+    mass_var = PlotConfig(vars.m, D0, (100, 1810., 1920.))
+    ltime_var = PlotConfig(vars.ltime, D0, (100, 0, 0.003))
+    phsp_vars = [
         PlotConfig(vars.m12, None, (100, 0, 1600.)),
         PlotConfig(vars.m34, None, (100, 0, 1400.)),
-        PlotConfig(vars.cos1, None, (50, -1, 1)),
-        PlotConfig(vars.cos2, None, (50, -1, 1)),
-        PlotConfig(vars.phi1, None, (50, -pi, pi)),
+        PlotConfig(vars.cos1, None, (100, -1, 1)),
+        PlotConfig(vars.cos2, None, (100, -1, 1)),
+        PlotConfig(vars.phi1, None, (100, -pi, pi)),
+    ]
+
+    rand_spi_bdt_vars = [
+        PlotConfig(vars.pt, D0, (100, 0, 15000)),
+        # PlotConfig(vars.vchi2, D0, (100, 0, 20)),
+        PlotConfig(vars.vchi2, Dstp, (100, 0, 20)),
+        PlotConfig(vars.vdchi2, D0, (100, 0, 10), np.log, r'$\ln(\text{{{}}})$'),
+        PlotConfig(vars.dtf_chi2, Dstp, (100, 0, 100)),
+    ]
+    for d in [Pislow]:
+        rand_spi_bdt_vars += [
+            PlotConfig(vars.pt, d, (100, 0, 3000)),
+        ]
+    comb_bkg_bdt_vars = [
+        PlotConfig(vars.pt, D0, (100, 0, 15000)),
+        PlotConfig(vars.ipchi2, D0, (100, -7, 2.), np.log, r'$\ln(\text{{{}}})$'),
+        PlotConfig(vars.vdchi2, D0, (100, 0, 10), np.log, r'$\ln(\text{{{}}})$'),
+        PlotConfig(vars.maxdoca, D0, (100, 0, 0.5)),
+        PlotConfig(vars.vchi2, D0, (100, 0, 20)),
+
+    ]
+    # for d in [3, 4]:
+        # comb_bkg_bdt_vars += [
+            # PlotConfig(getattr(vars, 'ipchi2{}'.format(d)), None,
+                       # (100, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),  # NOQA
+            # PlotConfig(getattr(vars, 'ipchi2{}'.format(d)), None,
+                       # (100, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),  # NOQA
+        # ]
+    spectator_vars = [
+        PlotConfig(vars.ltime, D0, (100, 0, 0.001)),
+        PlotConfig(vars.m12, None, (100, 0, 1600.)),
+        PlotConfig(vars.m34, None, (100, 0, 1400.)),
+        PlotConfig(vars.cos1, None, (100, -1, 1)),
+        PlotConfig(vars.cos2, None, (100, -1, 1)),
+        PlotConfig(vars.phi1, None, (100, -pi, pi)),
+        PlotConfig(vars.m, D0, (100, 1810., 1920.)),
         PlotConfig(vars.dtf_dm, None, (100, 140.5, 160.5)),
     ]
     just_plot = [
-        PlotConfig(vars.probnnp, Pislow, (50, 0., 0.3)),
-        PlotConfig(vars.probnne, Pislow, (50, 0., 0.3)),
-        PlotConfig(vars.probnnmu, Pislow, (50, 0., 0.3)),
-        PlotConfig(vars.m, D0, (100, 1810., 1920.)),
-        PlotConfig(vars.dtf_chi2, Dstp, (100, 0, 100)),
+        PlotConfig(vars.probnnp, Pislow, (100, 0., 0.3)),
+        PlotConfig(vars.probnne, Pislow, (100, 0., 0.3)),
+        PlotConfig(vars.probnnmu, Pislow, (100, 0., 0.3)),
+        PlotConfig(vars.probnnghost, Pislow, (100, 0., 0.15)),
+        PlotConfig(vars.dm, None, (100, 140.5, 160.5)),
+        PlotConfig(vars.dtf_chi2, Dstp, (100, 0, 200)),
     ]
     for d in D0.all_daughters():
         just_plot += [
-            PlotConfig(vars.probnnghost, d, (50, 0., 1.)),
-            PlotConfig(vars.probnnp, d, (50, 0., 1.)),
-            PlotConfig(vars.probnne, d, (50, 0., 1.)),
-            PlotConfig(vars.probnnmu, d, (50, 0., 1.)),
+            PlotConfig(vars.probnnghost, d, (100, 0., 1.)),
+            PlotConfig(vars.probnnp, d, (100, 0., 1.)),
+            PlotConfig(vars.probnnpi, d, (100, 0., 1.)),
+            PlotConfig(vars.probnnk, d, (100, 0., 1.)),
+            PlotConfig(vars.probnne, d, (100, 0., 1.)),
+            PlotConfig(vars.probnnmu, d, (100, 0., 1.)),
         ]
 
 __all__ = ['D0ToKpipipi_RS']

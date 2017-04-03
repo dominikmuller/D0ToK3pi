@@ -3,6 +3,7 @@ from k3pi_utilities import parser, get_logger
 from k3pi_config import get_mode, config
 from itertools import product
 import root_pandas
+import ROOT
 
 log = get_logger('luminosity')
 
@@ -10,9 +11,18 @@ log = get_logger('luminosity')
 def get_luminosity(mode, polarity, year):
     mode = get_mode(polarity, year, mode)
 
+    # For a yet to be determined reason, some files do not contain a LumiTuple
+    # so sort those ones out
+    infiles = []
+    for f in mode.files:
+        fl = ROOT.TFile.Open(f)
+        if fl.Get('GetIntegratedLuminosity/LumiTuple'):
+            infiles.append(f)
+        fl.Close()
+
     # Get the files and stuff them into a dataframe
     df = root_pandas.read_root(
-        mode.files, key='GetIntegratedLuminosity/LumiTuple')
+        infiles, key='GetIntegratedLuminosity/LumiTuple')
 
     log.info('Luminosity {} {}: {} +- {}'.format(
         year, polarity,

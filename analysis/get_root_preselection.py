@@ -31,9 +31,9 @@ def get(mode):
 
     """
     _cuts = []
-    _cuts += ['fabs(' +
-              m(mode.D0) +
-              ' - {}) < 60.'.format(config.PDG_MASSES[config.Dz])]
+    # _cuts += ['fabs(' +
+              # m(mode.D0) +
+              # ' - {}) < 60.'.format(config.PDG_MASSES[config.Dz])]
     _cuts += [build_step_cuts(ipchi2, mode.D0.all_daughters(), [4, 4, 4, 4])]
     for daug in mode.head.all_daughters():
         _cuts += [p(daug) + ' >= 3000.']
