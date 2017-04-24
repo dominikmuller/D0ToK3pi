@@ -100,7 +100,6 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
         t.Inputs = [inputs]
     t.Decay = decay
     # Merge the mother and daughter dictionaries
-    dict(mothers.items() + intermediate.items() + daughters.items())
     t.addBranches(dict(mothers.items() + intermediate.items()
                        + daughters.items()))
     # Tools for all branches
@@ -225,27 +224,27 @@ def charm_tuple(name, decay, mothers, intermediate,
                          daughters, inputs, mc)
 
     # Define trigger lines we'd like to know the decisions of
-    triggers_list = ['L0HadronDecision',
-                     'Hlt1TrackMVADecision',
-                     'Hlt1TwoTrackMVADecision',
-                     'Hlt2CharmHadDstp2D0Pip_D02KmPimPipPipTurboDecision'
-                     ]
+    # triggers_list = ['L0HadronDecision',
+                     # 'Hlt1TrackMVADecision',
+                     # 'Hlt1TwoTrackMVADecision',
+                     # 'Hlt2CharmHadDstp2D0Pip_D02KmPimPipPipTurboDecision'
+                     # ]
 
-    for part in mothers.keys() + intermediate.keys():
-        branch = getattr(t, part)
-        # TISTOS
-        tistos = branch.addTupleTool('TupleToolTISTOS')
-        tistos.TriggerList = triggers_list
-        tistos.Verbose = True
-        # tistos.VerboseL0 = True
-        # tistos.VerboseHlt1 = True
-        # tistos.VerboseHlt2 = True
+    # for part in mothers.keys() + intermediate.keys():
+        # branch = getattr(t, part)
+        # # TISTOS
+        # tistos = branch.addTupleTool('TupleToolTISTOS')
+        # tistos.TriggerList = triggers_list
+        # tistos.Verbose = True
+        # # tistos.VerboseL0 = True
+        # # tistos.VerboseHlt1 = True
+        # # tistos.VerboseHlt2 = True
 
-    # Triggers
-    trigger = t.addTupleTool('TupleToolTrigger')
-    trigger.TriggerList = triggers_list
-    trigger.Verbose = True
-    # trigger.VerboseHlt1 = True
+    # # Triggers
+    # trigger = t.addTupleTool('TupleToolTrigger')
+    # trigger.TriggerList = triggers_list
+    # trigger.Verbose = True
+    # # trigger.VerboseHlt1 = True
 
     if has_turbo_inputs(t):
         t.WriteP2PVRelations = False

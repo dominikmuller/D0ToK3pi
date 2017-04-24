@@ -325,6 +325,7 @@ def d0_bkg(species, workspace, mode):
     vs = [
         ('c{0}'.format(species), r'$c_{m}$')
     ]
+    workspace.var('c{0}'.format(species)).setConstant()
     return 'm_bkg{}'.format(species), vs
 
 

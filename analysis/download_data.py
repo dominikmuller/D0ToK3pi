@@ -17,10 +17,16 @@ import pandas as pd
 log = get_logger('download_data')
 
 
-def download(mode, polarity, year, full, test=False, mc=None):
+def download(modename, polarity, year, full, test=False, mc=None):
     log.info('Getting data for {} {} {}'.format(
-        mode, polarity, year))
-    mode = get_mode(polarity, year, mode, mc)
+        modename, polarity, year))
+
+    mode = get_mode(polarity, year, modename, mc)
+    # I accidentally forgot the p in Dstp. Got to rename everything now for
+    # this one exception. Hack incoming
+    if modename == 'WS' and year == 2016:
+        # As this is the start, hack name of the particle in the mode.
+        mode.Dstp.name = 'Dst'
 
     sel = get_root_preselection.get(mode)
 
@@ -102,6 +108,12 @@ def download(mode, polarity, year, full, test=False, mc=None):
     for df in df_gen:
         log.info('Adding {} events of {} to store {}.'.format(
             len(df), mode.get_tree_name(), bcolz_folder))
+        if modename == 'WS' and year == 2016:
+            new_names = {
+                old: old.replace('Dst', 'Dstp')
+                for old in df.columns if 'Dst' in old
+            }
+            df = df.rename(index=str, columns=new_names)
         if ctuple is None:
             ctuple = bcolz.ctable.fromdataframe(df, rootdir=bcolz_folder)
         else:
@@ -111,6 +123,9 @@ def download(mode, polarity, year, full, test=False, mc=None):
         os.remove(f)
     # Loop and delete everything in the datastore that needs to be recached
     remove_buffer_for_mode(mode.mode)
+    if modename == 'WS' and year == 2016:
+        # As this is the start, hack name of the particle in the mode.
+        mode.Dstp.name = 'Dstp'
 
 
 if __name__ == '__main__':
@@ -124,4 +139,4 @@ if __name__ == '__main__':
     else:
         years = [args.year]
     for p, y in product(pols, years):
-        download(args.mode, p, y, args.full, args.test, args.mc)
+        download(args.mode, p, y, args.fraction, args.test, args.mc)

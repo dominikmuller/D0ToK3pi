@@ -97,6 +97,7 @@ var('probnnpi', '{part}_MC15TuneV1_ProbNNpi', False, True, r'ProbNN$\pi(PART)$')
 var('probnnghost', '{part}_MC15TuneV1_ProbNNghost', False, True, r'ProbNNghost$(PART)$')  # NOQA
 var('pidk', '{part}_PIDK', False, True, r'$\text{DLL}_{K^\pm-\pi^\pm}(PART)$')
 var('evt_num', 'eventNumber', False, False, 'Eventnumber')
+var('run_num', 'runNumber', False, False, 'Runnumber')
 var('dtf_pt', '{head}_DTFDict_{part}_PT', True, True, r'DTF $p_{\text{T}}(PART)$', mevc)  # NOQA
 var('dtf_p', '{head}_DTFDict_{part}_P', True, True, r'DTF $p(PART)$', mevc)
 var('dtf_eta', '{head}_DTFDict_{part}_ETA', True, True, r'DTF $\phi(PART)$', mevc)  # NOQA

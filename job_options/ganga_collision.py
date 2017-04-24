@@ -5,6 +5,7 @@ import sys
 import pwd
 import getpass
 import argparse
+from helpers import make_exec_app
 
 # Don't need to import these as Ganga does it for us, but silences flake8
 from Ganga.GPI import (
@@ -23,6 +24,7 @@ sys.path.append(os.getcwd())
 from simulation_config import (  # NOQA
     configs_file
 )
+
 
 
 def create_parser():
@@ -56,13 +58,17 @@ def stream(twotag=False):
 def bookkeeping_path(polarity, year, twotag=False):
     """Return the bookkeeping path for the given parameters."""
     if twotag is False:
-        bkq_path = (
-            '/LHCb/Collision{year}/Beam6500GeV-VeloClosed-{polarity}/'
-            'Real Data/Turbo02/RawRemoved/94000000/TURBO.MDST'
-        )
+        if year == 2015:
+            bkq_path = (
+                '/LHCb/Collision15/Beam6500GeV-VeloClosed-{polarity}/'
+                'Real Data/Turbo02/RawRemoved/94000000/TURBO.MDST'
+            )
+        else:
+            bkq_path = (
+                '/LHCb/Collision16/Beam6500GeV-VeloClosed-{polarity}/'
+                'Real Data/Turbo03/94000000/CHARMMULTIBODY.MDST'
+            )
         bkq = bkq_path.format(
-            # Only use last two digits of the year
-            year=(year - 2000),
             polarity=polarity
         )
     else:
@@ -128,8 +134,14 @@ with open('{0}/configs.py'.format(basedir), 'w+') as f:
         turbo=not args.twotag,
         mc='False'
     ))
+
+
 j = Job(name=JNAME.format(polarity, year))
-j.application = DaVinci(version='v40r2')
+# j.application = make_exec_app(version='v41r2p1')
+# j.application.options = [path.format(basedir) for path in OPTIONS]
+
+# Old submission method
+j.application = DaVinci(version='v41r2p1')
 j.application.optsfile = [path.format(basedir) for path in OPTIONS]
 
 # If testing, run over a couple of files locally, saving

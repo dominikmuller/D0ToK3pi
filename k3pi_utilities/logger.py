@@ -7,14 +7,17 @@ handler.setFormatter(colorlog.ColoredFormatter(
     '%(log_color)s%(levelname)s:%(name)s:%(message)s'))
 
 __all__ = ['get_logger', 'update_level']
-__loggers__ = []
+__loggers__ = {}
 
 __default_level__ = logging.INFO
 
 
 def get_logger(name, level=__default_level__):
+    if name in __loggers__:
+        return __loggers__[name]
     logger = logging.getLogger(name)
-    __loggers__.append(name)
+    logger.propagate = False
+    __loggers__[name] = logger
     logger.setLevel(level)
     logger.addHandler(handler)
     return logger
@@ -22,7 +25,6 @@ def get_logger(name, level=__default_level__):
 
 def update_level(level):
     global __default_level__
-    for name in __loggers__:
-        logger = logging.getLogger(name)
+    for logger in __loggers__.values():
         logger.setLevel(level)
     __default_level__ = level

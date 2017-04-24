@@ -11,7 +11,7 @@ from k3pi_utilities.buffer import buffer_load
 from k3pi_utilities.debugging import call_debug
 from k3pi_utilities import helpers, get_logger
 
-from analysis import extended_selection as selection
+from analysis import final_selection as selection
 from analysis.mass_fitting.metrics import get_metric
 from analysis.mass_fitting import shapes
 log = get_logger('mass_fitting')
@@ -28,8 +28,7 @@ def run_spearmint_fit(spearmint_selection=None, metric='punzi'):
     shapes.load_shape_class('RooBackground')
     mode = gcm()
     wsp = fit_config.load_workspace(mode)
-    sel = selection.get_complete_selection()
-
+    sel = selection.get_final_selection()
 
     # Get the data
     df = mode.get_data([dtf_dm(), m(mode.D0)])
@@ -65,19 +64,19 @@ def fit():
     """Runs the mass fit. Either nominal with making pretty plots or
     in spearmint mode which does not save the workspace and returns a
     metric."""
-    from . import fit_config
-    from ROOT import RooFit as RF
-    from .fit_setup import setup_workspace
     # Get the data
     # TODO: rewrite selection to use gcm itself
     mode = gcm()
-    sel = selection.get_complete_selection()
+    sel = selection.get_final_selection()
 
     df = mode.get_data([dtf_dm(), m(mode.D0)])
     df = df[sel]
 
-    wsp, _ = setup_workspace()
+    from . import fit_config
+    from ROOT import RooFit as RF
+    from .fit_setup import setup_workspace
 
+    wsp, _ = setup_workspace()
     data = fit_config.pandas_to_roodataset(df, wsp.set('datavars'))
     model = wsp.pdf('total')
 
@@ -99,7 +98,7 @@ def plot_fit(suffix=None, wsp=None):
     mode = gcm()
     if wsp is None:
         wsp = fit_config.load_workspace(mode)
-    sel = selection.get_complete_selection()
+    sel = selection.get_final_selection()
 
     df = mode.get_data([dtf_dm(), m(mode.D0)])
     df = df[sel]
@@ -170,7 +169,7 @@ def get_sweights():
     shapes.load_shape_class('RooBackground')
     wsp = fit_config.load_workspace(gcm())
 
-    sel = selection.get_complete_selection()
+    sel = selection.get_final_selection()
 
     df = df[sel]
 
@@ -197,7 +196,7 @@ def run_spearmint_sweights(spearmint_selection=None):
     """Runs the mass fit. Either nominal with making pretty plots or
     in spearmint mode which does not save the workspace and returns a
     metric."""
-    sel = selection.get_complete_selection()
+    sel = selection.get_final_selection()
 
     sweights = get_sweights(gcm())
 

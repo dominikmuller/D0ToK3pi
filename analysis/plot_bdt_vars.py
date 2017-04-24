@@ -99,23 +99,28 @@ def sig_sec_comb_stack(v, df):
     return fig
 
 
-def plot_bdt_variables(sw=False):
+def plot_bdt_variables(sw=False, comb_bkg=False):
     sig_df, bkg_df, sig_wgt, bkg_wgt = bdt_data.get_bdt_data(
-        sw=sw, sklearn=False)
-    bdt_vars = gcm().bdt_vars + gcm().spectator_vars + gcm().just_plot
+        sw=sw, sklearn=False, comb_data=comb_bkg, plot=True)
+    if comb_bkg:
+        bdt_vars = gcm().comb_bkg_bdt_vars[:]
+        bdt_folder = 'bdt_comb_bkg'
+    else:
+        bdt_vars = gcm().rand_spi_bdt_vars[:]
+        bdt_folder = 'bdt_rand_spi'
+    bdt_vars += gcm().spectator_vars + gcm().just_plot
 
-    outfile = gcm().get_output_path('sweight_fit') + 'bdt_vars.pdf'
+    outfile = gcm().get_output_path(bdt_folder) + 'bdt_vars.pdf'
     with PdfPages(outfile) as pdf:
         for v in tqdm(bdt_vars, smoothing=0.3):
             fig = sig_bkg_normed(v, sig_df, bkg_df, sig_wgt, bkg_wgt)
             pdf.savefig(fig)
+            plt.clf()
             plt.close()
-            # fig = sig_sec_comb_stack(v, df)
-            # pdf.savefig(fig)
-            # plt.close()
 
 
 if __name__ == '__main__':
     args = parser.create_parser()
     with MODE(args.polarity, args.year, args.mode):
         plot_bdt_variables(args.sweight)
+        plot_bdt_variables(args.sweight, True)

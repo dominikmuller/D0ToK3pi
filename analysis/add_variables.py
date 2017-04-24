@@ -3,16 +3,13 @@ from k3pi_utilities.selective_load import selective_load, is_dummy_run
 from k3pi_utilities.decorator_utils import pop_arg
 from k3pi_utilities.buffer import buffer_load
 from k3pi_utilities import parser
-import collections
 from k3pi_utilities.debugging import call_debug
 from k3pi_config.modes import gcm, MODE
-from k3pi_config import get_mode
 from k3pi_cpp import (compute_delta_angle, vec_phsp_variables,
                       double_misid_d0_mass, change_slowpi_d0,
                       change_slowpi_d0_ws)
 from k3pi_config import config
 import pandas as pd
-from k3pi_utilities import bdt_utils
 
 
 def append_angle(df):
@@ -31,11 +28,6 @@ def append_dtf_ip_diff(df):
     df['dtf_ip_diff'] = extra
 
 
-def append_bdt(df):
-    extra = bdt_variable()
-    df['bdt'] = extra
-
-
 @buffer_load
 @pop_arg(selective_load, allow_for=[None, 'mc'])
 @call_debug
@@ -52,25 +44,6 @@ def _dstp_slowpi_angle(df):
     if is_dummy_run(df):
         return 1
     return pd.Series(ret, name='dstp_slowpi_angle', index=df.index)
-
-
-@buffer_load
-@pop_arg(selective_load, allow_for=[None, 'mc'])
-@call_debug
-def bdt_variable(df):
-    year = gcm().year
-    polarity = gcm().polarity
-    # Make sure it reads to necessary variables
-    if is_dummy_run(df):
-        [df[f.functor(f.particle)] for f in gcm().bdt_vars + gcm().spectator_vars]
-        return 1.
-    # For now, we always use the RS BDT, even when looking at WS
-    mode = get_mode(polarity, year, 'RS')
-    bdt = bdt_utils.load_classifiers(mode)['KnnFlatnessWeak']
-
-    probs = bdt.predict_proba(df).transpose()[1]
-
-    return pd.Series(probs, name='BDT', index=df.index)
 
 
 @buffer_load
@@ -119,14 +92,14 @@ def double_misid_d0(df):
     mode = gcm()
 
     val = double_misid_d0_mass(
-        df[vars.pt(mode.K)], df[vars.eta(mode.K)],
-        df[vars.phi(mode.K)], config.PDG_MASSES['Pi'],
-        df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
-        df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['K'],
-        df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
-        df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-        df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
-        df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
+        df[vars.dtf_pt(mode.K)], df[vars.dtf_eta(mode.K)],
+        df[vars.dtf_phi(mode.K)], config.PDG_MASSES['Pi'],
+        df[vars.dtf_pt(mode.Pi_SS)], df[vars.dtf_eta(mode.Pi_SS)],
+        df[vars.dtf_phi(mode.Pi_SS)], config.PDG_MASSES['K'],
+        df[vars.dtf_pt(mode.Pi_OS1)], df[vars.dtf_eta(mode.Pi_OS1)],
+        df[vars.dtf_phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
+        df[vars.dtf_pt(mode.Pi_OS2)], df[vars.dtf_eta(mode.Pi_OS2)],
+        df[vars.dtf_phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
     if not is_dummy_run(df):
         return pd.Series(val, name=vars.m(gcm().D0), index=df.index)
     return 1
@@ -140,16 +113,16 @@ def other_slowpi(df):
     mode = gcm()
 
     val = change_slowpi_d0(
-        df[vars.pt(mode.K)], df[vars.eta(mode.K)],
-        df[vars.phi(mode.K)], config.PDG_MASSES['K'],
-        df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
-        df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
-        df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
-        df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-        df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
-        df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'],
-        df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
-        df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi'],
+        df[vars.dtf_pt(mode.K)], df[vars.dtf_eta(mode.K)],
+        df[vars.dtf_phi(mode.K)], config.PDG_MASSES['K'],
+        df[vars.dtf_pt(mode.Pi_SS)], df[vars.dtf_eta(mode.Pi_SS)],
+        df[vars.dtf_phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
+        df[vars.dtf_pt(mode.Pi_OS1)], df[vars.dtf_eta(mode.Pi_OS1)],
+        df[vars.dtf_phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
+        df[vars.dtf_pt(mode.Pi_OS2)], df[vars.dtf_eta(mode.Pi_OS2)],
+        df[vars.dtf_phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'],
+        df[vars.dtf_pt(mode.Pislow)], df[vars.dtf_eta(mode.Pislow)],
+        df[vars.dtf_phi(mode.Pislow)], config.PDG_MASSES['Pi'],
         config.PDG_MASSES['D0']
     )
     if not is_dummy_run(df):
@@ -165,16 +138,16 @@ def other_slowpi_ws(df):
     mode = gcm()
 
     val = change_slowpi_d0_ws(
-        df[vars.pt(mode.K)], df[vars.eta(mode.K)],
-        df[vars.phi(mode.K)], config.PDG_MASSES['K'],
-        df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
-        df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
-        df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
-        df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'],
-        df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
-        df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
-        df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
-        df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi'],
+        df[vars.dtf_pt(mode.K)], df[vars.dtf_eta(mode.K)],
+        df[vars.dtf_phi(mode.K)], config.PDG_MASSES['K'],
+        df[vars.dtf_pt(mode.Pi_OS1)], df[vars.dtf_eta(mode.Pi_OS1)],
+        df[vars.dtf_phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
+        df[vars.dtf_pt(mode.Pi_OS2)], df[vars.dtf_eta(mode.Pi_OS2)],
+        df[vars.dtf_phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'],
+        df[vars.dtf_pt(mode.Pi_SS)], df[vars.dtf_eta(mode.Pi_SS)],
+        df[vars.dtf_phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
+        df[vars.dtf_pt(mode.Pislow)], df[vars.dtf_eta(mode.Pislow)],
+        df[vars.dtf_phi(mode.Pislow)], config.PDG_MASSES['Pi'],
         config.PDG_MASSES['D0']
     )
     if not is_dummy_run(df):

@@ -61,6 +61,9 @@ def setup_pdf(wsp):
     wsp.factory(mode.get_rf_vars('NSPi'))
     wsp.factory(mode.get_rf_vars('NBkg'))
 
+    wsp.var('NBkg').setConstant()
+    wsp.var('a_dm_bkg').setConstant()
+
     variables += [[
         ('NSig', r'$N_{\text{Sig}}$'),
         ('NSPi', r'$N_{\text{Rnd}}$'),

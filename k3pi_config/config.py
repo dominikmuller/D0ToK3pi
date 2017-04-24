@@ -50,6 +50,7 @@ PDG_MASSES = {
     Dz: 1864.84,
     Dst: 2010.26,
     pion: 139.57,
+    slowpion: 139.57,
     kaon: 493.677
 }
 PDG_MASSES['delta'] = PDG_MASSES['Dst'] - PDG_MASSES['D0']
@@ -61,6 +62,7 @@ output_mode = output_prefix + '/{}_{}_{}/'
 data_store = output_prefix + '/data/store.h5'
 bcolz_locations = output_prefix + '/data/{}.bcolz'
 optimised_selection = False
+candidates_selection = False
 add_wrongsign = False
 
 devnull = open(os.devnull, 'wb')

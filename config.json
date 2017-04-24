@@ -4,47 +4,23 @@
     "experiment-name" : "wrong_sign_optimisation",
     "likelihood"      : "GAUSSIAN",
     "variables" : {
-        "min_pi_nnpi" : {
-            "type" : "FLOAT",
-            "size" : 1,
-            "min"  : 0.3,
-            "max"  : 0.9
-        },
-        "max_pi_nnk" : {
-            "type" : "FLOAT",
-            "size" : 1,
-            "min"  : 0.02,
-            "max"  : 0.7
-        },
-        "max_k_nnpi" : {
-            "type" : "FLOAT",
-            "size" : 1,
-            "min"  : 0.02,
-            "max"  : 0.7
-        },
-        "min_k_nnk" : {
-            "type" : "FLOAT",
-            "size" : 1,
-            "min"  : 0.3,
-            "max"  : 0.9
-        },
         "min_spi_nnpi" : {
             "type" : "FLOAT",
             "size" : 1,
             "min"  : 0.3,
-            "max"  : 0.9
+            "max"  : 0.95
         },
         "max_spi_nnk" : {
             "type" : "FLOAT",
             "size" : 1,
-            "min"  : 0.02,
+            "min"  : 0.05,
             "max"  : 0.7
         },
         "max_spi_nnghost" : {
             "type" : "FLOAT",
             "size" : 1,
             "min"  : 0.02,
-            "max"  : 0.3
+            "max"  : 0.15
         },
         "max_spi_nnp" : {
             "type" : "FLOAT",
@@ -53,6 +29,12 @@
             "max"  : 0.15
         },
         "BDT_CUT" : {
+            "type" : "FLOAT",
+            "size" : 1,
+            "min"  : 0.0,
+            "max"  : 0.7
+        },
+        "BDT_CUT2" : {
             "type" : "FLOAT",
             "size" : 1,
             "min"  : 0.0,

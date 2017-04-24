@@ -51,6 +51,8 @@ class mode_base(object):
         # Set the default output location
         self.output_path = os.path.join(config.output_prefix, self.mode,
                                         str(self.year), polarity)
+        self.bdt_vars = list(
+            set(self.comb_bkg_bdt_vars + self.rand_spi_bdt_vars))
 
         # Get list of mother and daughter branch name prefixes
         name_getter = operator.attrgetter('name')
@@ -93,6 +95,7 @@ class mode_base(object):
         else:
             years = [self.year]
         df = None
+        columns = list(set(columns))
         for p, y in product(pols, years):
             bcolz_folder = config.bcolz_locations.format(
                 self.get_store_name(p, y))
@@ -129,6 +132,11 @@ class mode_base(object):
             return identifier + '[{}, {}, {}]'.format(val, low, high)
         return identifier + '[{}]'.format(val)
 
+    # Couple of variables to store information. bdt_vars gets automatically
+    # filled with the union of the two bdt variable sets in init for
+    # backwards compatibility
+    comb_bkg_bdt_vars = []
+    rand_spi_bdt_vars = []
     bdt_vars = []
     spectator_vars = []
     just_plot = []

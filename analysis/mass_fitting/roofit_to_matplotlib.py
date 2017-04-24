@@ -125,7 +125,7 @@ def plot_fit(part, wsp, varfunctor, output_name='', subs=None, data=None,
     pdf_comb = plotobjs[4]
 
     # colours = ['#333333', '#325B9D', '#269784', '#8677CF']
-    colours = ['#333333'] + palettable.tableau.TableauMedium_10.hex_colors[:3]
+    colours = ['#333333'] + palettable.tableau.Tableau_10.hex_colors[:3]
     cdata, csig, crn, cbkg = colours
 
     # Change 'Events' to 'Candidates and remove the parens around the units
@@ -145,7 +145,8 @@ def plot_fit(part, wsp, varfunctor, output_name='', subs=None, data=None,
     xa, siga = roocurve(ax, pdf_sig)
     xa, rna = roocurve(ax, pdf_rnd)
     xa, bkga = roocurve(ax, pdf_comb)
-    ax.stackplot(xa, [bkga, rna, siga], colors=[cbkg, crn, csig])
+    ax.stackplot(xa, [bkga, rna, siga], colors=[cbkg, crn, csig],
+                 labels=['Comb. Bkg.', 'Rand. $\pi_s^+$', 'Signal'])
     # roocurve(ax, pdf_tot, color=csig, label='Total fit')
     # Plot the data
     datalabel = 'Data'
@@ -159,6 +160,7 @@ def plot_fit(part, wsp, varfunctor, output_name='', subs=None, data=None,
     pullax.set_xlim((frame.GetXaxis().GetXmin(), frame.GetXaxis().GetXmax()))
     pullax.set_xlabel(varfunctor.latex(part, with_unit=True))
     pullax.set_ylabel(r'$\Delta/\sigma$')
+    ax.legend()
 
     if pdf is not None:
         pdf.savefig(fig)

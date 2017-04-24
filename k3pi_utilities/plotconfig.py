@@ -11,3 +11,13 @@ class PlotConfig(object):
                                                with_unit=True))
         else:
             self.xlabel = functor.latex(particle, with_unit=True)
+
+
+    def __repr__(self):
+        """Returns some usefule information
+        :returns: str with information
+
+        """
+        return '{}({}) ({},{},{})'.format(
+            self.functor.name, self.particle.name if self.particle else '',
+            *self.binning)

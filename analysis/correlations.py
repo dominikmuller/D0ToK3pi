@@ -6,13 +6,24 @@ from analysis import selection, add_variables
 from k3pi_config.modes import MODE, gcm
 import numpy as np
 from k3pi_utilities.variables import m, dtf_dm
+from k3pi_utilities.processify import processify
 
 
-def correlations():
+@processify
+def correlations(comb_bkg=False):
     sns.set(style="white")
 
+    if comb_bkg:
+        features_config = gcm().comb_bkg_bdt_vars
+        bdt_folder = 'bdt_comb_bkg'
+        bkg_sel = selection.comb_bkg_sideband_region()
+    else:
+        features_config = gcm().rand_spi_bdt_vars
+        bdt_folder = 'bdt_rand_spi'
+        bkg_sel = selection.rand_spi_sideband_region()
+
     functors = set()
-    for pc in gcm().bdt_vars:
+    for pc in features_config:
         functors.add((pc.functor, pc.particle))
 
     functors.add((m, gcm().D0))
@@ -21,13 +32,12 @@ def correlations():
     varlist = [f(p) for f, p in functors]
     nlist = [f.latex(p) for f, p in functors]
 
-    df = gcm().get_data(varlist)
+    df = gcm().get_data([i for i in varlist if 'angle' not in i])
     sel = selection.full_selection()
     add_variables.append_angle(df)
     add_variables.append_phsp(df)
     df = df[sel]
     signal_sel = selection.mass_signal_region()
-    bkg_sel = selection.mass_sideband_region()
     suffix = ['sig', 'bkg']
     for s, n in zip([signal_sel, bkg_sel], suffix):
 
@@ -58,7 +68,7 @@ def correlations():
 
         fn = 'correlations_{}.pdf'.format(n)
 
-        outfile = gcm().get_output_path('sweight_fit') + fn
+        outfile = gcm().get_output_path(bdt_folder) + fn
 
         bla.get_figure().savefig(outfile)
 
@@ -66,3 +76,4 @@ if __name__ == '__main__':
     args = parser.create_parser()
     with MODE(args.polarity, args.year, args.mode):
         correlations()
+        correlations(True)

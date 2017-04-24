@@ -20,9 +20,9 @@ class D0ToKpipipi_WS(mode_base):
         alpha_dm_R=0.2, error_alpha_dm_R=0.02, limit_alpha_dm_R=(0.0001, 1.),
         a_bkg=1.2, error_a_bkg=0.1, limit_a_bkg=(0.0001, 5.),
         p_bkg=-0.03, error_p_bkg=0.01, limit_p_bkg=(-0.5, 0.5),
-        NSig=500., error_NSig=10, limit_NSig=(100, 100000),
-        NBkg=20000, error_NBkg=5000, limit_NBkg=(100, 600000),
-        NSPi=20000, error_NSPi=5000, limit_NSPi=(100, 600000),
+        NSig=1500., error_NSig=50, limit_NSig=(100, 100000),
+        NBkg=0, error_NBkg=50, limit_NBkg=(0, 600000),
+        NSPi=40000, error_NSPi=50, limit_NSPi=(100, 600000),
         width_dm=0.4, error_width_dm=0.02, limit_width_dm=(0.0001, 1.),
         nu_dm=1.0, error_nu_dm=0.02, limit_nu_dm=(0.0001, 5.),
         tau_dm=1.0, error_tau_dm=0.02, limit_tau_dm=(0.0001, 5.),
@@ -38,10 +38,10 @@ class D0ToKpipipi_WS(mode_base):
         sigma_m_R=5, error_sigma_m_R=0.1, limit_sigma_m_R=(0.001, 15.),
         alpha_m_L=0.2, error_alpha_m_L=0.001, limit_alpha_m_L=(0.001, 1.),
         alpha_m_R=0.2, error_alpha_m_R=0.001, limit_alpha_m_R=(0.001, 1.),
-        width_m=5, error_width_m=0.12, limit_width_m=(0.0001, 15.),
+        width_m=12, error_width_m=0.12, limit_width_m=(0.0001, 15.),
         nu_m=0., error_nu_m=0.02,
         tau_m=1.0, error_tau_m=0.02, limit_tau_m=(0.0001, 5.),
-        width_1_m=5, error_width_1_m=0.12, limit_width_1_m=(0.0001, 15.),
+        width_1_m=12, error_width_1_m=0.12, limit_width_1_m=(0.0001, 15.),
         nu_1_m=0., error_nu_1_m=0.02,
         tau_1_m=1.0, error_tau_1_m=0.02, limit_tau_1_m=(0.0001, 5.),
         width_2_m=5, error_width_2_m=0.12, limit_width_2_m=(0.0001, 15.),
@@ -70,7 +70,20 @@ class D0ToKpipipi_WS(mode_base):
     def __init__(self, polarity=None, year=None, mc=None):
         super(D0ToKpipipi_WS, self).__init__(polarity, year, mc)
 
+    mass_var = D0ToKpipipi_RS.mass_var
+    ltime_var = D0ToKpipipi_RS.ltime_var
+    dmass_var = D0ToKpipipi_RS.dmass_var
+    phsp_vars = [
+        PlotConfig(vars.m12, None, (100, 0, 1600.)),
+        PlotConfig(vars.m34, None, (100, 0, 1400.)),
+        PlotConfig(vars.cos1, None, (100, -1, 1)),
+        PlotConfig(vars.cos2, None, (100, -1, 1)),
+        PlotConfig(vars.phi1, None, (100, -pi, pi)),
+    ]
+
     bdt_vars = D0ToKpipipi_RS.bdt_vars
+    rand_spi_bdt_vars = D0ToKpipipi_RS.rand_spi_bdt_vars
+    comb_bkg_bdt_vars = D0ToKpipipi_RS.comb_bkg_bdt_vars
 
     spectator_vars = D0ToKpipipi_RS.spectator_vars
 

@@ -5,6 +5,9 @@ from k3pi_config.modes.D0ToKpipipi_2tag_WS import D0ToKpipipi_2tag_WS
 from k3pi_config.modes.mode_base import ModeConfig
 import sys
 from contextlib import contextmanager
+from k3pi_utilities import logger
+
+log = logger.get_logger('modes')
 
 _current_mode = None
 _previous_modes = []
@@ -22,9 +25,14 @@ def MODE(polarity, year, mode, mc=None):
         _previous_modes.append(_current_mode)
     _current_mode = getattr(
         _thismodule, 'D0ToKpipipi_' + mode)(polarity, year, mc)
+    log.debug('Entering {} {} {} mc={}'.format(mode, polarity, year, mc))
     yield _current_mode
+    log.debug('Leaving {} {} {} mc={}'.format(mode, polarity, year, mc))
     try:
         _current_mode = _previous_modes.pop()
+        log.debug('Setting back to {} {} {} mc={}'.format(
+            _current_mode.mode, _current_mode.polarity,
+            _current_mode.year, _current_mode.mc))
     except IndexError:
         _current_mode = None
 
