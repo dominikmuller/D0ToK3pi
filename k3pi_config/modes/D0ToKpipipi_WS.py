@@ -70,8 +70,9 @@ class D0ToKpipipi_WS(mode_base):
     def __init__(self, polarity=None, year=None, mc=None):
         super(D0ToKpipipi_WS, self).__init__(polarity, year, mc)
 
-    mass_var = PlotConfig(vars.m, D0, (100, 1810., 1920.))
-    ltime_var = PlotConfig(vars.ltime, D0, (100, 0, 0.003))
+    mass_var = D0ToKpipipi_RS.mass_var
+    ltime_var = D0ToKpipipi_RS.ltime_var
+    dmass_var = D0ToKpipipi_RS.dmass_var
     phsp_vars = [
         PlotConfig(vars.m12, None, (100, 0, 1600.)),
         PlotConfig(vars.m34, None, (100, 0, 1400.)),

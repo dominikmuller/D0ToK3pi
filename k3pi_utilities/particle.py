@@ -25,26 +25,6 @@ class Particle(object):
                 setattr(daughter, 'head', self)
         self.pid = pid
 
-    def __getattr__(self, name):
-        """Access decay Particle objects with dot notation.
-
-        Given the Particle object
-          a = Particle('A', 'A', {
-            'B': Particle('B', 'B'),
-            'C' Particle('C', 'C')
-        })
-        the decay products A and B can be accessed as
-            b = a.B
-            c = a.C
-        or equivalently using
-            b = getattr(a, 'B')
-            c = getattr(a, 'C')
-        """
-        for d in self.daughters:
-            if d.name == name:
-                return d
-        raise AttributeError
-
     def __repr__(self):
         return "Particle(name='{0}', title='{1}', daughters={2})".format(
             self.name, self.title, self.daughters

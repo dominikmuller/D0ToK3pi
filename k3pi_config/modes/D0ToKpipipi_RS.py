@@ -71,6 +71,7 @@ class D0ToKpipipi_RS(mode_base):
 
     mass_var = PlotConfig(vars.m, D0, (100, 1810., 1920.))
     ltime_var = PlotConfig(vars.ltime, D0, (100, 0, 0.003))
+    dmass_var = PlotConfig(vars.dtf_dm, None, (100, 140.5, 160.5))
     phsp_vars = [
         PlotConfig(vars.m12, None, (100, 0, 1600.)),
         PlotConfig(vars.m34, None, (100, 0, 1400.)),

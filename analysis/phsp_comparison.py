@@ -28,7 +28,7 @@ def phsp_comparison_plots():
         OS = gcm().get_data([f.var for f in extra_vars])
         add_variables.append_phsp(OS)
         os_sel = final_selection.get_final_selection()
-        os_sel &= selection.mass_signal_region()
+        os_sel &= selection.delta_mass_wide_signal_region()
 
     # Current mode stuff
     DF = gcm().get_data([f.var for f in extra_vars])

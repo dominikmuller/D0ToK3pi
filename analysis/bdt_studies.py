@@ -19,6 +19,7 @@ from analysis import bdt_data
 from rep.metaml import ClassifiersFactory
 
 from k3pi_utilities import tex_compile
+from k3pi_utilities.helpers import add_separation_page
 
 # Because this stuff all lots of memory and I am too lazy to properly make
 # sure all functions correctly delete their stuff.
@@ -34,7 +35,7 @@ def train_bdts(sw=False, comb_bkg=False):
     (train, test, train_lbl, test_lbl), features, spectators = bdt_data.prep_data_for_sklearn(sw=sw, same_weight=True, comb_data=comb_bkg)  # NOQA
 
     uniform_features = [vars.ltime(gcm().D0)]
-    n_estimators = 200
+    n_estimators = 400
 
     classifiers = ClassifiersFactory()
     log.info('Configuring classifiers')
@@ -191,6 +192,7 @@ def plot_bdt_discriminant(sw=False, comb_bkg=False):
     log.info('Saving to {}'.format(outfile))
     with PdfPages(outfile) as pdf:
         for bdt_name in ['Exponential', 'KnnFlatness', 'BinFlatness']:
+            add_separation_page(pdf, bdt_name)
             bdt_probs = get_named_bdt_discriminant(name=bdt_name,
                                                    comb_bkg=comb_bkg)
             train[vars.bdt()] = bdt_probs
@@ -207,10 +209,10 @@ def create_feature_importance(comb_bkg=False):
     classifiers = bdt_utils.load_classifiers(comb_bkg)
     bdt = classifiers['KnnFlatness']
     if comb_bkg:
-        features = [f.functor.latex(f.particle) for f in gcm().comb_bkg_bdt_vars]
+        features = [f.functor.latex(f.particle) for f in gcm().comb_bkg_bdt_vars]  # NOQA
         bdt_folder = 'bdt_comb_bkg'
     else:
-        features = [f.functor.latex(f.particle) for f in gcm().rand_spi_bdt_vars]
+        features = [f.functor.latex(f.particle) for f in gcm().rand_spi_bdt_vars]  # NOQA
         bdt_folder = 'bdt_rand_spi'
 
     log.info('Features: {}'.format(' '.join(features)))
@@ -247,6 +249,9 @@ def plot_efficiencies(sw=False, comb_bkg=False):
     with PdfPages(outfile) as pdf:
         for var in gcm().spectator_vars:
             for bdt_name in ['Exponential', 'KnnFlatness', 'BinFlatness']:
+                add_separation_page(
+                    pdf, '{}: {}'.format(
+                        bdt_name, var.functor.latex(var.particle)))
                 fig = bdt.plot_eff(var.functor, var.particle,
                                    test, classifiers[bdt_name],
                                    test_lbl, test.weights)

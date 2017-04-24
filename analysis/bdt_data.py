@@ -1,5 +1,5 @@
 from k3pi_config.modes import gcm, opposite_mode
-from analysis import add_variables, selection, extended_selection
+from analysis import add_variables, selection
 import numpy as np
 from hep_ml.commonutils import train_test_split
 from k3pi_config import config
@@ -58,7 +58,7 @@ def get_bdt_data(sw=False, sklearn=True, same_weight=False, comb_data=False,
     df = gcm().get_data(
         [v.var for v in bdt_vars if v.functor.additional is False])
     add_variables.append_angle(df)
-    sel = extended_selection.get_complete_selection()
+    sel = selection.full_selection()
     add_variables.append_phsp(df)
     add_variables.append_dtf_ip_diff(df)
 
@@ -83,7 +83,6 @@ def get_bdt_data(sw=False, sklearn=True, same_weight=False, comb_data=False,
         df['weights'] = np.ones(df.index.size)
         df.loc[selection.mass_signal_region() & sel, 'labels'] = 1
         df.loc[bkg_sel & sel, 'labels'] = 0
-
 
     if config.add_wrongsign and gcm().mode not in config.wrong_sign_modes:
         with opposite_mode():

@@ -123,6 +123,9 @@ def download(modename, polarity, year, full, test=False, mc=None):
         os.remove(f)
     # Loop and delete everything in the datastore that needs to be recached
     remove_buffer_for_mode(mode.mode)
+    if modename == 'WS' and year == 2016:
+        # As this is the start, hack name of the particle in the mode.
+        mode.Dstp.name = 'Dstp'
 
 
 if __name__ == '__main__':
@@ -136,4 +139,4 @@ if __name__ == '__main__':
     else:
         years = [args.year]
     for p, y in product(pols, years):
-        download(args.mode, p, y, args.full, args.test, args.mc)
+        download(args.mode, p, y, args.fraction, args.test, args.mc)

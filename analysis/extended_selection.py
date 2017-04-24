@@ -1,17 +1,16 @@
-from k3pi_utilities.buffer import buffer_load
+from analysis import bdt_studies
 from k3pi_utilities.debugging import call_debug
 
 from k3pi_config import config
-from k3pi_config.modes import MODE
+from k3pi_utilities.buffer import buffer_load, remove_buffer_for_function
 
 
 @buffer_load
 def bdt_selection():
-    from analysis import bdt_studies
     # return bdt_studies.get_bdt_discriminant() > 0.5
     bdt = bdt_studies.get_bdt_discriminant()
-    bdt_sel = bdt['comb_bkg_bdt'] > 0.000296
-    bdt_sel &= bdt['rand_spi_bdt'] > 0.484488
+    bdt_sel = bdt['comb_bkg_bdt'] > 0.0005
+    bdt_sel &= bdt['rand_spi_bdt'] > 0.44
     return bdt_sel
 
 
@@ -19,18 +18,10 @@ def bdt_selection():
 def spearmint_spi_selection():
     from analysis.selection import _apply_slow_pion_cut
     return _apply_slow_pion_cut(
-        # max_spi_nnghost=0.288,
-        # min_spi_nnpi=0.3,
-        # max_spi_nnk=0.7,
-        # max_spi_nnp=0.05,
-        # max_spi_nnghost=0.300000,
-        # max_spi_nnk=0.305837,
-        # min_spi_nnpi=0.300000,
-        # max_spi_nnp=0.15,
-        max_spi_nnp=0.150000,
-        min_spi_nnpi=0.596740,
-        max_spi_nnghost=0.150000,
-        max_spi_nnk=0.700000,
+        max_spi_nnp=0.15,
+        min_spi_nnpi=0.73,
+        max_spi_nnghost=0.15,
+        max_spi_nnk=0.24,
     )
 
 
@@ -76,6 +67,5 @@ if __name__ == '__main__':
     else:
         sels = args.selections
 
-    with MODE(args.polarity, args.year, args.mode):
-        for sel in sels:
-            getattr(sys.modules[__name__], sel)(use_buffered=False)
+    for sel in sels:
+        remove_buffer_for_function(getattr(sys.modules[__name__], sel))

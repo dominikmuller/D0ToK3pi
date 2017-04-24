@@ -21,6 +21,7 @@ from scipy.stats import gaussian_kde
 from scipy.optimize import fmin
 
 import numpy
+import matplotlib.pyplot as plt
 
 # List of prefixes for branch names
 # Can't place in config due to circular dependency
@@ -341,3 +342,13 @@ def rounder(num, l_for_sig_dgt, is_unc=False, sig_prec=1):
         sig_digit -= sig_prec
     prec = [0, -sig_digit][sig_digit < 0]
     return round(num, -sig_digit), prec
+
+
+def add_separation_page(pdf, text):
+    """Small helper function to add an empty plot with text in the middle.
+    Intended to be used in PdfPages multipage to describe the following plot"""
+    plt.figure()
+    plt.axis('off')
+    plt.text(0.5, 0.5, text, ha='center', va='center')
+    pdf.savefig()
+    plt.close()

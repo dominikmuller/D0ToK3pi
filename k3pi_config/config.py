@@ -50,6 +50,7 @@ PDG_MASSES = {
     Dz: 1864.84,
     Dst: 2010.26,
     pion: 139.57,
+    slowpion: 139.57,
     kaon: 493.677
 }
 PDG_MASSES['delta'] = PDG_MASSES['Dst'] - PDG_MASSES['D0']

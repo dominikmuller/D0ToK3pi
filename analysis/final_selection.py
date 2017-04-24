@@ -18,5 +18,6 @@ def get_final_selection():
     if config.candidates_selection:
         sel = sel & candidate_sorting.remove_right_sign_candidates()
         sel = sel & candidate_sorting.randomly_remove_candidates()
+        sel = sel & candidate_sorting.remove_clones()
 
     return sel
