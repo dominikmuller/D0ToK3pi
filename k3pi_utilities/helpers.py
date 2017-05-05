@@ -7,7 +7,6 @@ try:
 except ImportError:
     izip = zip
     izip_longest = itertools.zip_longest
-import logging as log
 import multiprocessing
 import os
 from math import floor, log10
@@ -22,10 +21,51 @@ from scipy.optimize import fmin
 
 import numpy
 import matplotlib.pyplot as plt
+from k3pi_utilities import logger
+
+log = logger.get_logger('helpers')
 
 # List of prefixes for branch names
 # Can't place in config due to circular dependency
 numbered_branch_prefixes = ['First', 'Second', 'Third', 'Fourth', 'Fifth']
+
+
+def allow_root():
+    """
+    Removes the ban on ROOT (if previously set)
+    Returns true if successful, false otherwise
+
+    :returns: Boolean
+
+    """
+    if 'ROOT' in sys.modules:
+        if sys.modules['ROOT'] is None:
+            del sys.modules['ROOT']
+            log.debug('Allowed ROOT')
+        else:
+            log.debug('ROOT already imported')
+        return True
+    log.debug('ROOT not imported')
+    return False
+
+
+def ban_root():
+    """
+    Bans ROOT (if not already loaded)
+    Returns true if successful, false otherwise
+
+    :returns: Boolean
+
+    """
+    if 'ROOT' not in sys.modules:
+        sys.modules['ROOT'] = None
+        log.debug('Banned ROOT')
+        return True
+    elif sys.modules['ROOT'] is None:
+        log.debug('ROOT already banned')
+        return True
+    log.error('ROOT already imported')
+    return False
 
 
 def check_fit_result(fit_result, logger=None):

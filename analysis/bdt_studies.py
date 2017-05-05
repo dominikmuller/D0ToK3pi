@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import palettable
 from sklearn.ensemble import GradientBoostingClassifier
 # this wrapper makes it possible to train on subset of features
-from rep.estimators import SklearnClassifier
 from k3pi_plotting import bdt
 from k3pi_utilities import buffer, selective_load
 
@@ -16,7 +15,6 @@ from k3pi_utilities import variables as vars
 from k3pi_config.modes import MODE, gcm
 from k3pi_utilities import bdt_utils
 from analysis import bdt_data
-from rep.metaml import ClassifiersFactory
 
 from k3pi_utilities import tex_compile
 from k3pi_utilities.helpers import add_separation_page
@@ -30,6 +28,8 @@ log = get_logger('bdt_studies')
 
 @processify
 def train_bdts(sw=False, comb_bkg=False):
+    from rep.estimators import SklearnClassifier
+    from rep.metaml import ClassifiersFactory
     log.info('Training BDTs for {} {} {}'.format(gcm().mode, gcm().polarity,
                                                  gcm().year))
     (train, test, train_lbl, test_lbl), features, spectators = bdt_data.prep_data_for_sklearn(sw=sw, same_weight=True, comb_data=comb_bkg)  # NOQA

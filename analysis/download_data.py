@@ -6,7 +6,6 @@ from k3pi_utilities import variables, helpers, parser, get_logger
 from k3pi_utilities.variables import m, dtf_m, evt_num, ipchi2, pt
 from k3pi_utilities.buffer import remove_buffer_for_mode
 from k3pi_cpp import treesplitter
-import root_pandas
 import shutil
 import bcolz
 import tempfile
@@ -18,6 +17,7 @@ log = get_logger('download_data')
 
 
 def download(modename, polarity, year, full, test=False, mc=None):
+    import root_pandas
     log.info('Getting data for {} {} {}'.format(
         modename, polarity, year))
 
@@ -130,6 +130,8 @@ def download(modename, polarity, year, full, test=False, mc=None):
 
 if __name__ == '__main__':
     args = parser.create_parser(log)
+    helpers.allow_root()
+
     if args.polarity == config.magboth:
         pols = [config.magup, config.magdown]
     else:

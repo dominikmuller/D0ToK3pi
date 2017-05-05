@@ -91,7 +91,7 @@ def pull_plot(ax, pdf, data, **kwargs):
 
 
 def plot_fit(part, wsp, varfunctor, output_name='', subs=None, data=None,
-             dataname='data', pdf=None):
+             dataname='data', pdf=None, do_comb_bkg=False):
     varname = varfunctor(part)
     var = wsp.var(varname)
 
@@ -115,14 +115,16 @@ def plot_fit(part, wsp, varfunctor, output_name='', subs=None, data=None,
     wsp.pdf(pdf_tot).plotOn(frame)
     wsp.pdf(pdf_tot).plotOn(frame, RF.Components('signal'))
     wsp.pdf(pdf_tot).plotOn(frame, RF.Components('random'))
-    wsp.pdf(pdf_tot).plotOn(frame, RF.Components('combinatorial'))
+    if do_comb_bkg:
+        wsp.pdf(pdf_tot).plotOn(frame, RF.Components('combinatorial'))
 
     plotobjs = [frame.getObject(i) for i in range(int(frame.numItems()))]
 
     pdf_tot = plotobjs[1]
     pdf_sig = plotobjs[2]
     pdf_rnd = plotobjs[3]
-    pdf_comb = plotobjs[4]
+    if do_comb_bkg:
+        pdf_comb = plotobjs[4]
 
     # colours = ['#333333', '#325B9D', '#269784', '#8677CF']
     colours = ['#333333'] + palettable.tableau.Tableau_10.hex_colors[:3]
@@ -144,9 +146,13 @@ def plot_fit(part, wsp, varfunctor, output_name='', subs=None, data=None,
     # plt.plot([], [], color=csig, label='Signal', linewidth=10)
     xa, siga = roocurve(ax, pdf_sig)
     xa, rna = roocurve(ax, pdf_rnd)
-    xa, bkga = roocurve(ax, pdf_comb)
-    ax.stackplot(xa, [bkga, rna, siga], colors=[cbkg, crn, csig],
-                 labels=['Comb. Bkg.', 'Rand. $\pi_s^+$', 'Signal'])
+    if do_comb_bkg:
+        xa, bkga = roocurve(ax, pdf_comb)
+        ax.stackplot(xa, [bkga, rna, siga], colors=[cbkg, crn, csig],
+                     labels=['Comb. Bkg.', 'Rand. $\pi_s^+$', 'Signal'])
+    else:
+        ax.stackplot(xa, [rna, siga], colors=[cbkg, crn, csig],
+                     labels=['Rand. $\pi_s^+$', 'Signal'])
     # roocurve(ax, pdf_tot, color=csig, label='Total fit')
     # Plot the data
     datalabel = 'Data'

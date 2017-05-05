@@ -1,6 +1,7 @@
 import argparse
 from k3pi_config import config
 from k3pi_utilities.logger import update_level
+from k3pi_utilities.helpers import ban_root
 
 
 def create_parser(logger=None):
@@ -9,7 +10,7 @@ def create_parser(logger=None):
     """
     parser = argparse.ArgumentParser(description='Generate sWeights for PID')
     parser.add_argument('-f', '--fraction', default=0.05,
-                        help='Fraction of events to download. 5% of the data')  # NOQA
+                        help='Fraction of events to download. 5 percent of the data')  # NOQA
     parser.add_argument('-t', '--test', action='store_true', default=False,
                         help='Acticates testing mode')
     parser.add_argument('-m', '--mode', default='RS', choices=['RS', 'WS', '2tag_RS', '2tag_WS'],  # NOQA
@@ -29,6 +30,8 @@ def create_parser(logger=None):
                         help='Train the BDT.')
     parser.add_argument('--cbbdt', default=False, action='store_true',
                         help='Run the training and plotting for the comb. Bkg BDT')  # NOQA
+    parser.add_argument('--root', default=False, action='store_true',
+                        help='Allows ROOT to be imported')  # NOQA
     parser.add_argument('-s', '--selections', nargs='+', default=None,
                         help='Run the specified selections')
     parser.add_argument('--spearmint', default=False, action='store_true',
@@ -57,8 +60,14 @@ def create_parser(logger=None):
         update_level(10)
     else:
         config.devnull = None
-        import ROOT
-        ROOT.RooMsgService.instance().setSilentMode(False)
-        ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.DEBUG)
         update_level(10)
+        if args.root:
+            import ROOT
+            ROOT.RooMsgService.instance().setSilentMode(False)
+            ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.DEBUG)
+    if args.root is False:
+        ban_root()
+    else:
+        import ROOT
+        ROOT.PyConfig.IgnoreCommandLineOptions = True
     return args
