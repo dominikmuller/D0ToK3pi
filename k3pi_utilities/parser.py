@@ -10,7 +10,7 @@ def create_parser(logger=None):
     """
     parser = argparse.ArgumentParser(description='Generate sWeights for PID')
     parser.add_argument('-f', '--fraction', default=0.05,
-                        help='Fraction of events to download. 5% of the data')  # NOQA
+                        help='Fraction of events to download. 5 percent of the data')  # NOQA
     parser.add_argument('-t', '--test', action='store_true', default=False,
                         help='Acticates testing mode')
     parser.add_argument('-m', '--mode', default='RS', choices=['RS', 'WS', '2tag_RS', '2tag_WS'],  # NOQA
