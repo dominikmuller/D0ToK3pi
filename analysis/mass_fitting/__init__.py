@@ -160,7 +160,8 @@ def call_after_set(pdf, wsp, **kwargs):
 
 @buffer_load
 @call_debug
-def get_sweights():
+def get_sweights(do_comb_bkg=False):
+    helpers.allow_root()
     df = gcm().get_data([m(gcm().D0), dtf_dm()])
     from . import fit_config
     from hep_ml import splot
@@ -179,16 +180,25 @@ def get_sweights():
 
     sig_prob = call_after_set(sig_pdf, wsp, **df)
     rnd_prob = call_after_set(rnd_pdf, wsp, **df)
-    comb_prob = call_after_set(comb_pdf, wsp, **df)
+    if do_comb_bkg:
+        comb_prob = call_after_set(comb_pdf, wsp, **df)
 
-    probs = pd.DataFrame(dict(sig=sig_prob*wsp.var('NSig').getVal(),
-                              rnd=rnd_prob*wsp.var('NSPi').getVal(),
-                              comb=comb_prob*wsp.var('NBkg').getVal()),
-                         index=df.index)
+    if do_comb_bkg:
+        probs = pd.DataFrame(dict(sig=sig_prob*wsp.var('NSig').getVal(),
+                                  rnd=rnd_prob*wsp.var('NSPi').getVal(),
+                                  comb=comb_prob*wsp.var('NBkg').getVal()),
+                             index=df.index)
+    else:
+        probs = pd.DataFrame(dict(sig=sig_prob*wsp.var('NSig').getVal(),
+                                  rnd=rnd_prob*wsp.var('NSPi').getVal()),
+                             index=df.index)
     probs = probs.div(probs.sum(axis=1), axis=0)
 
     sweights = splot.compute_sweights(probs)
     sweights.index = probs.index
+    if not do_comb_bkg:
+        sweights['comb'] = 0.0
+
     return sweights
 
 
