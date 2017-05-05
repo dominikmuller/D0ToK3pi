@@ -67,4 +67,7 @@ def create_parser(logger=None):
             ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.DEBUG)
     if args.root is False:
         ban_root()
+    else:
+        import ROOT
+        ROOT.PyConfig.IgnoreCommandLineOptions = True
     return args
