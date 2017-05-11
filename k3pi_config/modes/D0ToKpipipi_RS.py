@@ -73,8 +73,10 @@ class D0ToKpipipi_RS(mode_base):
     ltime_var = PlotConfig(vars.ltime, D0, (100, 0, 0.003))
     dmass_var = PlotConfig(vars.dtf_dm, None, (100, 140.5, 160.5))
     phsp_vars = [
-        PlotConfig(vars.m12, None, (100, 0, 1600.)),
-        PlotConfig(vars.m34, None, (100, 0, 1400.)),
+        PlotConfig(vars.m12, None,
+                   (100, 2*config.PDG_MASSES[config.pion], 1300.)),
+        PlotConfig(vars.m34, None,
+                   (100, config.PDG_MASSES[config.pion] + config.PDG_MASSES[config.kaon], 1600.)),  # NOQA
         PlotConfig(vars.cos1, None, (100, -1, 1)),
         PlotConfig(vars.cos2, None, (100, -1, 1)),
         PlotConfig(vars.phi1, None, (100, -pi, pi)),

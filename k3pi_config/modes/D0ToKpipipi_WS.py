@@ -73,13 +73,7 @@ class D0ToKpipipi_WS(mode_base):
     mass_var = D0ToKpipipi_RS.mass_var
     ltime_var = D0ToKpipipi_RS.ltime_var
     dmass_var = D0ToKpipipi_RS.dmass_var
-    phsp_vars = [
-        PlotConfig(vars.m12, None, (100, 0, 1600.)),
-        PlotConfig(vars.m34, None, (100, 0, 1400.)),
-        PlotConfig(vars.cos1, None, (100, -1, 1)),
-        PlotConfig(vars.cos2, None, (100, -1, 1)),
-        PlotConfig(vars.phi1, None, (100, -pi, pi)),
-    ]
+    phsp_vars = D0ToKpipipi_RS.phsp_vars
 
     bdt_vars = D0ToKpipipi_RS.bdt_vars
     rand_spi_bdt_vars = D0ToKpipipi_RS.rand_spi_bdt_vars

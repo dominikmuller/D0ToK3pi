@@ -116,8 +116,8 @@ var('pt2', 'pt_2', False, False, r'$2^\text{nd} p_{\text{T}}$', mevc, append=Fal
 var('pt3', 'pt_3', False, False, r'$3^\text{rd} p_{\text{T}}$', mevc, append=False)  # NOQA
 var('pt4', 'pt_4', False, False, r'$4^\text{th} p_{\text{T}}$', mevc, append=False)  # NOQA
 var('angle', 'dstp_slowpi_angle', False, False, r'$\Delta\Phi$', append=False, additional=True)  # NOQA
-var('m12', 'm12', False, False, r'$m_{K^\pm\pi^\mp}$', mevcc, append=False, additional=True)  # NOQA
-var('m34', 'm34', False, False, r'$m_{\pi^\pm\pi^\mp}$', mevcc, append=False, additional=True)  # NOQA
+var('m12', 'm12', False, False, r'$m_{\pi^\pm\pi^\mp}$', mevcc, append=False, additional=True)  # NOQA
+var('m34', 'm34', False, False, r'$m_{K^\pm\pi^\mp}$', mevcc, append=False, additional=True)  # NOQA
 var('cos1', 'cos1', False, False, r'$\cos\theta_1$', None, append=False, additional=True)  # NOQA
 var('cos2', 'cos2', False, False, r'$\cos\theta_2$', None, append=False, additional=True)  # NOQA
 var('phi1', 'phi1', False, False, r'$\phi_1$', None, append=False, additional=True)  # NOQA
