@@ -40,3 +40,22 @@ def load_classifiers(comb_bkg=False):
         mode = get_mode(mode.polarity, mode.year, '2tag_RS')
     outfile = mode.get_output_path(bdt_folder) + 'classifiers.p'
     return helpers.load(outfile)
+
+
+def dump_reweighter(reweighter):
+    outfile = gcm().get_output_path('effs') + 'reweighter.p'
+    helpers.dump(reweighter, outfile)
+
+
+def load_reweighter():
+    mode = gcm()
+    # Hard coded check here: Use the RS mode if WS is supplied. Also get a new
+    # mode object to remove possible MC flags.
+    # Just recreate the mode here to get rid of potential MC flags
+    mode = get_mode(mode.polarity, mode.year, mode.mode_short)
+    if mode.mode == config.D0ToKpipipi_WS:
+        mode = get_mode(mode.polarity, mode.year, 'RS')
+    if mode.mode == config.D0ToKpipipi_2tag_WS:
+        mode = get_mode(mode.polarity, mode.year, '2tag_RS')
+    outfile = mode.get_output_path('effs') + 'reweighter.p'
+    return helpers.load(outfile)

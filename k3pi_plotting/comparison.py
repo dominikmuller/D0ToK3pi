@@ -3,7 +3,8 @@ import numpy as np
 
 
 def plot_comparison(pc, filled, errorbars, filled_label, errorbars_label,
-                    ax=None, add_uncertainties=False, normed=True):
+                    ax=None, add_uncertainties=False, normed=True,
+                    filled_weight=None, errorbars_weight=None):
     """
 
     :pc: PlotConfig object
@@ -18,19 +19,25 @@ def plot_comparison(pc, filled, errorbars, filled_label, errorbars_label,
     if ax is None:
         fig, ax = plt.subplots(figsize=(10, 10))
     nbins, xmin, xmax = pc.binning
+    if filled_weight is None:
+        filled_weight = np.ones(len(filled))
+    if errorbars_weight is None:
+        errorbars_weight = np.ones(len(errorbars))
 
     # Plot train signal and background
 
-    h_filled, edges = np.histogram(filled, bins=nbins, range=(xmin, xmax))
-    h_errorbars, _ = np.histogram(errorbars, bins=nbins, range=(xmin, xmax))
+    h_filled, edges = np.histogram(filled, bins=nbins, range=(xmin, xmax), weights=filled_weight)
+    h_errorbars, _ = np.histogram(errorbars, bins=nbins, range=(xmin, xmax), weights=errorbars_weight)
+    err_filled, _ = np.histogram(filled, bins=nbins, range=(xmin, xmax), weights=filled_weight**2.)
+    err_errorbars, _ = np.histogram(errorbars, bins=nbins, range=(xmin, xmax), weights=errorbars_weight**2.)
 
-    err_filled = np.sqrt(h_filled)
-    err_errorbars = np.sqrt(h_errorbars)
+    err_filled = np.sqrt(err_filled)
+    err_errorbars = np.sqrt(err_errorbars)
     if normed:
-        h_filled = h_filled.astype(np.float) / (len(filled)*(xmax - xmin))
-        h_errorbars = h_errorbars.astype(np.float) / (len(errorbars)*(xmax - xmin))  # NOQA
-        err_filled = err_filled.astype(np.float) / (len(filled)*(xmax - xmin))  # NOQA
-        err_errorbars = err_errorbars.astype(np.float) / (len(errorbars)*(xmax - xmin))  # NOQA
+        h_filled = h_filled.astype(np.float) / (np.sum(filled_weight)*(xmax - xmin))  # NOQA
+        h_errorbars = h_errorbars.astype(np.float) / (np.sum(errorbars_weight)*(xmax - xmin))  # NOQA
+        err_filled = err_filled.astype(np.float) / (np.sum(filled_weight)*(xmax - xmin))  # NOQA
+        err_errorbars = err_errorbars.astype(np.float) / (np.sum(errorbars_weight)*(xmax - xmin))  # NOQA
 
     if add_uncertainties:
         err_errorbars = np.sqrt(err_errorbars**2. + err_filled**2.)

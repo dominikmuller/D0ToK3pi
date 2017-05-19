@@ -42,6 +42,7 @@ def get_model(redo=False):
         df[vars.m12()] = df[vars.m12()] * 1000.
         df[vars.m34()] = df[vars.m34()] * 1000.
         df[vars.ltime(mode_config.D0)] = df[vars.ltime(mode_config.D0)] / 1000.
+        df = df.query('{} > 0.0001725'.format(vars.ltime(mode_config.D0)))
         bcolz.ctable.fromdataframe(df, rootdir=bcolz_folder)
         return df
 

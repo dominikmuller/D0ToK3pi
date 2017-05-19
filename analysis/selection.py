@@ -1,6 +1,6 @@
 from k3pi_utilities.variables import (eta, probnnk, probnnpi, p, m, dtf_dm,
                                       probnnmu, dtf_chi2, probnnp, pt, vchi2,
-                                      maxdoca)
+                                      maxdoca, ltime)
 from k3pi_utilities.variables import ipchi2, probnnghost
 from k3pi_utilities.selective_load import selective_load
 from k3pi_utilities.decorator_utils import pop_arg
@@ -95,6 +95,15 @@ def d0_selection(df):
 
 
 @buffer_load
+@pop_arg(selective_load, allow_for=[None, 'mc'])
+@call_debug
+def d0_lifetime_permille(df):
+    ret = df[ltime(gcm().D0)] > 0.0001725
+    ret &= df[ltime(gcm().D0)] < 0.00326
+    return ret
+
+
+@buffer_load
 def slow_pion():
     return _apply_slow_pion_cut()
 
@@ -118,6 +127,7 @@ def full_selection():
     sel &= d0_selection()
     sel &= slow_pion()
     sel &= dtf_cuts()
+    sel &= d0_lifetime_permille()
     return sel
 
 
@@ -189,6 +199,7 @@ if __name__ == '__main__':
             'mass_fiducial_selection',
             'remove_secondary',
             'd0_selection',
+            'd0_lifetime_permille',
             'slow_pion',
             'mass_signal_region',
             'mass_sideband_region',
