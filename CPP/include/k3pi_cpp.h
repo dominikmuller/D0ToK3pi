@@ -51,4 +51,8 @@ double change_slowpi_d0_ws(double p1_pt, double p1_eta, double p1_phi,
                            double p4_m, double ps_pt, double ps_eta,
                            double ps_phi, double ps_m, double m_compare);
 
+double invariant_mass_pair(double p1_pt, double p1_eta, double p1_phi,
+                           double p1_m, double p2_pt, double p2_eta,
+                           double p2_phi, double p2_m);
+
 #endif /* ifndef k3pi_cpp */

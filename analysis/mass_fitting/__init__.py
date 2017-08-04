@@ -12,7 +12,7 @@ from k3pi_utilities.debugging import call_debug
 from k3pi_utilities import helpers, get_logger
 
 from analysis import final_selection as selection
-from analysis.mass_fitting.metrics import get_metric
+from analysis.mass_fitting.metrics import get_metric, _metric_base
 from analysis.mass_fitting import shapes
 log = get_logger('mass_fitting')
 
@@ -112,6 +112,9 @@ def plot_fit(suffix=None, wsp=None):
         for func in [m, dtf_dm]:
             roofit_to_matplotlib.plot_fit(mode.D0, wsp, func,
                                           data=data, pdf=pdf)
+            roofit_to_matplotlib.plot_fit(mode.D0, wsp, func,
+                                          data=data, pdf=pdf,
+                                          do_pulls=False)
 
 
 def fit_parameters():
@@ -151,7 +154,7 @@ def fit_parameters():
 
 @np.vectorize
 def call_after_set(pdf, wsp, **kwargs):
-    for var, val in kwargs.iteritems():
+    for var, val in kwargs.items():
         fnd = wsp.var(var)
         if fnd:
             fnd.setVal(val)
@@ -225,3 +228,20 @@ def run_spearmint_sweights(spearmint_selection=None):
         bkg = 0
 
     return -(sig/sig0)/(0.5 + np.sqrt(bkg))
+
+
+def get_yields(comb_bkg=False):
+    helpers.allow_root()
+    from . import fit_config
+    import ROOT
+    from ROOT import RooFit as RF
+    shapes.load_shape_class('RooCruijff')
+    shapes.load_shape_class('RooJohnsonSU')
+    shapes.load_shape_class('RooBackground')
+
+    wsp = fit_config.load_workspace(gcm())
+
+    calculator = _metric_base(wsp, comb_bkg)
+    sig = calculator._get_number_of_signal()
+    bkg = calculator._get_number_of_background()
+    return sig, bkg

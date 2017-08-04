@@ -45,7 +45,7 @@ proton = 'muon'
 Dz = 'D0'
 Dst = 'Dst'
 species = [kaon, pion, proton]
-
+Dz_ltime = 0.00040995
 PDG_MASSES = {
     Dz: 1864.84,
     Dst: 2010.26,

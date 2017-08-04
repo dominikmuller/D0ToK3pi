@@ -46,16 +46,16 @@ def plot_comparison(pc, filled, errorbars, filled_label, errorbars_label,
     width = (edges[1:] - edges[:-1])
     x_err = width/2.
 
-    ax.bar(x_ctr, h_filled, 2.*x_err,
-           color='#5F5293', label=filled_label, linewidth=0, alpha=0.50)
+    ax.bar(x_ctr, h_filled, 2.*x_err, color='#D3EFFB',
+           label=filled_label, edgecolor='#D3EFFB')
 
-    options = dict(
+    dt_options = dict(
         fmt='o', markersize=5, capthick=1, capsize=0, elinewidth=2,
-        alpha=1)
+        color='#006EB6', markeredgecolor='#006EB6')
 
     ax.errorbar(
         x_ctr, h_errorbars, xerr=x_err, yerr=err_errorbars,
-        label=errorbars_label,
-        color='#5F5293', markeredgecolor='#5F5293',   **options)
+        label=errorbars_label, **dt_options)
+    ax.set_xlim((xmin, xmax))
 
     return ax

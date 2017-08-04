@@ -70,7 +70,7 @@ class D0ToKpipipi_RS(mode_base):
         super(D0ToKpipipi_RS, self).__init__(polarity, year, mc)
 
     mass_var = PlotConfig(vars.m, D0, (100, 1810., 1920.))
-    ltime_var = PlotConfig(vars.ltime, D0, (100, 0, 0.003))
+    ltime_var = PlotConfig(vars.ltime, D0, (100, 0.0001725, 0.00326))  # NOQA
     dmass_var = PlotConfig(vars.dtf_dm, None, (100, 140.5, 160.5))
     phsp_vars = [
         PlotConfig(vars.m12, None,
@@ -101,23 +101,12 @@ class D0ToKpipipi_RS(mode_base):
         PlotConfig(vars.vchi2, D0, (100, 0, 20)),
 
     ]
-    # for d in [3, 4]:
-        # comb_bkg_bdt_vars += [
-            # PlotConfig(getattr(vars, 'ipchi2{}'.format(d)), None,
-                       # (100, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),  # NOQA
-            # PlotConfig(getattr(vars, 'ipchi2{}'.format(d)), None,
-                       # (100, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),  # NOQA
-        # ]
     spectator_vars = [
-        PlotConfig(vars.ltime, D0, (100, 0, 0.001)),
-        PlotConfig(vars.m12, None, (100, 0, 1600.)),
-        PlotConfig(vars.m34, None, (100, 0, 1400.)),
-        PlotConfig(vars.cos1, None, (100, -1, 1)),
-        PlotConfig(vars.cos2, None, (100, -1, 1)),
-        PlotConfig(vars.phi1, None, (100, -pi, pi)),
-        PlotConfig(vars.m, D0, (100, 1810., 1920.)),
-        PlotConfig(vars.dtf_dm, None, (100, 140.5, 160.5)),
+        ltime_var,
+        mass_var,
+        dmass_var
     ]
+    spectator_vars += phsp_vars
     just_plot = [
         PlotConfig(vars.probnnp, Pislow, (100, 0., 0.3)),
         PlotConfig(vars.probnne, Pislow, (100, 0., 0.3)),

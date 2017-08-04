@@ -3,7 +3,7 @@ from analysis import get_root_preselection
 import os
 from k3pi_config import get_mode, config
 from k3pi_utilities import variables, helpers, parser, get_logger
-from k3pi_utilities.variables import m, dtf_m, evt_num, ipchi2, pt
+from k3pi_utilities.variables import m, dtf_m, evt_num, ipchi2, pt, ltime
 from k3pi_utilities.buffer import remove_buffer_for_mode
 from k3pi_cpp import treesplitter
 import shutil
@@ -62,6 +62,7 @@ def download(modename, polarity, year, full, test=False, mc=None):
     add_vars = {
         'delta_m': '{} - {}'.format(m(mode.Dstp), m(mode.D0)),
         'delta_m_dtf': '{} - {}'.format(dtf_m(mode.Dstp), dtf_m(mode.D0)),
+        'ltime_ratio': '{} / {}'.format(ltime(mode.D0), config.Dz_ltime),
         'ipchi2_1': 'ROOTex::Leading({})'.format(arg_sorted_ip),
         'ipchi2_2': 'ROOTex::SecondLeading({})'.format(arg_sorted_ip),
         'ipchi2_3': 'ROOTex::ThirdLeading({})'.format(arg_sorted_ip),

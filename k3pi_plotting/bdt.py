@@ -60,9 +60,12 @@ def plot_roc_for_feature(ax, data, legend, colour, labels, weights=1.):
             label=legend, linewidth=3, linestyle='--')
 
 
-def plot_eff(var, part, test, bdt, labels, weights, quantiles=None):
+def plot_eff(pc, test, bdt, labels, weights, quantiles=None):
     if quantiles is None:
         quantiles = [0.2, 0.4, 0.6, 0.8]
+    var = pc.functor
+    part = pc.particle
+
     varname = var(part)
     log.info('Doing efficiency for {}'.format(varname))
     colours = palettable.tableau.TableauMedium_10.hex_colors
@@ -87,7 +90,7 @@ def plot_eff(var, part, test, bdt, labels, weights, quantiles=None):
         ax.errorbar(x, y, yerr=yerr, xerr=xerr, label=label,
                     **dt_options)
     ax.legend(loc='best')
-    ax.set_xlabel(var.latex(part, with_unit=True))
+    ax.set_xlabel(pc.xlabel)
 
     return fig
 

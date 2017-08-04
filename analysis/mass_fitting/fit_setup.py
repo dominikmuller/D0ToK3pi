@@ -1,7 +1,7 @@
 import ROOT
-import ROOT.RooFit as RF
+import ROOT.RooFit as RF  # NOQA
 from . import shapes
-from k3pi_config import modes, config
+from k3pi_config import modes
 from k3pi_utilities.variables import dtf_dm, m
 from . import fit_config
 
@@ -14,15 +14,17 @@ def setup_workspace():
     fit_config.WS_DMASS_NAME = dtf_dm()
     fit_config.WS_MASS_NAME = m(mode.D0)
 
-    d = config.PDG_MASSES[config.Dz] + 5.
-    wsp.factory('{}[{},{}]'.format(m(mode.D0), 1810., 1920. ))
-    wsp.factory('{}[{},{}]'.format(dtf_dm(), 140.5, 160.5 ))
+    wsp.factory('{}[{},{}]'.format(m(mode.D0), 1810., 1920.))
+    wsp.factory('{}[{},{}]'.format(dtf_dm(), 140.5, 160.5))
+    wsp.var(dtf_dm()).setRange('plotting', 140.5, 152.5)
+    wsp.var(m(mode.D0)).setRange('plotting', 1820, 1910)
 
     wsp.defineSet('datavars', '{},{}'.format(dtf_dm(), m(mode.D0)))
 
     vs = setup_pdf(wsp)
 
     return wsp, vs
+
 
 def setup_pdf(wsp):
     # Only call this function once on a workspace

@@ -157,6 +157,38 @@ def delta_mass_wide_signal_region(df):
 @buffer_load
 @selective_load
 @call_debug
+def delta_mass_signal_region(df):
+    """Selects the signal peak in both D0 and delta mass to create a signal
+    enriched sample."""
+    ret = True
+    ret &= np.abs(df[dtf_dm()] - config.PDG_MASSES['delta']) < 0.5
+    return ret
+
+
+@buffer_load
+@selective_load
+@call_debug
+def delta_mass_sideband_near(df):
+    """Selects the delta mass sidebands to create a background sample"""
+    ret = True
+    ret &= np.abs(df[dtf_dm()] - config.PDG_MASSES['delta']) > 2
+    ret &= np.abs(df[dtf_dm()] - config.PDG_MASSES['delta']) < 6
+    return ret
+
+
+@buffer_load
+@selective_load
+@call_debug
+def delta_mass_sideband_far(df):
+    """Selects the delta mass sidebands to create a background sample"""
+    ret = True
+    ret &= np.abs(df[dtf_dm()] - config.PDG_MASSES['delta']) > 6.
+    return ret
+
+
+@buffer_load
+@selective_load
+@call_debug
 def mass_sideband_region(df):
     """Selects the delta mass sidebands to create a background sample"""
     ret = True

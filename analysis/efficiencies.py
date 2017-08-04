@@ -26,23 +26,17 @@ def get_efficiency():
         gcm().ltime_var
     ]
     all_vars = gcm().phsp_vars + extra_vars
-    columns = [v.var for v in all_vars]
+    columns = [v.var for v in all_vars if 'phi' not in v.var]
+    columns += ['cosphi', 'sinphi']
     log.info('Getting efficiencies for {}'.format(', '.join(columns)))
 
     # Current mode stuff
     data = gcm().get_data([f.var for f in extra_vars])
     add_variables.append_phsp(data)
-    df_sel = final_selection.get_final_selection()
-    df_sel &= selection.mass_signal_region()
 
-    gen = get_model()
-    for c in columns:
-        mi, ma = gen[c].min(), gen[c].max()
-        data[c] = (data[c] - mi) / (ma - mi) + 1.
-
-    reweighter = bdt_utils.load_reweighter()
-    weight = reweighter.predict_weights(data[columns])
-    return pd.Series(weight, index=data.index)
+    data['cosphi'] = np.cos(data.phi1)
+    data['sinphi'] = np.sin(data.phi1)
+    return compute_efficiency(data)
 
 
 def get_efficiency_gen():
@@ -51,18 +45,46 @@ def get_efficiency_gen():
         gcm().ltime_var
     ]
     all_vars = gcm().phsp_vars + extra_vars
-    columns = [v.var for v in all_vars]
+    columns = [v.var for v in all_vars if 'phi' not in v.var]
+    columns += ['cosphi', 'sinphi']
     log.info('Getting efficiencies for {}'.format(', '.join(columns)))
 
     # Current mode stuff
     data = get_model()
+    data['cosphi'] = np.cos(data.phi1)
+    data['sinphi'] = np.sin(data.phi1)
+    return compute_efficiency(data)
+
+
+def compute_efficiency(df):
+    """Returns or first trains the BDT efficiency."""
+    extra_vars = [
+        gcm().ltime_var
+    ]
+    all_vars = gcm().phsp_vars + extra_vars
+    columns = [v.var for v in all_vars if 'phi' not in v.var]
+    columns += ['cosphi', 'sinphi']
+    log.info('Getting efficiencies for {}'.format(', '.join(columns)))
+
+    # Current mode stuff
+    data = df.copy()
+    data['cosphi'] = np.cos(data.phi1)
+    data['sinphi'] = np.sin(data.phi1)
+    failed_lcut = data[gcm().ltime_var.var] < 0.0001725
+    failed_lcut = data[gcm().ltime_var.var] > 0.003256
+    limits = {v.var: v.binning[1:] for v in all_vars}
+    limits['cosphi'] = (-1., 1)
+    limits['sinphi'] = (-1., 1)
     for c in columns:
-        mi, ma = data[c].min(), data[c].max()
-        data[c] = (data[c] - mi) / (ma - mi) + 1.
+        mi, ma = limits[c]
+        data[c] = (data[c] - mi) / (ma - mi) + 2.
 
     reweighter = bdt_utils.load_reweighter()
     weight = reweighter.predict_weights(data[columns])
-    return pd.Series(weight, index=data.index)
+    weight = pd.Series(weight, index=data.index)
+    weight[failed_lcut] = 0.
+    weight[weight > 6.] = 6.
+    return weight/6.
 
 
 def train_reweighter():
@@ -70,26 +92,34 @@ def train_reweighter():
         gcm().ltime_var
     ]
     all_vars = gcm().phsp_vars + extra_vars
-    columns = [v.var for v in all_vars]
+    columns = [v.var for v in all_vars if 'phi' not in v.var]
+    columns += ['cosphi', 'sinphi']
 
     # Current mode stuff
     data = gcm().get_data([f.var for f in extra_vars])
     add_variables.append_phsp(data)
+    data['cosphi'] = np.cos(data.phi1)
+    data['sinphi'] = np.sin(data.phi1)
     df_sel = final_selection.get_final_selection()
-    df_sel &= selection.mass_signal_region()
+    df_sel &= selection.delta_mass_signal_region()
 
     gen = get_model()
+    gen['cosphi'] = np.cos(gen.phi1)
+    gen['sinphi'] = np.sin(gen.phi1)
+
+    limits = {v.var: v.binning[1:] for v in all_vars}
+    limits['cosphi'] = (-1., 1)
+    limits['sinphi'] = (-1., 1)
     for c in columns:
-        mi, ma = gen[c].min(), gen[c].max()
-        data[c] = (data[c] - mi) / (ma - mi) + 1.
-        gen[c] = (gen[c] - mi) / (ma - mi) + 1.
+        mi, ma = limits[c]
+        data[c] = (data[c] - mi) / (ma - mi) + 2.
+        gen[c] = (gen[c] - mi) / (ma - mi) + 2.
 
     log.info('Training BDT reweighter for {}'.format(', '.join(columns)))
+    reweighter = GBReweighter(n_estimators=300, max_depth=5, learning_rate=0.2)
 
-    reweighter = GBReweighter(n_estimators=300, max_depth=3, learning_rate=0.1)
-
-    reweighter.fit(original=gen[columns].sample(frac=0.3),
-                   target=data[columns][df_sel].sample(frac=0.3))
+    reweighter.fit(original=gen[columns].sample(n=250000),
+                   target=data[columns][df_sel].sample(n=250000))
     bdt_utils.dump_reweighter(reweighter)
 
 
@@ -103,7 +133,7 @@ def simple_phsp_efficiencies():
     data = gcm().get_data([f.var for f in extra_vars])
     add_variables.append_phsp(data)
     df_sel = final_selection.get_final_selection()
-    df_sel &= selection.mass_signal_region()
+    df_sel &= selection.delta_mass_signal_region()
 
     gen = get_model()
 
@@ -143,7 +173,7 @@ def dependence_study(use_efficiencies=False):
     data = gcm().get_data([f.var for f in extra_vars])
     add_variables.append_phsp(data)
     df_sel = final_selection.get_final_selection()
-    df_sel &= selection.mass_signal_region()
+    df_sel &= selection.delta_mass_signal_region()
 
     gen = get_model()
 
@@ -153,6 +183,7 @@ def dependence_study(use_efficiencies=False):
     else:
         outfile = gcm().get_output_path('effs') + 'Gen_DATA_Eff_dep.pdf'
         gen['weight'] = 1.
+
     with PdfPages(outfile) as pdf:
         for selected, plotted in permutations(all_vars, 2):
             log.info('Plotting {} in intervals of {}'.format(
@@ -199,7 +230,7 @@ def lifetime_study(correct_efficiencies=False):
     data = gcm().get_data([gcm().ltime_var.var])
     add_variables.append_phsp(data)
     df_sel = final_selection.get_final_selection()
-    df_sel &= selection.mass_signal_region()
+    df_sel &= selection.delta_mass_signal_region()
     data['weight'] = 1.
 
     if correct_efficiencies:
@@ -259,7 +290,7 @@ def plot_comparison_test():
     data = gcm().get_data([f.var for f in extra_vars])
     add_variables.append_phsp(data)
     df_sel = final_selection.get_final_selection()
-    df_sel &= selection.mass_signal_region()
+    df_sel &= selection.delta_mass_signal_region()
 
     gen = get_model()
     gen['weight'] = get_efficiency_gen()
@@ -289,7 +320,7 @@ if __name__ == '__main__':
     with MODE(args.polarity, args.year, args.mode):
         if args.train:
             train_reweighter()
-            buffer.remove_buffer_for_function(get_efficiency)
+        buffer.remove_buffer_for_function(get_efficiency)
         dependence_study(True)
         plot_comparison_test()
         lifetime_study()

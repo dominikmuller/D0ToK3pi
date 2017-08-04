@@ -252,12 +252,12 @@ def plot_efficiencies(sw=False, comb_bkg=False):
                 add_separation_page(
                     pdf, '{}: {}'.format(
                         bdt_name, var.functor.latex(var.particle)))
-                fig = bdt.plot_eff(var.functor, var.particle,
+                fig = bdt.plot_eff(var,
                                    test, classifiers[bdt_name],
                                    test_lbl, test.weights)
                 pdf.savefig(fig)
                 plt.clf()
-                fig = bdt.plot_eff(var.functor, var.particle,
+                fig = bdt.plot_eff(var,
                                    test, classifiers[bdt_name],
                                    ~test_lbl, test.weights)
                 pdf.savefig(fig)

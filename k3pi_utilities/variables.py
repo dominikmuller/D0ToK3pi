@@ -82,7 +82,8 @@ var('p', '{part}_P', True, True, r'$p(PART)$', mevc)
 var('eta', '{part}_ETA', True, True, r'$\eta(PART)$', mevc)
 var('phi', '{part}_PHI', True, True, r'$\phi(PART)$', mevc)
 var('m', '{part}_M', True, False, r'$m(PART)$', mevcc)
-var('ltime', '{part}_Loki_BPVLTIME', True, False, r'$\tau$', ns)  # NOQA
+var('ltime', '{part}_Loki_BPVLTIME', True, False, r'$t$', ns)  # NOQA
+var('ltimer', 'ltime_ratio', True, False, r'$t/\tau$')  # NOQA
 var('vchi2', '{part}_Loki_VCHI2NDOF', True, False, r'Vertex $\chi^2/\text{dof}(PART)$')  # NOQA
 var('ipchi2', '{part}_Loki_BPVIPCHI2', True, True, r'$\chi^2_\text{IP}(PART)$')  # NOQA
 var('dira', '{part}_Loki_BPVDIRA', True, False, r'DIRA$(PART)$')

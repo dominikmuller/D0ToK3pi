@@ -4,7 +4,7 @@ from k3pi_utilities.decorator_utils import pop_arg
 from k3pi_utilities.buffer import buffer_load, remove_buffer_for_function
 from k3pi_utilities import parser
 from k3pi_utilities.debugging import call_debug
-from k3pi_config.modes import gcm, MODE
+from k3pi_config.modes import gcm
 from k3pi_cpp import (compute_delta_angle, vec_phsp_variables,
                       double_misid_d0_mass, change_slowpi_d0,
                       change_slowpi_d0_ws)
@@ -14,6 +14,11 @@ import pandas as pd
 
 def append_angle(df):
     extra = _dstp_slowpi_angle()
+    df[extra.name] = extra
+
+
+def append_ltime_ratio(df):
+    extra = _ltime_ratio()
     df[extra.name] = extra
 
 
@@ -44,6 +49,18 @@ def _dstp_slowpi_angle(df):
     if is_dummy_run(df):
         return 1
     return pd.Series(ret, name='dstp_slowpi_angle', index=df.index)
+
+
+@buffer_load
+@pop_arg(selective_load, allow_for=[None, 'mc'])
+@call_debug
+def _ltime_ratio(df):
+
+    mode = gcm()
+    ret = df[vars.ltime(mode.D0)] / config.Dz_ltime
+    if is_dummy_run(df):
+        return 1
+    return pd.Series(ret, name='ltime_ratio', index=df.index)
 
 
 @buffer_load

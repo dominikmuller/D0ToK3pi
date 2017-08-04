@@ -1,6 +1,6 @@
 class PlotConfig(object):
     def __init__(self, functor, particle, binning, convert=None,
-                 convert_label=None):
+                 convert_label=None, convert_unit=True):
         self.functor = functor
         self.particle = particle
         self.var = functor(particle)
@@ -8,10 +8,9 @@ class PlotConfig(object):
         self.convert = convert
         if convert is not None and convert_label is not None:
             self.xlabel = convert_label.format(functor.latex(particle,
-                                               with_unit=True))
+                                               with_unit=convert_unit))
         else:
             self.xlabel = functor.latex(particle, with_unit=True)
-
 
     def __repr__(self):
         """Returns some usefule information

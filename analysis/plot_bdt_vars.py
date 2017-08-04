@@ -6,7 +6,9 @@ from matplotlib.backends.backend_pdf import PdfPages
 from analysis.mass_fitting import get_sweights
 import numpy as np
 from k3pi_config.modes import gcm, MODE
+from k3pi_plotting import utils as plot_utils
 from tqdm import tqdm
+from k3pi_plotting.comparison import plot_comparison
 
 
 def sig_bkg_normed(v, sig_df, bkg_df, sig_wgt=1., bkg_wgt=1.):
@@ -113,8 +115,14 @@ def plot_bdt_variables(sw=False, comb_bkg=False):
     outfile = gcm().get_output_path(bdt_folder) + 'bdt_vars.pdf'
     with PdfPages(outfile) as pdf:
         for v in tqdm(bdt_vars, smoothing=0.3):
-            fig = sig_bkg_normed(v, sig_df, bkg_df, sig_wgt, bkg_wgt)
-            pdf.savefig(fig)
+            ax = plot_comparison(
+                v, sig_df[v.var], bkg_df[v.var], 'Signal', 'Background',
+                filled_weight=sig_wgt, errorbars_weight=bkg_wgt)
+            ax.set_xlabel(v.xlabel)
+            ax.yaxis.set_visible(False)
+            plot_utils.y_margin_scaler(ax, lf=0, la=True)
+            ax.legend()
+            pdf.savefig(plt.gcf())
             plt.clf()
             plt.close()
 

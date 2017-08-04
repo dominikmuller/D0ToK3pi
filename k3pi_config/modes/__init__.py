@@ -56,6 +56,24 @@ def opposite_mode():
     return MODE(polarity, year, mode, mc)
 
 
+def rs_mode():
+    polarity = gcm().polarity
+    year = gcm().year
+    mc = gcm().mc
+    mode = gcm().mode_short.replace('WS', 'RS')
+
+    return MODE(polarity, year, mode, mc)
+
+
+def ws_mode():
+    polarity = gcm().polarity
+    year = gcm().year
+    mc = gcm().mc
+    mode = gcm().mode_short.replace('RS', 'WS')
+
+    return MODE(polarity, year, mode, mc)
+
+
 __all__ = [
     'D0ToKpipipi_RS',
     'D0ToKpipipi_WS',

@@ -26,7 +26,7 @@ Objects_TreeSplitter=$(patsubst %,$(ODIR)/%,$(_Objects_TreeSplitter))
 all: lib/k3pi_cpp.so lib/libROOTex.so
 
 lib/k3pi_cpp.so: lib/libROOTex.so
-	$(CC) -O3 -shared -o $@ -fPIC -g -std=c++11 -I./include $(RCXX) $(PYTHONCFLAGS) src/phsp_variables.cpp src/delta_m.cpp src/double_misid.cpp src/delta_angle.cpp src/bindings.cpp src/TreeSplitter.cpp $(LDFLAGS) $(ROOTLIBS) $(PYTHONLIBS)
+	$(CC) -O3 -shared -o $@ -fPIC -g -std=c++11 -I./include $(RCXX) $(PYTHONCFLAGS) src/phsp_variables.cpp src/delta_m.cpp src/masses.cpp src/double_misid.cpp src/delta_angle.cpp src/bindings.cpp src/TreeSplitter.cpp $(LDFLAGS) $(ROOTLIBS) $(PYTHONLIBS)
 
 dict/MyDict.cxx: include/ROOTex.h include/LinkDef.h
 	rootcint -f $@ -c -p $^

@@ -176,6 +176,7 @@ PYBIND11_PLUGIN(k3pi_cpp) {
     m.def("double_misid_d0_mass", py::vectorize(double_misid_d0_mass),
           "D0 mass");
     m.def("change_slowpi_d0", py::vectorize(change_slowpi_d0), "D0 mass");
+    m.def("invariant_mass_pair", py::vectorize(invariant_mass_pair), "Invariant mass of pair");
     m.def("change_slowpi_d0_ws", py::vectorize(change_slowpi_d0_ws), "D0 mass");
 
     return m.ptr();

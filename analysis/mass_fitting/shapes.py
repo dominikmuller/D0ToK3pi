@@ -270,7 +270,7 @@ def double_johnsonsu(species, workspace, mode, var):
     workspace.factory(mode.get_rf_vars('width_2_{0}'.format(species)))
     workspace.factory(mode.get_rf_vars('nu_2_{0}'.format(species)))
     workspace.factory(mode.get_rf_vars('tau_2_{0}'.format(species)))
-    workspace.factory('ds_fraction_{0}[0.5,0,1]'.format(species))
+    workspace.factory('ds_fraction_{0}[0.5]'.format(species))
     # Threshold at the charged pion mass
     workspace.factory((
         'RooJohnsonSU::pdf_1_{0}('

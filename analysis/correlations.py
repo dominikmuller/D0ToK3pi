@@ -6,10 +6,8 @@ from analysis import selection, add_variables
 from k3pi_config.modes import MODE, gcm
 import numpy as np
 from k3pi_utilities.variables import m, dtf_dm
-from k3pi_utilities.processify import processify
 
 
-@processify
 def correlations(comb_bkg=False):
     sns.set(style="white")
 
@@ -48,10 +46,11 @@ def correlations(comb_bkg=False):
 
         from scipy.cluster.hierarchy import fcluster
         clusters = fcluster(row_linkage, 10, criterion='maxclust')
+
         clustered = list(
-            zip(*sorted(zip(varlist, clusters), key=lambda x: x[1]))[0])
+            next(zip(*sorted(zip(varlist, clusters), key=lambda x: x[1]))))
         clustered_names = list(
-            zip(*sorted(zip(nlist, clusters), key=lambda x: x[1]))[0])
+            next(zip(*sorted(zip(nlist, clusters), key=lambda x: x[1]))))
         correlations = correlations[clustered].loc[clustered]*100
 
         f, ax = plt.subplots(figsize=(15, 15))
