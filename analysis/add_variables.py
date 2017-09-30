@@ -1,7 +1,7 @@
 from k3pi_utilities import variables as vars
 from k3pi_utilities.selective_load import selective_load, is_dummy_run
 from k3pi_utilities.decorator_utils import pop_arg
-from k3pi_utilities.buffer import buffer_load
+from k3pi_utilities.buffer import buffer_load, remove_buffer_for_function
 from k3pi_utilities import parser
 from k3pi_utilities.debugging import call_debug
 from k3pi_config.modes import gcm, MODE
@@ -57,14 +57,15 @@ def phsp_variables(df):
     # here, otherwise the passed arrays are of non-matching type.
     if not is_dummy_run(df):
         vals = vec_phsp_variables(
-            df[vars.dtf_pt(mode.K)], df[vars.dtf_eta(mode.K)],
-            df[vars.dtf_phi(mode.K)], config.PDG_MASSES['K'],
             df[vars.dtf_pt(mode.Pi_OS1)], df[vars.dtf_eta(mode.Pi_OS1)],
             df[vars.dtf_phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
             df[vars.dtf_pt(mode.Pi_SS)], df[vars.dtf_eta(mode.Pi_SS)],
             df[vars.dtf_phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
+            df[vars.dtf_pt(mode.K)], df[vars.dtf_eta(mode.K)],
+            df[vars.dtf_phi(mode.K)], config.PDG_MASSES['K'],
             df[vars.dtf_pt(mode.Pi_OS2)], df[vars.dtf_eta(mode.Pi_OS2)],
-            df[vars.dtf_phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'])
+            df[vars.dtf_phi(mode.Pi_OS2)], config.PDG_MASSES['Pi']
+        )
         return pd.DataFrame({'m12': vals[0],
                              'm34': vals[1],
                              'cos1': vals[2],
@@ -168,8 +169,9 @@ if __name__ == '__main__':
     funcs = [
         'phsp_variables',
         '_dstp_slowpi_angle',
+        'double_misid_d0',
+        'other_slowpi',
+        'other_slowpi_ws',
     ]
-
-    with MODE(args.polarity, args.year, args.mode):
-        for f in funcs:
-            getattr(sys.modules[__name__], f)(use_buffered=False)
+    for sel in funcs:
+        remove_buffer_for_function(getattr(sys.modules[__name__], sel))
