@@ -3,7 +3,8 @@ import numpy as np
 
 
 def plot_comparison(pc, filled, errorbars, filled_label, errorbars_label,
-                    ax=None, add_uncertainties=False, normed=True):
+                    ax=None, add_uncertainties=False, normed=True,
+                    filled_weight=None, errorbars_weight=None, normed_max=False):
     """
 
     :pc: PlotConfig object
@@ -18,19 +19,30 @@ def plot_comparison(pc, filled, errorbars, filled_label, errorbars_label,
     if ax is None:
         fig, ax = plt.subplots(figsize=(10, 10))
     nbins, xmin, xmax = pc.binning
+    if filled_weight is None:
+        filled_weight = np.ones(len(filled))
+    if errorbars_weight is None:
+        errorbars_weight = np.ones(len(errorbars))
 
     # Plot train signal and background
 
-    h_filled, edges = np.histogram(filled, bins=nbins, range=(xmin, xmax))
-    h_errorbars, _ = np.histogram(errorbars, bins=nbins, range=(xmin, xmax))
+    h_filled, edges = np.histogram(filled, bins=nbins, range=(xmin, xmax), weights=filled_weight)
+    h_errorbars, _ = np.histogram(errorbars, bins=nbins, range=(xmin, xmax), weights=errorbars_weight)
+    err_filled, _ = np.histogram(filled, bins=nbins, range=(xmin, xmax), weights=filled_weight**2.)
+    err_errorbars, _ = np.histogram(errorbars, bins=nbins, range=(xmin, xmax), weights=errorbars_weight**2.)
 
-    err_filled = np.sqrt(h_filled)
-    err_errorbars = np.sqrt(h_errorbars)
+    err_filled = np.sqrt(err_filled)
+    err_errorbars = np.sqrt(err_errorbars)
     if normed:
-        h_filled = h_filled.astype(np.float) / (len(filled)*(xmax - xmin))
-        h_errorbars = h_errorbars.astype(np.float) / (len(errorbars)*(xmax - xmin))  # NOQA
-        err_filled = err_filled.astype(np.float) / (len(filled)*(xmax - xmin))  # NOQA
-        err_errorbars = err_errorbars.astype(np.float) / (len(errorbars)*(xmax - xmin))  # NOQA
+        h_filled = h_filled.astype(np.float) / (np.sum(filled_weight)*(xmax - xmin))  # NOQA
+        h_errorbars = h_errorbars.astype(np.float) / (np.sum(errorbars_weight)*(xmax - xmin))  # NOQA
+        err_filled = err_filled.astype(np.float) / (np.sum(filled_weight)*(xmax - xmin))  # NOQA
+        err_errorbars = err_errorbars.astype(np.float) / (np.sum(errorbars_weight)*(xmax - xmin))  # NOQA
+    if normed_max:
+        err_filled = err_filled.astype(np.float) / np.max(h_filled)  # NOQA
+        err_errorbars = err_errorbars.astype(np.float) / np.max(h_errorbars)  # NOQA
+        h_filled = h_filled.astype(np.float) / np.max(h_filled)  # NOQA
+        h_errorbars = h_errorbars.astype(np.float) / np.max(h_errorbars)  # NOQA
 
     if add_uncertainties:
         err_errorbars = np.sqrt(err_errorbars**2. + err_filled**2.)
@@ -39,16 +51,16 @@ def plot_comparison(pc, filled, errorbars, filled_label, errorbars_label,
     width = (edges[1:] - edges[:-1])
     x_err = width/2.
 
-    ax.bar(x_ctr, h_filled, 2.*x_err,
-           color='#5F5293', label=filled_label, linewidth=0, alpha=0.50)
+    ax.bar(x_ctr, h_filled, 2.*x_err, color='#D3EFFB',
+           label=filled_label, edgecolor='#D3EFFB')
 
-    options = dict(
+    dt_options = dict(
         fmt='o', markersize=5, capthick=1, capsize=0, elinewidth=2,
-        alpha=1)
+        color='#006EB6', markeredgecolor='#006EB6')
 
     ax.errorbar(
         x_ctr, h_errorbars, xerr=x_err, yerr=err_errorbars,
-        label=errorbars_label,
-        color='#5F5293', markeredgecolor='#5F5293',   **options)
+        label=errorbars_label, **dt_options)
+    ax.set_xlim((xmin, 0.999*xmax))
 
     return ax

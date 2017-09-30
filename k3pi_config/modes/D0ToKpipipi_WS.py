@@ -9,7 +9,7 @@ from .D0ToKpipipi_RS import D0ToKpipipi_RS
 
 
 class D0ToKpipipi_WS(mode_base):
-    shapes = ('JSU', 'JSU', 'PID')
+    shapes = ('JSU', 'JSU', 'DM1')
     mode_short = 'WS'
     mass_fit_pars = dict(
         # Dst - D0 mass fit

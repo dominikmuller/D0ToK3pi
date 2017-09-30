@@ -11,7 +11,7 @@ class D0ToKpipipi_RS(mode_base):
     mode = config.D0ToKpipipi_RS
     mode_short = 'RS'
     tpl = config.ntuple_strip.format(mode)
-    shapes = ('CRU', 'DJSU', 'PID')
+    shapes = ('JSU', 'JSU', 'DM1')
     mass_fit_pars = dict(
         # Dst - D0 mass fit
         mu_dm=145.5, error_mu_dm=2, limit_mu_dm=(140, 150),
@@ -39,8 +39,8 @@ class D0ToKpipipi_RS(mode_base):
         sigma_m_R=5, error_sigma_m_R=0.1, limit_sigma_m_R=(0.001, 15.),
         alpha_m_L=0.2, error_alpha_m_L=0.001, limit_alpha_m_L=(0.001, 1.),
         alpha_m_R=0.2, error_alpha_m_R=0.001, limit_alpha_m_R=(0.001, 1.),
-        width_m=5, error_width_m=0.12, limit_width_m=(0.0001, 15.),
-        nu_m=1., error_nu_m=0.02, limit_nu_m=(0.0000001, 5.),
+        width_m=12, error_width_m=0.12, limit_width_m=(0.0001, 15.),
+        nu_m=0., error_nu_m=0.02,
         tau_m=1.0, error_tau_m=0.02, limit_tau_m=(0.0001, 5.),
         width_1_m=5, error_width_1_m=0.12, limit_width_1_m=(0.0001, 15.),
         nu_1_m=1., error_nu_1_m=0.02, limit_nu_1_m=(0.0000001, 5.),
@@ -70,7 +70,7 @@ class D0ToKpipipi_RS(mode_base):
         super(D0ToKpipipi_RS, self).__init__(polarity, year, mc)
 
     mass_var = PlotConfig(vars.m, D0, (100, 1810., 1920.))
-    ltime_var = PlotConfig(vars.ltime, D0, (100, 0, 0.003))
+    ltime_var = PlotConfig(vars.ltime, D0, (100, 0.0001725, 0.00326))  # NOQA
     dmass_var = PlotConfig(vars.dtf_dm, None, (100, 140.5, 160.5))
     phsp_vars = [
         PlotConfig(vars.m12, None,
@@ -101,23 +101,12 @@ class D0ToKpipipi_RS(mode_base):
         PlotConfig(vars.vchi2, D0, (100, 0, 20)),
 
     ]
-    # for d in [3, 4]:
-        # comb_bkg_bdt_vars += [
-            # PlotConfig(getattr(vars, 'ipchi2{}'.format(d)), None,
-                       # (100, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),  # NOQA
-            # PlotConfig(getattr(vars, 'ipchi2{}'.format(d)), None,
-                       # (100, -2, 10.), np.log, r'$\ln(\text{{{}}})$'),  # NOQA
-        # ]
     spectator_vars = [
-        PlotConfig(vars.ltime, D0, (100, 0, 0.001)),
-        PlotConfig(vars.m12, None, (100, 0, 1600.)),
-        PlotConfig(vars.m34, None, (100, 0, 1400.)),
-        PlotConfig(vars.cos1, None, (100, -1, 1)),
-        PlotConfig(vars.cos2, None, (100, -1, 1)),
-        PlotConfig(vars.phi1, None, (100, -pi, pi)),
-        PlotConfig(vars.m, D0, (100, 1810., 1920.)),
-        PlotConfig(vars.dtf_dm, None, (100, 140.5, 160.5)),
+        ltime_var,
+        mass_var,
+        dmass_var
     ]
+    spectator_vars += phsp_vars
     just_plot = [
         PlotConfig(vars.probnnp, Pislow, (100, 0., 0.3)),
         PlotConfig(vars.probnne, Pislow, (100, 0., 0.3)),

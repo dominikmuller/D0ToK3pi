@@ -1,6 +1,6 @@
 from k3pi_utilities.variables import (eta, probnnk, probnnpi, p, m, dtf_dm,
                                       probnnmu, dtf_chi2, probnnp, pt, vchi2,
-                                      maxdoca)
+                                      maxdoca, ltime)
 from k3pi_utilities.variables import ipchi2, probnnghost
 from k3pi_utilities.selective_load import selective_load
 from k3pi_utilities.decorator_utils import pop_arg
@@ -87,10 +87,21 @@ def remove_secondary(df):
 @call_debug
 def d0_selection(df):
     ret = True
-    ret &= np.log(df[ipchi2(gcm().D0)]) < 1.
-    ret &= df[pt(gcm().D0)] > 4000.
+
+    if gcm().mode not in config.twotag_modes:
+        ret &= np.log(df[ipchi2(gcm().D0)]) < 1.
+        ret &= df[pt(gcm().D0)] > 4000.
     ret &= df[vchi2(gcm().D0)] < 4.
     ret &= df[maxdoca(gcm().D0)] < .2
+    return ret
+
+
+@buffer_load
+@pop_arg(selective_load, allow_for=[None, 'mc'])
+@call_debug
+def d0_lifetime_permille(df):
+    ret = df[ltime(gcm().D0)] > 0.0001725
+    ret &= df[ltime(gcm().D0)] < 0.00326
     return ret
 
 
@@ -118,6 +129,8 @@ def full_selection():
     sel &= d0_selection()
     sel &= slow_pion()
     sel &= dtf_cuts()
+    if gcm().mode not in config.twotag_modes:
+        sel &= d0_lifetime_permille()
     return sel
 
 
@@ -141,6 +154,38 @@ def delta_mass_wide_signal_region(df):
     enriched sample."""
     ret = True
     ret &= np.abs(df[dtf_dm()] - config.PDG_MASSES['delta']) < 1.0
+    return ret
+
+
+@buffer_load
+@selective_load
+@call_debug
+def delta_mass_signal_region(df):
+    """Selects the signal peak in both D0 and delta mass to create a signal
+    enriched sample."""
+    ret = True
+    ret &= np.abs(df[dtf_dm()] - config.PDG_MASSES['delta']) < 0.5
+    return ret
+
+
+@buffer_load
+@selective_load
+@call_debug
+def delta_mass_sideband_near(df):
+    """Selects the delta mass sidebands to create a background sample"""
+    ret = True
+    ret &= np.abs(df[dtf_dm()] - config.PDG_MASSES['delta']) > 2
+    ret &= np.abs(df[dtf_dm()] - config.PDG_MASSES['delta']) < 6
+    return ret
+
+
+@buffer_load
+@selective_load
+@call_debug
+def delta_mass_sideband_far(df):
+    """Selects the delta mass sidebands to create a background sample"""
+    ret = True
+    ret &= np.abs(df[dtf_dm()] - config.PDG_MASSES['delta']) > 6.
     return ret
 
 
@@ -189,11 +234,16 @@ if __name__ == '__main__':
             'mass_fiducial_selection',
             'remove_secondary',
             'd0_selection',
+            'd0_lifetime_permille',
             'slow_pion',
             'mass_signal_region',
             'mass_sideband_region',
             'comb_bkg_sideband_region',
             'rand_spi_sideband_region',
+            'delta_mass_signal_region',
+            'delta_mass_wide_signal_region',
+            'delta_mass_sideband_near',
+            'delta_mass_sideband_far',
             'dtf_cuts',
             'full_selection',
         ]

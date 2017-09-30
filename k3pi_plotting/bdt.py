@@ -1,6 +1,7 @@
 from sklearn.metrics import roc_curve, roc_auc_score
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import to_rgba
 from rep import utils
 import palettable
 from k3pi_utilities import variables as vars
@@ -9,6 +10,8 @@ from k3pi_config.modes import gcm
 
 from k3pi_utilities.logger import get_logger
 log = get_logger('k3pi_plotting/bdt')
+
+from k3pi_plotting import utils as plot_utils
 
 
 def roc(test, bdt, labels, weights):
@@ -60,9 +63,12 @@ def plot_roc_for_feature(ax, data, legend, colour, labels, weights=1.):
             label=legend, linewidth=3, linestyle='--')
 
 
-def plot_eff(var, part, test, bdt, labels, weights, quantiles=None):
+def plot_eff(pc, test, bdt, labels, weights, quantiles=None):
     if quantiles is None:
         quantiles = [0.2, 0.4, 0.6, 0.8]
+    var = pc.functor
+    part = pc.particle
+
     varname = var(part)
     log.info('Doing efficiency for {}'.format(varname))
     colours = palettable.tableau.TableauMedium_10.hex_colors
@@ -87,7 +93,8 @@ def plot_eff(var, part, test, bdt, labels, weights, quantiles=None):
         ax.errorbar(x, y, yerr=yerr, xerr=xerr, label=label,
                     **dt_options)
     ax.legend(loc='best')
-    ax.set_xlabel(var.latex(part, with_unit=True))
+    ax.set_xlabel(pc.xlabel)
+    ax.set_ylabel('BDT efficiency')
 
     return fig
 
@@ -151,10 +158,10 @@ def plot_bdt_discriminant(train, test):
         ax.bar(x_ctr-x_err, h_sig_comb, 2.*x_err,
                color='#5F5293', label='Signal', linewidth=0, alpha=0.50)
     else:
-        ax.bar(x_ctr, h_bkg_train, 2.*x_err,
-               color='#11073B', label='Train background', linewidth=0, alpha=0.50)
-        ax.bar(x_ctr, h_sig_train, 2.*x_err,
-               color='#5F5293', label='Train signal', linewidth=0, alpha=0.50)
+        ax.bar(x_ctr, h_bkg_train, 2.*x_err, edgecolor=to_rgba('#11073B', 0.5),
+               color='#11073B', label='Train bkg.', alpha=0.50)
+        ax.bar(x_ctr, h_sig_train, 2.*x_err, edgecolor=to_rgba('#5F5293', 0.5),
+               color='#5F5293', label='Train signal', alpha=0.50)
 
         options = dict(
             fmt='o', markersize=5, capthick=1, capsize=0, elinewidth=2,
@@ -166,10 +173,11 @@ def plot_bdt_discriminant(train, test):
             color='#5F5293', markeredgecolor='#5F5293',   **options)
         ax.errorbar(
             x_ctr, h_bkg_test, xerr=x_err, yerr=err_bkg_test,
-            label='Test background',
+            label='Test bkg.',
             color='#11073B', markeredgecolor='#11073B', **options)
 
-    ax.set_ylim((0, 1.2))
-    ax.legend(loc='best')
+    plot_utils.y_margin_scaler(ax, lf=0, la=True)
+    ax.legend(loc='best', ncol=2)
+    ax.set_ylabel('Arbitrary units')
     ax.set_xlabel(vars.bdt.latex())
     return fig

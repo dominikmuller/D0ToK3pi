@@ -55,5 +55,6 @@ def dump_workspace(mode, wsp):
 
 
 def load_workspace(mode):
+    import ROOT
     outfile = mode.get_output_path('sweight_fit') + 'mass_fit.p'
     return helpers.load(outfile)

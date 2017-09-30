@@ -82,7 +82,8 @@ var('p', '{part}_P', True, True, r'$p(PART)$', mevc)
 var('eta', '{part}_ETA', True, True, r'$\eta(PART)$', mevc)
 var('phi', '{part}_PHI', True, True, r'$\phi(PART)$', mevc)
 var('m', '{part}_M', True, False, r'$m(PART)$', mevcc)
-var('ltime', '{part}_Loki_BPVLTIME', True, False, r'$\tau$', ns)  # NOQA
+var('ltime', '{part}_Loki_BPVLTIME', True, False, r'$t$', ns)  # NOQA
+var('ltimer', 'ltime_ratio', True, False, r'$t/\tau$')  # NOQA
 var('vchi2', '{part}_Loki_VCHI2NDOF', True, False, r'Vertex $\chi^2/\text{dof}(PART)$')  # NOQA
 var('ipchi2', '{part}_Loki_BPVIPCHI2', True, True, r'$\chi^2_\text{IP}(PART)$')  # NOQA
 var('dira', '{part}_Loki_BPVDIRA', True, False, r'DIRA$(PART)$')
@@ -120,6 +121,14 @@ var('m12', 'm12', False, False, r'$m_{\pi^\pm\pi^\mp}$', mevcc, append=False, ad
 var('m34', 'm34', False, False, r'$m_{K^\pm\pi^\mp}$', mevcc, append=False, additional=True)  # NOQA
 var('cos1', 'cos1', False, False, r'$\cos\theta_1$', None, append=False, additional=True)  # NOQA
 var('cos2', 'cos2', False, False, r'$\cos\theta_2$', None, append=False, additional=True)  # NOQA
-var('phi1', 'phi1', False, False, r'$\phi_1$', None, append=False, additional=True)  # NOQA
+var('phi1', 'phi1', False, False, r'$\phi$', None, append=False, additional=True)  # NOQA
 var('bdt', 'bdt', False, False, r'BDT discriminant', None, append=False, additional=True)  # NOQA
 var('dtf_ip_diff', 'dtf_ip_diff', False, False, r'DTF $\chi^2 - \chi^2_\text{IP}(D^0)$', None, append=False, additional=True)  # NOQA
+var('m_SS', 'm_SS', False, False, r'$m(D^0|K^\pm\leftrightarrow\pi^\pm)$', mevcc, append=False, additional=True)  # NOQA
+var('dm_SS', 'dm_SS', False, False, r'$\Delta m(.|K^\pm\leftrightarrow\pi^\pm)$', mevcc, append=False, additional=True)  # NOQA
+var('m_C', 'm_C', False, False, r'$m(D^0)$', mevcc, append=False, additional=True)  # NOQA
+var('dm_C', 'dm_C', False, False, r'$\Delta m$', mevcc, append=False, additional=True)  # NOQA
+var('m_OSH', 'm_OSH', False, False, r'$m(D^0|K^\pm\leftrightarrow\pi^\mp_\nearrow)$', mevcc, append=False, additional=True)  # NOQA
+var('dm_OSH', 'dm_OSH', False, False, r'$\Delta m(.|K^\pm\leftrightarrow\pi^\mp_\nearrow)$', mevcc, append=False, additional=True)  # NOQA
+var('m_OSL', 'm_OSL', False, False, r'$m(D^0|K^\pm\leftrightarrow\pi^\mp_\searrow)$', mevcc, append=False, additional=True)  # NOQA
+var('dm_OSL', 'dm_OSL', False, False, r'$\Delta m(.|K^\pm\leftrightarrow\pi^\mp_\searrow)$', mevcc, append=False, additional=True)  # NOQA

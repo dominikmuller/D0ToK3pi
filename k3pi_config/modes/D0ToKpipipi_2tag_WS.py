@@ -1,10 +1,12 @@
 from k3pi_utilities import Particle
 from k3pi_config import config
 from .mode_base import mode_base
+from k3pi_config.modes import D0ToKpipipi_RS
 
 
 class D0ToKpipipi_2tag_WS(mode_base):
     shapes = ('DJSU', 'JSU', 'PID')
+    mode_short = '2tag_WS'
     mass_fit_pars = dict(
         # Dst - D0 mass fit
         mu_dm=145.5, error_2_mu_dm=2, limit_mu_dm=(140, 150),
@@ -14,8 +16,8 @@ class D0ToKpipipi_2tag_WS(mode_base):
         alpha_dm_R=0.2, error_alpha_dm_R=0.02, limit_alpha_dm_R=(0.0001, 1.),
         a_bkg=1.2, error_a_bkg=0.1, limit_a_bkg=(0.0001, 5.),
         p_bkg=-0.03, error_p_bkg=0.01, limit_p_bkg=(-0.5, 0.5),
-        NSig=4000, error_NSig=10, limit_NSig=(3000, 10000),
-        NBkg=40000, error_NBkg=5, limit_NBkg=(30000, 50000),
+        NSig=4000, error_NSig=10, limit_NSig=(100, 10000),
+        NBkg=4000, error_NBkg=5, limit_NBkg=(100, 50000),
         NSPi=100, error_NSPi=5, limit_NSPi=(1, 600000),
         width_dm=0.7, error_width_dm=0.02, limit_width_dm=(0.0001, 1.),
         nu_dm=1.0, error_nu_dm=0.02, limit_nu_dm=(0.0001, 5.),
@@ -67,5 +69,18 @@ class D0ToKpipipi_2tag_WS(mode_base):
 
     def __init__(self, polarity=None, year=None, mc=None):
         super(D0ToKpipipi_2tag_WS, self).__init__(polarity, year, mc)
+
+    mass_var = D0ToKpipipi_RS.mass_var
+    ltime_var = D0ToKpipipi_RS.ltime_var
+    dmass_var = D0ToKpipipi_RS.dmass_var
+    phsp_vars = D0ToKpipipi_RS.phsp_vars
+
+    bdt_vars = D0ToKpipipi_RS.bdt_vars
+    rand_spi_bdt_vars = D0ToKpipipi_RS.rand_spi_bdt_vars
+    comb_bkg_bdt_vars = D0ToKpipipi_RS.comb_bkg_bdt_vars
+
+    spectator_vars = D0ToKpipipi_RS.spectator_vars
+
+    just_plot = D0ToKpipipi_RS.just_plot
 
 __all__ = ['D0ToKpipipi_2tag_WS']

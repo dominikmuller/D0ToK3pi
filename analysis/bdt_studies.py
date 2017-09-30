@@ -103,16 +103,16 @@ def plot_roc(sw=False, comb_bkg=False):
         [f.functor(f.particle) for f in features_config])))
 
     (train, test, train_lbl, test_lbl), features, spectators = bdt_data.prep_data_for_sklearn(sw=sw, comb_data=comb_bkg)  # NOQA
-    bdt.plot_roc(ax, 'Exponential', colours[0], test,
+    bdt.plot_roc(ax, 'AdaBoost', colours[0], test,
                  classifiers['Exponential'],
                  test_lbl, test.weights)
     # bdt.plot_roc(ax, 'KnnAdaFlatness', colours[1], test,
     # classifiers['KnnAdaFlatness'], test_lbl, test.weights)
-    bdt.plot_roc(ax, 'KnnFlatness', colours[1], test,
+    bdt.plot_roc(ax, 'Uniformity', colours[1], test,
                  classifiers['KnnFlatness'], test_lbl, test.weights)
 
-    bdt.plot_roc(ax, 'BinFlatness', colours[2], test,
-                 classifiers['BinFlatness'], test_lbl, test.weights)
+    # bdt.plot_roc(ax, 'BinFlatness', colours[2], test,
+                 # classifiers['BinFlatness'], test_lbl, test.weights)
     for i, var in enumerate(features_config):
         bdt.plot_roc_for_feature(
             ax, test[var.var], var.functor.latex(var.particle),
@@ -252,12 +252,12 @@ def plot_efficiencies(sw=False, comb_bkg=False):
                 add_separation_page(
                     pdf, '{}: {}'.format(
                         bdt_name, var.functor.latex(var.particle)))
-                fig = bdt.plot_eff(var.functor, var.particle,
+                fig = bdt.plot_eff(var,
                                    test, classifiers[bdt_name],
                                    test_lbl, test.weights)
                 pdf.savefig(fig)
                 plt.clf()
-                fig = bdt.plot_eff(var.functor, var.particle,
+                fig = bdt.plot_eff(var,
                                    test, classifiers[bdt_name],
                                    ~test_lbl, test.weights)
                 pdf.savefig(fig)

@@ -38,6 +38,8 @@ def create_parser(logger=None):
                         help='Activate something spearmint related.')
     parser.add_argument('--candidates', default=False, action='store_true',
                         help='Activate multiple candidate treatment.')
+    parser.add_argument('--misid', default=False, action='store_true',
+                        help='Activate misid treatment.')
     parser.add_argument('--addwrongsign', default=False, action='store_true',
                         help='BDT data will add the WS sidebands to the  data')
     parser.add_argument(
@@ -50,6 +52,8 @@ def create_parser(logger=None):
         config.optimised_selection = True
     if args.candidates:
         config.candidates_selection = True
+    if args.misid:
+        config.misid_selection = True
     if args.addwrongsign:
         config.add_wrongsign = True
     if args.verbose == 0:

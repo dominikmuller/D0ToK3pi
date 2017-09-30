@@ -56,6 +56,7 @@ def decay_tree_tuple(name, decay, mothers, intermediate,
         'ETA': 'ETA',
         'PHI': 'PHI',
         'PT': 'PT',
+        'ID': 'ID',
         'P': 'P',
         'Loki_BPVIPCHI2': 'BPVIPCHI2()',
         'Loki_MIPCHI2DV': 'MIPCHI2DV(PRIMARY)',
@@ -224,21 +225,21 @@ def charm_tuple(name, decay, mothers, intermediate,
                          daughters, inputs, mc)
 
     # Define trigger lines we'd like to know the decisions of
-    # triggers_list = ['L0HadronDecision',
-                     # 'Hlt1TrackMVADecision',
-                     # 'Hlt1TwoTrackMVADecision',
-                     # 'Hlt2CharmHadDstp2D0Pip_D02KmPimPipPipTurboDecision'
-                     # ]
+    triggers_list = ['L0HadronDecision',
+                     'Hlt1TrackMVADecision',
+                     'Hlt1TwoTrackMVADecision',
+                     'Hlt2CharmHadDstp2D0Pip_D02KmPimPipPipTurboDecision'
+                     ]
 
     # for part in mothers.keys() + intermediate.keys():
         # branch = getattr(t, part)
-        # # TISTOS
+        # TISTOS
         # tistos = branch.addTupleTool('TupleToolTISTOS')
         # tistos.TriggerList = triggers_list
         # tistos.Verbose = True
-        # # tistos.VerboseL0 = True
-        # # tistos.VerboseHlt1 = True
-        # # tistos.VerboseHlt2 = True
+        # tistos.VerboseL0 = True
+        # tistos.VerboseHlt1 = True
+        # tistos.VerboseHlt2 = True
 
     # # Triggers
     # trigger = t.addTupleTool('TupleToolTrigger')

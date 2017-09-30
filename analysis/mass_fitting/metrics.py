@@ -5,21 +5,23 @@ log = logger.get_logger('metrics')
 
 
 class _metric_base(object):
-    def __init__(self, wsp):
+    def __init__(self, wsp, comb_bkg=False):
         self.wsp = wsp
-        wsp.var('D0_M').setRange(
-            'signal', config.PDG_MASSES['D0'] - 20.,
-            config.PDG_MASSES['D0'] + 20.)
+        self._comb_bkg = comb_bkg
+        # wsp.var('D0_M').setRange(
+        # 'signal', config.PDG_MASSES['D0'] - 20.,
+        # config.PDG_MASSES['D0'] + 20.)
         wsp.var('delta_m_dtf').setRange(
             'signal',
-            config.PDG_MASSES['Dst'] - config.PDG_MASSES['D0'] - 0.8,
-            config.PDG_MASSES['Dst'] - config.PDG_MASSES['D0'] + 0.8)
-        self._comb = wsp.pdf('combinatorial')
+            config.PDG_MASSES['delta'] - 0.5,
+            config.PDG_MASSES['delta'] + 0.5)
         self._signal = wsp.pdf('signal')
         self._random = wsp.pdf('random')
         self._nsig = wsp.var('NSig')
         self._nrnd = wsp.var('NSPi')
-        self._ncmb = wsp.var('NBkg')
+        if comb_bkg:
+            self._ncmb = wsp.var('NBkg')
+            self._comb = wsp.pdf('combinatorial')
 
     def _get_number_of_signal(self):
         import ROOT.RooFit as RF
@@ -32,18 +34,21 @@ class _metric_base(object):
 
     def _get_number_of_background(self):
         import ROOT.RooFit as RF
-        _icmb = self._comb.createIntegral(
-            self.wsp.set('datavars'), RF.NormSet(self.wsp.set('datavars')),
-            RF.Range("signal"))
-        log.info('Combinatorial yield: {}'.format(self._ncmb.getVal()))
-        log.info('Combinatorial integral: {}'.format(_icmb.getVal()))
+        if self._comb_bkg:
+            _icmb = self._comb.createIntegral(
+                self.wsp.set('datavars'), RF.NormSet(self.wsp.set('datavars')),
+                RF.Range("signal"))
+            log.info('Combinatorial yield: {}'.format(self._ncmb.getVal()))
+            log.info('Combinatorial integral: {}'.format(_icmb.getVal()))
+            comb = self._ncmb.getVal() * _icmb.getVal()
+        else:
+            comb = 0.
         _irnd = self._random.createIntegral(
             self.wsp.set('datavars'), RF.NormSet(self.wsp.set('datavars')),
             RF.Range("signal"))
         log.info('Random pion yield: {}'.format(self._nrnd.getVal()))
         log.info('Random pion integral: {}'.format(_irnd.getVal()))
         rnd = self._nrnd.getVal() * _irnd.getVal()
-        comb = self._ncmb.getVal() * _icmb.getVal()
         return rnd + comb
 
 

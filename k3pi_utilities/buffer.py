@@ -3,6 +3,7 @@ from k3pi_config import config, modes
 from k3pi_utilities.logger import get_logger
 from inspect import getargspec
 import pandas as pd
+from pandas import HDFStore
 
 log = get_logger('buffer_load')
 
@@ -56,7 +57,7 @@ class buffer_load():
         log.info('Loading {} from {}'.format(
             buffer_name, config.data_store
         ))
-        with pd.get_store(config.data_store) as store:
+        with HDFStore(config.data_store) as store:
             if use_buffered:
                 try:
                     return store.select(buffer_name)

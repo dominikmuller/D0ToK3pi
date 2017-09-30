@@ -1,9 +1,9 @@
+from __future__ import print_function
 import re
 import numpy as np
 import ROOT.RooFit as RF
 import matplotlib.pyplot as plt
 import logging as log
-import palettable
 
 
 def rooplot(ax, rc, **kwargs):
@@ -35,8 +35,7 @@ def roocurve(ax, rc):
 
 def double_buffer_to_list(buf, N):
     """Return a Python list from a C++ double array buffer of length N."""
-    buf.SetSize(N)
-    return np.array(buf, copy=True)
+    return np.array([buf[i] for i in range(N)])
 
 
 def tgraphasymerrors(ax, tgae, **kwargs):
@@ -91,32 +90,36 @@ def pull_plot(ax, pdf, data, **kwargs):
 
 
 def plot_fit(part, wsp, varfunctor, output_name='', subs=None, data=None,
-             dataname='data', pdf=None, do_comb_bkg=False):
+             dataname='data', pdf=None, do_comb_bkg=False, do_pulls=True):
     varname = varfunctor(part)
     var = wsp.var(varname)
 
-    if subs is None:
+    if subs is None and do_pulls:
         fig = plt.figure(figsize=(10, 10))
         gs = plt.GridSpec(2, 1, height_ratios=[4, 1])
         gspl = gs[0]
         gspu = gs[1]
         ax = fig.add_subplot(gspl)
         pullax = fig.add_subplot(gspu)
+    elif subs is None:
+        fig, ax = plt.subplots(figsize=(10, 10))
     else:
         ax, pullax = subs
 
     pdf_tot = 'total'
 
-    frame = var.frame(RF.Bins(100))
+    frame = var.frame(RF.Bins(200), RF.Range("plotting"))
+    # import ipdb; ipdb.set_trace()  # XXX BREAKPOINT
+
     if data is None:
-        wsp.data(dataname).plotOn(frame)
+        wsp.data(dataname).plotOn(frame, RF.CutRange("plotting"))
     else:
-        data.plotOn(frame)
-    wsp.pdf(pdf_tot).plotOn(frame)
-    wsp.pdf(pdf_tot).plotOn(frame, RF.Components('signal'))
-    wsp.pdf(pdf_tot).plotOn(frame, RF.Components('random'))
+        data.plotOn(frame, RF.CutRange("plotting"))
+    wsp.pdf(pdf_tot).plotOn(frame, RF.ProjectionRange("plotting"))
+    wsp.pdf(pdf_tot).plotOn(frame, RF.Components('signal'), RF.ProjectionRange("plotting"))  # NOQA
+    wsp.pdf(pdf_tot).plotOn(frame, RF.Components('random'), RF.ProjectionRange("plotting"))  # NOQA
     if do_comb_bkg:
-        wsp.pdf(pdf_tot).plotOn(frame, RF.Components('combinatorial'))
+        wsp.pdf(pdf_tot).plotOn(frame, RF.Components('combinatorial'), RF.ProjectionRange("plotting"))  # NOQA
 
     plotobjs = [frame.getObject(i) for i in range(int(frame.numItems()))]
 
@@ -127,8 +130,9 @@ def plot_fit(part, wsp, varfunctor, output_name='', subs=None, data=None,
         pdf_comb = plotobjs[4]
 
     # colours = ['#333333', '#325B9D', '#269784', '#8677CF']
-    colours = ['#333333'] + palettable.tableau.Tableau_10.hex_colors[:3]
-    cdata, csig, crn, cbkg = colours
+    # colours = ['#333333'] + palettable.tableau.Tableau_10.hex_colors[:3]
+    colours = ['#333333'] + ['#FF6828', '#5796CA', '#1868AA', '#6B69CA']
+    cdata, csig, crn, cbkg, ctot = colours
 
     # Change 'Events' to 'Candidates and remove the parens around the units
     ylabel = frame.GetYaxis().GetTitle()
@@ -138,34 +142,39 @@ def plot_fit(part, wsp, varfunctor, output_name='', subs=None, data=None,
     ax.set_ylabel(ylabel)
 
     # Plot the PDFs
-    # roocurve(ax, pdf_sig, color=csig, linestyle='--', label='Signal')
     # roocurve(ax, pdf_rn,  color=crn, linestyle='--', label='Random')
     # roocurve(ax, pdf_bkg, color=cbkg, linestyle=':', label='Background')
     # plt.plot([], [], color=cbkg, label='Background', linewidth=10)
     # plt.plot([], [], color=crn, label='Random pion', linewidth=10)
     # plt.plot([], [], color=csig, label='Signal', linewidth=10)
     xa, siga = roocurve(ax, pdf_sig)
+    xa, tota = roocurve(ax, pdf_tot)
     xa, rna = roocurve(ax, pdf_rnd)
     if do_comb_bkg:
         xa, bkga = roocurve(ax, pdf_comb)
-        ax.stackplot(xa, [bkga, rna, siga], colors=[cbkg, crn, csig],
-                     labels=['Comb. Bkg.', 'Rand. $\pi_s^+$', 'Signal'])
+        ax.stackplot(xa, [bkga, rna], colors=[cbkg, crn],
+                     labels=['Comb. Bkg.', 'Rand. $\pi_s^+$'])
     else:
-        ax.stackplot(xa, [rna, siga], colors=[cbkg, crn, csig],
-                     labels=['Rand. $\pi_s^+$', 'Signal'])
-    # roocurve(ax, pdf_tot, color=csig, label='Total fit')
+        ax.stackplot(xa, [rna], colors=[crn],
+                     labels=['Rand. $\pi_s^+$'])
+    ax.plot(xa, siga, color=csig, linestyle='--', label='Signal')
+    ax.plot(xa, tota, color=ctot, label='Fit')
     # Plot the data
     datalabel = 'Data'
+
     tgraphasymerrors(ax, plotobjs[0], color=cdata, label=datalabel)
     ax.set_xlim((frame.GetXaxis().GetXmin(), frame.GetXaxis().GetXmax()))
-    # Hide the x-axis labels and exponents
-    [xtl.set_visible(False) for xtl in ax.get_xticklabels()]
-    ax.get_xaxis().get_offset_text().set_visible(False)
+    if do_pulls:
+        # Hide the x-axis labels and exponents
+        [xtl.set_visible(False) for xtl in ax.get_xticklabels()]
+        ax.get_xaxis().get_offset_text().set_visible(False)
 
-    pull_plot(pullax, plotobjs[1], plotobjs[0])
-    pullax.set_xlim((frame.GetXaxis().GetXmin(), frame.GetXaxis().GetXmax()))
-    pullax.set_xlabel(varfunctor.latex(part, with_unit=True))
-    pullax.set_ylabel(r'$\Delta/\sigma$')
+        pull_plot(pullax, plotobjs[1], plotobjs[0])
+        pullax.set_xlim((frame.GetXaxis().GetXmin(), frame.GetXaxis().GetXmax()))  # NOQA
+        pullax.set_xlabel(varfunctor.latex(part, with_unit=True))
+        pullax.set_ylabel(r'$\Delta/\sigma$')
+    else:
+        ax.set_xlabel(varfunctor.latex(part, with_unit=True))
     ax.legend()
 
     if pdf is not None:

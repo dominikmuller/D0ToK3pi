@@ -3,6 +3,7 @@ selection file."""
 
 from analysis import selection
 from analysis import extended_selection
+from analysis import misid_selection
 from analysis import candidate_sorting
 from k3pi_utilities.debugging import call_debug
 from k3pi_config import config
@@ -19,5 +20,7 @@ def get_final_selection():
         sel = sel & candidate_sorting.remove_right_sign_candidates()
         sel = sel & candidate_sorting.randomly_remove_candidates()
         sel = sel & candidate_sorting.remove_clones()
+    if config.misid_selection:
+        sel = sel & misid_selection.misid_cut()
 
     return sel

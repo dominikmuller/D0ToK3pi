@@ -6,10 +6,8 @@ from analysis import selection, add_variables
 from k3pi_config.modes import MODE, gcm
 import numpy as np
 from k3pi_utilities.variables import m, dtf_dm
-from k3pi_utilities.processify import processify
 
 
-@processify
 def correlations(comb_bkg=False):
     sns.set(style="white")
 
@@ -33,6 +31,12 @@ def correlations(comb_bkg=False):
     nlist = [f.latex(p) for f, p in functors]
 
     df = gcm().get_data([i for i in varlist if 'angle' not in i])
+
+    for pc in gcm().phsp_vars:
+        functors.add((pc.functor, pc.particle))
+    varlist = [f(p) for f, p in functors]
+    nlist = [f.latex(p) for f, p in functors]
+
     sel = selection.full_selection()
     add_variables.append_angle(df)
     add_variables.append_phsp(df)
@@ -48,10 +52,11 @@ def correlations(comb_bkg=False):
 
         from scipy.cluster.hierarchy import fcluster
         clusters = fcluster(row_linkage, 10, criterion='maxclust')
+
         clustered = list(
-            zip(*sorted(zip(varlist, clusters), key=lambda x: x[1]))[0])
+            next(zip(*sorted(zip(varlist, clusters), key=lambda x: x[1]))))
         clustered_names = list(
-            zip(*sorted(zip(nlist, clusters), key=lambda x: x[1]))[0])
+            next(zip(*sorted(zip(nlist, clusters), key=lambda x: x[1]))))
         correlations = correlations[clustered].loc[clustered]*100
 
         f, ax = plt.subplots(figsize=(15, 15))

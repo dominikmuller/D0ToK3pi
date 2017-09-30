@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import collections
 import itertools
+from functools import reduce
 try:
     from itertools import izip, izip_longest
 except ImportError:
@@ -323,6 +324,7 @@ def variables_from_formulae(formulae, modifiers=None):
 
 
 class buffer_return():
+
     def __init__(self, function):
         self._return = None
         self._func = function
@@ -392,3 +394,179 @@ def add_separation_page(pdf, text):
     plt.text(0.5, 0.5, text, ha='center', va='center')
     pdf.savefig()
     plt.close()
+
+
+def check_arrays(*arrays):
+    """
+    Left for consistency, version of `sklearn.validation.check_arrays`
+    :param list[iterable] arrays: arrays with same length of first dimension.
+    """
+    assert len(arrays) > 0, 'The number of array must be greater than zero'
+    checked_arrays = []
+    shapes = []
+    for arr in arrays:
+        if arr is not None:
+            checked_arrays.append(numpy.array(arr))
+            shapes.append(checked_arrays[-1].shape[0])
+        else:
+            checked_arrays.append(None)
+    assert numpy.sum(numpy.array(shapes) == shapes[0]) == len(
+        shapes), 'Different shapes of the arrays {}'.format(shapes)
+    return checked_arrays
+
+
+def check_sample_weight(y_true, sample_weight):
+    """Checks the weights, if None, returns array.
+    :param y_true: labels (or any array of length [n_samples])
+    :param sample_weight: None or array of length [n_samples]
+    :return: numpy.array of shape [n_samples]
+    """
+    if sample_weight is None:
+        return numpy.ones(len(y_true), dtype=numpy.float)
+    else:
+        sample_weight = numpy.array(sample_weight, dtype=numpy.float)
+        assert len(y_true) == len(sample_weight), "The length of weights is different: not {0}, but {1}".format(
+            len(y_true), len(sample_weight))
+        return sample_weight
+
+
+def weighted_quantile(
+        array,
+        quantiles,
+        sample_weight=None,
+        array_sorted=False,
+        old_style=False):
+    """Computing quantiles of array. Unlike the numpy.percentile, this function supports weights,
+    but it is inefficient and performs complete sorting.
+    :param array: distribution, array of shape [n_samples]
+    :param quantiles: floats from range [0, 1] with quantiles of shape [n_quantiles]
+    :param sample_weight: optional weights of samples, array of shape [n_samples]
+    :param array_sorted: if True, the sorting step will be skipped
+    :param old_style: if True, will correct output to be consistent with numpy.percentile.
+    :return: array of shape [n_quantiles]
+    Example:
+    >>> weighted_quantile([1, 2, 3, 4, 5], [0.5])
+    Out: array([ 3.])
+    >>> weighted_quantile([1, 2, 3, 4, 5], [0.5], sample_weight=[3, 1, 1, 1, 1])
+    Out: array([ 2.])
+    """
+    array = numpy.array(array)
+    quantiles = numpy.array(quantiles)
+    sample_weight = check_sample_weight(array, sample_weight)
+    assert numpy.all(
+        quantiles >= 0) and numpy.all(
+        quantiles <= 1), 'Percentiles should be in [0, 1]'
+
+    if not array_sorted:
+        array, sample_weight = reorder_by_first(array, sample_weight)
+
+    weighted_quantiles = numpy.cumsum(sample_weight) - 0.5 * sample_weight
+    if old_style:
+        # To be convenient with numpy.percentile
+        weighted_quantiles -= weighted_quantiles[0]
+        weighted_quantiles /= weighted_quantiles[-1]
+    else:
+        weighted_quantiles /= numpy.sum(sample_weight)
+    return numpy.interp(quantiles, weighted_quantiles, array)
+
+
+def reorder_by_first(*arrays):
+    """
+    Applies the same permutation to all passed arrays,
+    permutation sorts the first passed array
+    """
+    arrays = check_arrays(*arrays)
+    order = numpy.argsort(arrays[0])
+    return [arr[order] for arr in arrays]
+
+
+class Binner(object):
+
+    def __init__(self, values, bins_number, weights=None):
+        """
+        Binner is a class that helps to split the values into several bins.
+        Initially an array of values is given, which is then splitted into
+        'bins_number' equal parts,
+        and thus we are computing limits (boundaries of bins).
+        Adapted from the rep/utils.py to allow weights use weighted quantiles
+        """
+
+        if weights:
+            assert len(weights) == len(values), "weights not same length"
+        percentiles = [i * 100.0 / bins_number for i in range(1, bins_number)]
+        self.limits = weighted_quantile(values, percentiles, weights)
+
+    def get_bins(self, values):
+        """Given the values of feature, compute the index of bin
+        :param values: array of shape [n_samples]
+        :return: array of shape [n_samples]
+        """
+        return numpy.searchsorted(self.limits, values)
+
+    def set_limits(self, limits):
+        """Change the thresholds inside bins."""
+        self.limits = limits
+
+    @property
+    def bins_number(self):
+        """:return: number of bins"""
+        return len(self.limits) + 1
+
+    def split_into_bins(self, *arrays):
+        """
+        :param arrays: data to be splitted, the first array corresponds
+        :return: sequence of length [n_bins] with values corresponding to each bin.
+        """
+        values = arrays[0]
+        for array in arrays:
+            assert len(array) == len(
+                values), "passed arrays have different length"
+        bins = self.get_bins(values)
+        result = []
+        for bin in range(len(self.limits) + 1):
+            indices = bins == bin
+            result.append([numpy.array(array)[indices] for array in arrays])
+        return result
+
+
+def make_efficiency(numerator, denominator, bins, weight_n=None,
+                    weight_d=None, independent=False):
+    """Efficiency computation"""
+
+    # First do the binning, either equal as specified by tuple
+    if isinstance(bins, int):
+        percentiles = [i * 1. / bins for i in range(0, bins)]
+        edges = weighted_quantile(denominator, percentiles, weight_d)
+    elif isinstance(bins, str):
+        _, edges = numpy.histogram(denominator, bins=bins)
+    else:
+        bins, xmin, xmax = bins
+        _, edges = numpy.histogram(denominator, bins=bins, range=(xmin, xmax))
+
+    x_ctr = (edges[1:] + edges[:-1])/2.
+    width = (edges[1:] - edges[:-1])
+    x_err = width/2.
+
+    h_num, _ = numpy.histogram(numerator, bins=edges, weights=weight_n)
+    h_den, _ = numpy.histogram(denominator, bins=edges, weights=weight_d)
+    h_eff = h_num / h_den
+    h_num_errsq, _ = numpy.histogram(
+        numerator, bins=edges, weights=weight_n**2.)
+    h_den_errsq, _ = numpy.histogram(
+        denominator, bins=edges, weights=weight_d**2.)
+    if independent:
+        h_eff_err = numpy.sqrt(h_num_errsq/h_den**2 + (h_num/h_den**2)**2*h_den_errsq)
+    else:
+        h_eff_err = numpy.abs(
+            ((1. -
+              2. *
+              h_num /
+              h_den) *
+             h_num_errsq +
+             h_num**2 *
+             h_den_errsq /
+             h_den**2) /
+            h_den**2)
+    mask = ~numpy.isnan(h_eff) & ~numpy.isnan(h_eff_err)
+
+    return x_ctr[mask], h_eff[mask], x_err[mask], h_eff_err[mask]

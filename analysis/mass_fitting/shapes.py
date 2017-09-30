@@ -48,9 +48,9 @@ def dst_d0_delta_mass_bkg(species, workspace):
     dmass_var = get_delta_mass_var(workspace).GetName()
     # Threshold at the charged pion mass
     workspace.factory('threshold_dm_{0}[139.57]'.format(species))
-    workspace.factory('a_dm_{0}[-1, -10, 10]'.format(species))
+    workspace.factory('a_dm_{0}[-0.33, -2, 2]'.format(species))
     workspace.factory('b_dm_{0}[0]'.format(species))
-    workspace.factory('c_dm_{0}[0.5, -2., 4.]'.format(species))
+    workspace.factory('c_dm_{0}[2.0, 0.001, 4.]'.format(species))
     workspace.factory((
         'RooDstD0BG::pdf_dm_{0}('
         '{1}, threshold_dm_{0}, c_dm_{0}, a_dm_{0}, b_dm_{0}'
@@ -59,8 +59,8 @@ def dst_d0_delta_mass_bkg(species, workspace):
     vs = [
         ('threshold_dm_{0}'.format(species), r'$\Delta m^0_{{{}}}$'.format(species)),  # NOQA
         ('a_dm_{0}'.format(species), r'$a_{{\Delta m, {}}}$'.format(species)),
-        ('b_dm_{0}'.format(species), r'$a_{{\Delta m, {}}}$'.format(species)),
-        ('c_dm_{0}'.format(species), r'$a_{{\Delta m, {}}}$'.format(species)),
+        ('b_dm_{0}'.format(species), r'$b_{{\Delta m, {}}}$'.format(species)),
+        ('c_dm_{0}'.format(species), r'$c_{{\Delta m, {}}}$'.format(species)),
     ]
     return 'pdf_dm_{0}'.format(species), vs
 
@@ -270,7 +270,7 @@ def double_johnsonsu(species, workspace, mode, var):
     workspace.factory(mode.get_rf_vars('width_2_{0}'.format(species)))
     workspace.factory(mode.get_rf_vars('nu_2_{0}'.format(species)))
     workspace.factory(mode.get_rf_vars('tau_2_{0}'.format(species)))
-    workspace.factory('ds_fraction_{0}[0.5,0,1]'.format(species))
+    workspace.factory('ds_fraction_{0}[0.5]'.format(species))
     # Threshold at the charged pion mass
     workspace.factory((
         'RooJohnsonSU::pdf_1_{0}('

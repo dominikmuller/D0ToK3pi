@@ -45,7 +45,7 @@ proton = 'muon'
 Dz = 'D0'
 Dst = 'Dst'
 species = [kaon, pion, proton]
-
+Dz_ltime = 0.00040995
 PDG_MASSES = {
     Dz: 1864.84,
     Dst: 2010.26,
@@ -63,6 +63,7 @@ data_store = output_prefix + '/data/store.h5'
 bcolz_locations = output_prefix + '/data/{}.bcolz'
 optimised_selection = False
 candidates_selection = False
+misid_selection = False
 add_wrongsign = False
 
 devnull = open(os.devnull, 'wb')

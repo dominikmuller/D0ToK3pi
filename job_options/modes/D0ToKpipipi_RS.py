@@ -6,25 +6,25 @@ from helpers.config import (
 
 def get(mc=False):
     line = 'Hlt2CharmHadDstp2D0Pip_D02KmPimPipPipTurbo'
-    d0_dec = '[D*(2010)+ --> ^(D0 --> K- pi- pi+ pi+) pi+]CC'
+    d0_dec = '[D*(2010)+ -> ^(D0 -> K- pi- pi+ pi+) pi+]CC'
 
     d = dict()
     d['name'] = 'D0ToKpipipi_RS'
     d['tuple'] = tuple_templates.charm_tuple(
         'Tuple{0}'.format(d['name']),
-        '[D*(2010)+ --> ^(D0 --> ^K- ^pi- ^pi+ ^pi+) ^pi+]CC',
+        '[D*(2010)+ -> ^(D0 -> ^K- ^pi- ^pi+ ^pi+) ^pi+]CC',
         {
-            'Dstp': '[D*(2010)+ --> (D0 --> K- pi- pi+ pi+) pi+]CC',
+            'Dstp': '[D*(2010)+ -> (D0 -> K- pi- pi+ pi+) pi+]CC',
         },
         {
             'D0': d0_dec
         },
         {
-            'K': '[D*(2010)+ --> (D0 --> ^K- pi- pi+ pi+) pi+]CC',
-            'Pi_SS': '[D*(2010)+ --> (D0 --> K- ^pi- pi+ pi+) pi+]CC',
-            'Pi_OS1': '[D*(2010)+ --> (D0 --> K- pi- ^pi+ pi+) pi+]CC',
-            'Pi_OS2': '[D*(2010)+ --> (D0 --> K- pi- pi+ ^pi+) pi+]CC',
-            'Pislow': '[D*(2010)+ --> (D0 --> K- pi- pi+  pi+) ^pi+]CC',
+            'K': '[D*(2010)+ -> (D0 -> ^K- pi- pi+ pi+) pi+]CC',
+            'Pi_SS': '[D*(2010)+ -> (D0 -> K- ^pi- pi+ pi+) pi+]CC',
+            'Pi_OS1': '[D*(2010)+ -> (D0 -> K- pi- ^pi+ pi+) pi+]CC',
+            'Pi_OS2': '[D*(2010)+ -> (D0 -> K- pi- pi+ ^pi+) pi+]CC',
+            'Pislow': '[D*(2010)+ -> (D0 -> K- pi- pi+  pi+) ^pi+]CC',
         },
         inputs_template().format(line),
         mc
