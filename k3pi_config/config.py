@@ -63,6 +63,7 @@ data_store = output_prefix + '/data/store.h5'
 bcolz_locations = output_prefix + '/data/{}.bcolz'
 optimised_selection = False
 candidates_selection = False
+misid_selection = False
 add_wrongsign = False
 
 devnull = open(os.devnull, 'wb')

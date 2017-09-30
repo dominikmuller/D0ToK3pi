@@ -1,7 +1,7 @@
 from k3pi_config.modes import MODE, gcm
 from k3pi_utilities import parser, logger
 from matplotlib.backends.backend_pdf import PdfPages
-from analysis import extended_selection, selection
+from analysis import extended_selection, selection, misid_selection
 from itertools import combinations
 from k3pi_utilities import variables as vars
 from k3pi_utilities import buffer
@@ -73,10 +73,11 @@ def remove_clones():
         angle = pd.Series(angle, index=df.index)
 
         fig, ax = plt.subplots(figsize=(10, 10))
-        ax.hist(angle[sel & passed], bins=50, range=(0, 0.01))
+        ax.hist(angle[sel & passed], bins=50, range=(0, 0.01), color='#006EB6', edgecolor='#006EB6')
         ax.set_xlabel(r'$\angle({},{})$ [rad]'.format(
             A.title.replace('$', ''), B.title.replace('$', '')))
-        ax.yaxis.set_visible(False)
+        ax.set_ylabel('Candidates')
+        ax.set_xlim((0, 0.01))
         pdf.savefig(fig)
         plt.clf()
 
@@ -108,6 +109,7 @@ def remove_clones():
 def overlap_plotting():
     df = gcm().get_data([vars.dtf_dm()])
     sel = extended_selection.get_complete_selection(True)
+    sel &= misid_selection.misid_cut()
     passed = remove_right_sign_candidates()
 
     outfile = gcm().get_output_path('selection') + 'RS_candidates.pdf'
@@ -118,28 +120,31 @@ def overlap_plotting():
 
         fig, ax = plt.subplots(figsize=(10, 10))
         ax.hist(df[sel & passed][vars.dtf_dm()],
-                bins=nbins, range=(xmin, xmax))
+                bins=nbins, range=(xmin, xmax), color='#006EB6', edgecolor='#006EB6', label='Ghost')
         ax.set_xlabel(vars.dtf_dm.latex(with_unit=True))
-        ax.yaxis.set_visible(False)
+        ax.set_xlim((xmin, xmax))
+        ax.set_ylabel('Arbitrary units')
         pdf.savefig(fig)
         plt.clf()
 
         fig, ax = plt.subplots(figsize=(10, 10))
         ax.hist(df[sel & ~passed][vars.dtf_dm()],
-                bins=nbins, range=(xmin, xmax))
+                bins=nbins, range=(xmin, xmax), color='#006EB6', edgecolor='#006EB6', label='Ghost')
+        ax.set_xlim((xmin, xmax))
         ax.set_xlabel(vars.dtf_dm.latex(with_unit=True))
-        ax.yaxis.set_visible(False)
+        ax.set_ylabel('Arbitrary units')
         pdf.savefig(fig)
         plt.clf()
 
         fig, ax = plt.subplots(figsize=(10, 10))
-        ax.hist(df[sel & passed][vars.dtf_dm()], bins=nbins,
-                range=(xmin, xmax), label='Kept')
+        ax.hist(df[sel & passed][vars.dtf_dm()], bins=nbins, color='#D3EFFB',
+                range=(xmin, xmax), label='Kept', edgecolor='#D3EFFB')
         ax.hist(df[sel & ~passed][vars.dtf_dm()], bins=nbins,
-                range=(xmin, xmax), label='Removed')
+                range=(xmin, xmax), label='Removed', color='#006EB6', edgecolor='#006EB6')
+        ax.set_xlim((xmin, xmax))
         ax.set_xlabel(vars.dtf_dm.latex(with_unit=True))
+        ax.set_ylabel('Candidates')
         ax.legend()
-        ax.yaxis.set_visible(False)
         pdf.savefig(fig)
         plt.clf()
 

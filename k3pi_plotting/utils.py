@@ -12,7 +12,7 @@ def y_margin_scaler(ax, lf=0.1, hf=0.2, la=False, ha=False, log=False):
         if la:
             new_mi = lf
         else:
-            new_mi = lf * ma
+            new_mi = lf * mi
         delta = np.abs(np.log10(ma)-np.log10(new_mi))/(1. - hf)
         new_ma = 10.**((np.log10(new_mi) + delta))
 

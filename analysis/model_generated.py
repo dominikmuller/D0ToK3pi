@@ -28,7 +28,7 @@ def get_model(redo=False):
             pass
         helpers.allow_root()
         import root_pandas
-        df = root_pandas.read_root(files)
+        df = root_pandas.read_root(files, 'events')
         # Now rename stuff and fix units to MeV and ns.
         # Ugly hardcoded for now.
         df.rename(
@@ -66,7 +66,45 @@ def get_model_ws(redo=False):
             pass
         helpers.allow_root()
         import root_pandas
-        df = root_pandas.read_root(files)
+        df = root_pandas.read_root(files, 'events')
+        # Now rename stuff and fix units to MeV and ns.
+        # Ugly hardcoded for now.
+        df.rename(
+            columns={'c12': vars.cos1(),
+                     'c34': vars.cos2(),
+                     'dtime': vars.ltime(mode_config.D0),
+                     'phi': vars.phi1(),
+                     'm12': vars.m12(),
+                     'm34': vars.m34()},
+            inplace=True)
+        df[vars.m12()] = df[vars.m12()] * 1000.
+        df[vars.m34()] = df[vars.m34()] * 1000.
+        df[vars.ltime(mode_config.D0)] = df[vars.ltime(mode_config.D0)] / 1000.
+        df = df.query('{} > 0.0001725'.format(vars.ltime(mode_config.D0)))
+        df = df.query('{} < 0.003256'.format(vars.ltime(mode_config.D0)))
+        bcolz.ctable.fromdataframe(df, rootdir=bcolz_folder)
+        return df
+
+    else:
+        bc = bcolz.open(bcolz_folder)
+        return bc.todataframe()
+
+    return df
+
+
+@call_debug
+def get_model_ws_alt(redo=False):
+    files = ['/afs/cern.ch/user/c/chasse/public/forDominik/Sig_49_61_WSNR_Smaller.root']  # NOQA
+
+    bcolz_folder = config.bcolz_locations.format('generated_model_ws_alt')
+    if redo:
+        try:
+            shutil.rmtree(bcolz_folder)
+        except:
+            pass
+        helpers.allow_root()
+        import root_pandas
+        df = root_pandas.read_root(files, 'events')
         # Now rename stuff and fix units to MeV and ns.
         # Ugly hardcoded for now.
         df.rename(

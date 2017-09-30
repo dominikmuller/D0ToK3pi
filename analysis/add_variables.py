@@ -7,7 +7,7 @@ from k3pi_utilities.debugging import call_debug
 from k3pi_config.modes import gcm
 from k3pi_cpp import (compute_delta_angle, vec_phsp_variables,
                       double_misid_d0_mass, change_slowpi_d0,
-                      change_slowpi_d0_ws)
+                      change_slowpi_d0_ws, vec_compute_four_delta_mass)
 from k3pi_config import config
 import pandas as pd
 
@@ -126,6 +126,112 @@ def double_misid_d0(df):
 @buffer_load
 @pop_arg(selective_load, allow_for=[None, 'mc'])
 @call_debug
+def double_misid(df):
+    """Constructs dataframe of all double misid masses to play about"""
+    mode = gcm()
+    if is_dummy_run(df):
+        valSS = (
+            df[vars.pt(mode.K)], df[vars.eta(mode.K)],
+            df[vars.phi(mode.K)], config.PDG_MASSES['Pi'],
+            df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
+            df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['K'],
+            df[vars.pt(mode.Pi_OS1)], df[vars.eta(mode.Pi_OS1)],
+            df[vars.phi(mode.Pi_OS1)], config.PDG_MASSES['Pi'],
+            df[vars.pt(mode.Pi_OS2)], df[vars.eta(mode.Pi_OS2)],
+            df[vars.phi(mode.Pi_OS2)], config.PDG_MASSES['Pi'],
+            df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
+            df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi']
+        )
+        return 1.
+
+    # First some sortingbdtdata
+    os1bigger = df[vars.pt(mode.Pi_OS1)] > df[vars.pt(mode.Pi_OS2)]
+    os2bigger = df[vars.pt(mode.Pi_OS1)] <= df[vars.pt(mode.Pi_OS2)]
+
+    df.loc[os1bigger, 'H_PT'] = df[vars.pt(mode.Pi_OS1)]
+    df.loc[os1bigger, 'L_PT'] = df[vars.pt(mode.Pi_OS2)]
+    df.loc[os1bigger, 'H_ETA'] = df[vars.eta(mode.Pi_OS1)]
+    df.loc[os1bigger, 'L_ETA'] = df[vars.eta(mode.Pi_OS2)]
+    df.loc[os1bigger, 'H_PHI'] = df[vars.phi(mode.Pi_OS1)]
+    df.loc[os1bigger, 'L_PHI'] = df[vars.phi(mode.Pi_OS2)]
+    df.loc[os2bigger, 'H_PT'] = df[vars.pt(mode.Pi_OS2)]
+    df.loc[os2bigger, 'L_PT'] = df[vars.pt(mode.Pi_OS1)]
+    df.loc[os2bigger, 'H_ETA'] = df[vars.eta(mode.Pi_OS2)]
+    df.loc[os2bigger, 'L_ETA'] = df[vars.eta(mode.Pi_OS1)]
+    df.loc[os2bigger, 'H_PHI'] = df[vars.phi(mode.Pi_OS2)]
+    df.loc[os2bigger, 'L_PHI'] = df[vars.phi(mode.Pi_OS1)]
+
+    # Correct assignment as cross-check
+    valC = vec_compute_four_delta_mass(
+        df[vars.pt(mode.K)], df[vars.eta(mode.K)],
+        df[vars.phi(mode.K)], config.PDG_MASSES['K'],
+        df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
+        df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
+        df['H_PT'], df['H_ETA'],
+        df['H_PHI'], config.PDG_MASSES['Pi'],
+        df['L_PT'], df['L_ETA'],
+        df['L_PHI'], config.PDG_MASSES['Pi'],
+        df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
+        df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi']
+    )
+
+    # Exchange K <-> SS Pion
+    valSS = vec_compute_four_delta_mass(
+        df[vars.pt(mode.K)], df[vars.eta(mode.K)],
+        df[vars.phi(mode.K)], config.PDG_MASSES['Pi'],
+        df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
+        df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['K'],
+        df['H_PT'], df['H_ETA'],
+        df['H_PHI'], config.PDG_MASSES['Pi'],
+        df['L_PT'], df['L_ETA'],
+        df['L_PHI'], config.PDG_MASSES['Pi'],
+        df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
+        df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi']
+    )
+
+    # Exchange K <-> OS1 Pion
+    valOS1 = vec_compute_four_delta_mass(
+        df[vars.pt(mode.K)], df[vars.eta(mode.K)],
+        df[vars.phi(mode.K)], config.PDG_MASSES['Pi'],
+        df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
+        df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
+        df['H_PT'], df['H_ETA'],
+        df['H_PHI'], config.PDG_MASSES['K'],
+        df['L_PT'], df['L_ETA'],
+        df['L_PHI'], config.PDG_MASSES['Pi'],
+        df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
+        df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi']
+    )
+
+    # Exchange K <-> OS2 Pion
+    valOS2 = vec_compute_four_delta_mass(
+        df[vars.pt(mode.K)], df[vars.eta(mode.K)],
+        df[vars.phi(mode.K)], config.PDG_MASSES['Pi'],
+        df[vars.pt(mode.Pi_SS)], df[vars.eta(mode.Pi_SS)],
+        df[vars.phi(mode.Pi_SS)], config.PDG_MASSES['Pi'],
+        df['H_PT'], df['H_ETA'],
+        df['H_PHI'], config.PDG_MASSES['Pi'],
+        df['L_PT'], df['L_ETA'],
+        df['L_PHI'], config.PDG_MASSES['K'],
+        df[vars.pt(mode.Pislow)], df[vars.eta(mode.Pislow)],
+        df[vars.phi(mode.Pislow)], config.PDG_MASSES['Pi']
+    )
+    if not is_dummy_run(df):
+        return pd.DataFrame({
+            'm_SS': valSS[0],
+            'dm_SS': valSS[1],
+            'm_OSH': valOS1[0],
+            'dm_OSH': valOS1[1],
+            'm_C': valC[0],
+            'dm_C': valC[1],
+            'm_OSL': valOS2[0],
+            'dm_OSL': valOS2[1]}, index=df.index)
+    return 1
+
+
+@buffer_load
+@pop_arg(selective_load, allow_for=[None, 'mc'])
+@call_debug
 def other_slowpi(df):
     """Returns d0 mass with changed kaon and ss pion mass hypthesis"""
     mode = gcm()
@@ -187,6 +293,7 @@ if __name__ == '__main__':
         'phsp_variables',
         '_dstp_slowpi_angle',
         'double_misid_d0',
+        'double_misid',
         'other_slowpi',
         'other_slowpi_ws',
     ]

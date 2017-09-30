@@ -70,7 +70,7 @@ def plot_mass_regions():
         ylabel = r'Candidates / ({0})'.format(unit)
         ax.set_ylabel(ylabel)
         ax.legend()
-        ax.set_xlim(xmin, xmax)
+        ax.set_xlim(xmin, 0.9999*xmax)
 
         plot_utils.y_margin_scaler(ax, lf=0, la=True)
         pdf.savefig(fig)
@@ -117,7 +117,7 @@ def plot_mass_regions():
         ylabel = r'Candidates / ({0})'.format(unit)
         ax.set_ylabel(ylabel)
         ax.legend()
-        ax.set_xlim(xmin, xmax)
+        ax.set_xlim(xmin, 0.9999*xmax)
 
         plot_utils.y_margin_scaler(ax, lf=0, la=True)
         pdf.savefig(fig)

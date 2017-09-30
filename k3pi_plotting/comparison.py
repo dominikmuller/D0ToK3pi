@@ -4,7 +4,7 @@ import numpy as np
 
 def plot_comparison(pc, filled, errorbars, filled_label, errorbars_label,
                     ax=None, add_uncertainties=False, normed=True,
-                    filled_weight=None, errorbars_weight=None):
+                    filled_weight=None, errorbars_weight=None, normed_max=False):
     """
 
     :pc: PlotConfig object
@@ -38,6 +38,11 @@ def plot_comparison(pc, filled, errorbars, filled_label, errorbars_label,
         h_errorbars = h_errorbars.astype(np.float) / (np.sum(errorbars_weight)*(xmax - xmin))  # NOQA
         err_filled = err_filled.astype(np.float) / (np.sum(filled_weight)*(xmax - xmin))  # NOQA
         err_errorbars = err_errorbars.astype(np.float) / (np.sum(errorbars_weight)*(xmax - xmin))  # NOQA
+    if normed_max:
+        err_filled = err_filled.astype(np.float) / np.max(h_filled)  # NOQA
+        err_errorbars = err_errorbars.astype(np.float) / np.max(h_errorbars)  # NOQA
+        h_filled = h_filled.astype(np.float) / np.max(h_filled)  # NOQA
+        h_errorbars = h_errorbars.astype(np.float) / np.max(h_errorbars)  # NOQA
 
     if add_uncertainties:
         err_errorbars = np.sqrt(err_errorbars**2. + err_filled**2.)
@@ -56,6 +61,6 @@ def plot_comparison(pc, filled, errorbars, filled_label, errorbars_label,
     ax.errorbar(
         x_ctr, h_errorbars, xerr=x_err, yerr=err_errorbars,
         label=errorbars_label, **dt_options)
-    ax.set_xlim((xmin, xmax))
+    ax.set_xlim((xmin, 0.999*xmax))
 
     return ax

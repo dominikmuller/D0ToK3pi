@@ -51,19 +51,20 @@ def phsp_comparison_plots():
                 filled = pc.convert(filled)
                 errorbars = pc.convert(errorbars)
             ax = comparison.plot_comparison(
-                pc, filled, errorbars, 'RS signal', 'WS background')
+                pc, filled, errorbars, 'RS signal', 'WS background',
+                normed_max=True)
             ax.set_xlabel(pc.xlabel)
             plot_utils.y_margin_scaler(ax, lf=0, la=True)
-            ax.yaxis.set_visible(False)
+            ax.set_ylabel('Arbitrary units')
             ax.legend()
             pdf.savefig(plt.gcf())
             plt.clf()
             ax = comparison.plot_comparison(
                 pc, filled, errorbars, 'RS signal', 'WS background',
-                filled_weight=filled_weights)
+                filled_weight=filled_weights, normed_max=True)
             ax.set_xlabel(pc.xlabel)
             plot_utils.y_margin_scaler(ax, lf=0, la=True)
-            ax.yaxis.set_visible(False)
+            ax.set_ylabel('Arbitrary units')
             ax.legend()
             pdf.savefig(plt.gcf())
 

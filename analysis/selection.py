@@ -87,8 +87,10 @@ def remove_secondary(df):
 @call_debug
 def d0_selection(df):
     ret = True
-    ret &= np.log(df[ipchi2(gcm().D0)]) < 1.
-    ret &= df[pt(gcm().D0)] > 4000.
+
+    if gcm().mode not in config.twotag_modes:
+        ret &= np.log(df[ipchi2(gcm().D0)]) < 1.
+        ret &= df[pt(gcm().D0)] > 4000.
     ret &= df[vchi2(gcm().D0)] < 4.
     ret &= df[maxdoca(gcm().D0)] < .2
     return ret
@@ -127,7 +129,8 @@ def full_selection():
     sel &= d0_selection()
     sel &= slow_pion()
     sel &= dtf_cuts()
-    sel &= d0_lifetime_permille()
+    if gcm().mode not in config.twotag_modes:
+        sel &= d0_lifetime_permille()
     return sel
 
 
@@ -237,6 +240,10 @@ if __name__ == '__main__':
             'mass_sideband_region',
             'comb_bkg_sideband_region',
             'rand_spi_sideband_region',
+            'delta_mass_signal_region',
+            'delta_mass_wide_signal_region',
+            'delta_mass_sideband_near',
+            'delta_mass_sideband_far',
             'dtf_cuts',
             'full_selection',
         ]

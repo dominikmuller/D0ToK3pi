@@ -9,7 +9,7 @@ computed.
 """
 
 sig_file_name = 'root://eoslhcb.cern.ch//eos/lhcb/user/d/dmuller/K3Pi/signal_toy_data.root'  # NOQA
-bkg_file_name = 'root://eoslhcb.cern.ch//eos/lhcb/user/d/dmuller/K3Pi/background_toy_data.root'  # NOQA
+bkg_file_name = 'root://eoslhcb.cern.ch//eos/lhcb/user/d/dmuller/K3Pi/background_toy_data.root'  # NOQA3
 toy_file_name = 'toy_data.root'
 
 np.random.seed()

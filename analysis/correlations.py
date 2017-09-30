@@ -31,6 +31,12 @@ def correlations(comb_bkg=False):
     nlist = [f.latex(p) for f, p in functors]
 
     df = gcm().get_data([i for i in varlist if 'angle' not in i])
+
+    for pc in gcm().phsp_vars:
+        functors.add((pc.functor, pc.particle))
+    varlist = [f(p) for f, p in functors]
+    nlist = [f.latex(p) for f, p in functors]
+
     sel = selection.full_selection()
     add_variables.append_angle(df)
     add_variables.append_phsp(df)

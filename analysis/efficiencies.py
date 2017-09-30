@@ -7,6 +7,7 @@ from itertools import permutations
 from k3pi_config.modes import MODE, gcm
 from analysis.model_generated import get_model
 from k3pi_utilities import bdt_utils, buffer
+from k3pi_utilities.helpers import dump, load
 
 from k3pi_plotting import comparison
 from k3pi_plotting import utils as plot_utils
@@ -184,6 +185,7 @@ def dependence_study(use_efficiencies=False):
         outfile = gcm().get_output_path('effs') + 'Gen_DATA_Eff_dep.pdf'
         gen['weight'] = 1.
 
+    lim_file = gcm().get_output_path('effs') + 'limits_for_eff.p'
     with PdfPages(outfile) as pdf:
         for selected, plotted in permutations(all_vars, 2):
             log.info('Plotting {} in intervals of {}'.format(
@@ -209,8 +211,8 @@ def dependence_study(use_efficiencies=False):
                     fmt='o', markersize=5, capthick=1, capsize=0, elinewidth=2,
                     alpha=1)
 
-                rlow, prec = helpers.rounder(low, [low, high])
-                rhigh, _ = helpers.rounder(high, [low, high])
+                rlow, prec = helpers.rounder(low, boundaries)
+                rhigh, _ = helpers.rounder(high, boundaries)
 
                 spec = '{{:.{}f}}'.format(prec)
                 label = r'${} <$ {} $ < {}$'.format(
@@ -219,7 +221,23 @@ def dependence_study(use_efficiencies=False):
                 ax.errorbar(x, y, y_err, x_err, label=label, **options)
             ax.set_xlabel(plotted.xlabel)
             ax.set_ylabel('Relative efficiency')
-            plot_utils.y_margin_scaler(ax, hf=0.4)
+            try:
+                limits = load(lim_file)
+            except:
+                log.info('Creating new limits file')
+                limits = {}
+            if limits is None:
+                log.info('Creating new limits file')
+                limits = {}
+
+            if (plotted.var, selected.var) not in limits or use_efficiencies is False:  # NOQA
+                plot_utils.y_margin_scaler(ax, hf=0.4)
+                limits[(plotted.var, selected.var)] = ax.get_ylim()
+            else:
+                log.info('Applying limits')
+                lim = limits[(plotted.var, selected.var)]
+                ax.set_ylim(lim)
+            dump(limits, lim_file)
             ax.legend()
             pdf.savefig(plt.gcf())
             plt.close()
@@ -321,9 +339,9 @@ if __name__ == '__main__':
         if args.train:
             train_reweighter()
         buffer.remove_buffer_for_function(get_efficiency)
-        dependence_study(True)
-        plot_comparison_test()
-        lifetime_study()
-        lifetime_study(True)
-        simple_phsp_efficiencies()
+        # plot_comparison_test()
+        # lifetime_study()
+        # lifetime_study(True)
+        # simple_phsp_efficiencies()
         dependence_study()
+        dependence_study(True)

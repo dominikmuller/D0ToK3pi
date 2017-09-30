@@ -20,3 +20,8 @@ paths = [
     'root://eoslhcb.cern.ch//eos/lhcb/user/d/dmuller/K3Pi/GeneratedMC/FinalData_49_61_8_w20.root',
     'root://eoslhcb.cern.ch//eos/lhcb/user/d/dmuller/K3Pi/GeneratedMC/FinalData_49_61_9_w20.root',
 ]
+
+import glob
+
+paths = glob.glob('/afs/cern.ch/user/c/chasse/public/forDominik/SigToy/*')
+paths= ['root://eoslhcb.cern.ch//eos/lhcb/user/d/dmuller/K3Pi/corrected_signal.root']

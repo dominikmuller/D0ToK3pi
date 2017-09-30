@@ -117,9 +117,11 @@ def plot_bdt_variables(sw=False, comb_bkg=False):
         for v in tqdm(bdt_vars, smoothing=0.3):
             ax = plot_comparison(
                 v, sig_df[v.var], bkg_df[v.var], 'Signal', 'Background',
-                filled_weight=sig_wgt, errorbars_weight=bkg_wgt)
+                filled_weight=sig_wgt, errorbars_weight=bkg_wgt, normed=False,
+                normed_max=True)
             ax.set_xlabel(v.xlabel)
-            ax.yaxis.set_visible(False)
+            ax.set_ylabel('Arbitrary units')
+            # ax.yaxis.set_visible(False)
             plot_utils.y_margin_scaler(ax, lf=0, la=True)
             ax.legend()
             pdf.savefig(plt.gcf())

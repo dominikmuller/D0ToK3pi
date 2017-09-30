@@ -121,6 +121,14 @@ var('m12', 'm12', False, False, r'$m_{\pi^\pm\pi^\mp}$', mevcc, append=False, ad
 var('m34', 'm34', False, False, r'$m_{K^\pm\pi^\mp}$', mevcc, append=False, additional=True)  # NOQA
 var('cos1', 'cos1', False, False, r'$\cos\theta_1$', None, append=False, additional=True)  # NOQA
 var('cos2', 'cos2', False, False, r'$\cos\theta_2$', None, append=False, additional=True)  # NOQA
-var('phi1', 'phi1', False, False, r'$\phi_1$', None, append=False, additional=True)  # NOQA
+var('phi1', 'phi1', False, False, r'$\phi$', None, append=False, additional=True)  # NOQA
 var('bdt', 'bdt', False, False, r'BDT discriminant', None, append=False, additional=True)  # NOQA
 var('dtf_ip_diff', 'dtf_ip_diff', False, False, r'DTF $\chi^2 - \chi^2_\text{IP}(D^0)$', None, append=False, additional=True)  # NOQA
+var('m_SS', 'm_SS', False, False, r'$m(D^0|K^\pm\leftrightarrow\pi^\pm)$', mevcc, append=False, additional=True)  # NOQA
+var('dm_SS', 'dm_SS', False, False, r'$\Delta m(.|K^\pm\leftrightarrow\pi^\pm)$', mevcc, append=False, additional=True)  # NOQA
+var('m_C', 'm_C', False, False, r'$m(D^0)$', mevcc, append=False, additional=True)  # NOQA
+var('dm_C', 'dm_C', False, False, r'$\Delta m$', mevcc, append=False, additional=True)  # NOQA
+var('m_OSH', 'm_OSH', False, False, r'$m(D^0|K^\pm\leftrightarrow\pi^\mp_\nearrow)$', mevcc, append=False, additional=True)  # NOQA
+var('dm_OSH', 'dm_OSH', False, False, r'$\Delta m(.|K^\pm\leftrightarrow\pi^\mp_\nearrow)$', mevcc, append=False, additional=True)  # NOQA
+var('m_OSL', 'm_OSL', False, False, r'$m(D^0|K^\pm\leftrightarrow\pi^\mp_\searrow)$', mevcc, append=False, additional=True)  # NOQA
+var('dm_OSL', 'dm_OSL', False, False, r'$\Delta m(.|K^\pm\leftrightarrow\pi^\mp_\searrow)$', mevcc, append=False, additional=True)  # NOQA

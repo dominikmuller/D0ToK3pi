@@ -125,7 +125,7 @@ with open('{0}/davinci_collision.py'.format(basedir), 'w') as f:
         'from helpers import davinci\n\n'
         "davinci.configure(year={1}, mc=False, input_type='{0}',"
         "n_events={2}, root={3}, tfn='{4}')\n"
-    ).format(input_type, year, 25000 if args.test else -1, ROOT, tfn))
+    ).format(input_type, year, 10000 if args.test else -1, ROOT, tfn))
 
 # Make the file for setting the access functions for ntuple settings
 with open('{0}/configs.py'.format(basedir), 'w+') as f:
@@ -142,6 +142,7 @@ j = Job(name=JNAME.format(polarity, year))
 
 # Old submission method
 j.application = DaVinci(version='v41r2p1')
+# j.application = DaVinci()
 j.application.optsfile = [path.format(basedir) for path in OPTIONS]
 
 # If testing, run over a couple of files locally, saving
@@ -159,7 +160,7 @@ else:
     j.inputdata = dataset
     j.backend = Dirac()
     j.do_auto_resubmit = True
-    j.splitter = SplitByFiles(filesPerJob=25)
+    j.splitter = SplitByFiles(filesPerJob=200)
     j.postprocessors = [Notifier(address=email)]
     j.outputfiles = [DiracFile(tfn)]
 

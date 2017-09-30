@@ -11,7 +11,7 @@ class D0ToKpipipi_RS(mode_base):
     mode = config.D0ToKpipipi_RS
     mode_short = 'RS'
     tpl = config.ntuple_strip.format(mode)
-    shapes = ('CRU', 'DJSU', 'PID')
+    shapes = ('JSU', 'JSU', 'DM1')
     mass_fit_pars = dict(
         # Dst - D0 mass fit
         mu_dm=145.5, error_mu_dm=2, limit_mu_dm=(140, 150),
@@ -39,8 +39,8 @@ class D0ToKpipipi_RS(mode_base):
         sigma_m_R=5, error_sigma_m_R=0.1, limit_sigma_m_R=(0.001, 15.),
         alpha_m_L=0.2, error_alpha_m_L=0.001, limit_alpha_m_L=(0.001, 1.),
         alpha_m_R=0.2, error_alpha_m_R=0.001, limit_alpha_m_R=(0.001, 1.),
-        width_m=5, error_width_m=0.12, limit_width_m=(0.0001, 15.),
-        nu_m=1., error_nu_m=0.02, limit_nu_m=(0.0000001, 5.),
+        width_m=12, error_width_m=0.12, limit_width_m=(0.0001, 15.),
+        nu_m=0., error_nu_m=0.02,
         tau_m=1.0, error_tau_m=0.02, limit_tau_m=(0.0001, 5.),
         width_1_m=5, error_width_1_m=0.12, limit_width_1_m=(0.0001, 15.),
         nu_1_m=1., error_nu_1_m=0.02, limit_nu_1_m=(0.0000001, 5.),
