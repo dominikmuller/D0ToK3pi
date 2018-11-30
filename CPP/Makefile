@@ -10,10 +10,10 @@ SRCDIR=./src
 
 
 ifeq ($(CC), clang++)
-	CFLAGS  = -g -O0 -I./include/ -Wall -std=c++11 -fPIC -stdlib=libc++
+	CFLAGS  = -g -I./include/ -Wall -std=c++11 -fPIC -stdlib=libc++
 	#LDFLAGS= -L./lib -lboost_program_options -fPIC -lm
 else
-	CFLAGS  = -g -O0 -I./include/ -Wall -std=c++11 -fPIC
+	CFLAGS  = -g -I./include/ -Wall -std=c++11 -fPIC
 	#LDFLAGS= -lstdc++ 
 endif
 
