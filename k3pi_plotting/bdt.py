@@ -2,9 +2,9 @@ from sklearn.metrics import roc_curve, roc_auc_score
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgba
-from rep import utils
 import palettable
 from k3pi_utilities import variables as vars
+from k3pi_utilities import helpers
 from k3pi_config import config
 from k3pi_config.modes import gcm
 
@@ -45,7 +45,7 @@ def plot_roc_for_feature(ax, data, legend, colour, labels, weights=1.):
         def n_selected(d, c):
             return np.sum(d < c)
 
-    thresholds = [utils.weighted_quantile(
+    thresholds = [helpers.weighted_quantile(
         data, quantiles=1-eff, sample_weight=weights)
         for eff in np.arange(0., 1., 1./200)]
     true_positive = []
@@ -57,30 +57,35 @@ def plot_roc_for_feature(ax, data, legend, colour, labels, weights=1.):
         false_positive.append(float(n_selected(data[~labels], thr))/total_false)
     # sort for correct plotting
     true_positive, false_positive = zip(*sorted(
-        zip(true_positive, false_positive), key=lambda x:-x[0]))
+        zip(true_positive, false_positive), key=lambda x: -x[0]))
 
     ax.plot(false_positive, true_positive, color=colour,
             label=legend, linewidth=3, linestyle='--')
 
 
-def plot_eff(pc, test, bdt, labels, weights, quantiles=None):
+def plot_eff(pc, test, bdt, labels, weights, quantiles=None, features=None):
     if quantiles is None:
         quantiles = [0.2, 0.4, 0.6, 0.8]
     var = pc.functor
     part = pc.particle
 
+    if features:
+        for_bdt_eval = test[features]
+    else:
+        for_bdt_eval = test
     varname = var(part)
     log.info('Doing efficiency for {}'.format(varname))
     colours = palettable.tableau.TableauMedium_10.hex_colors
     fig, ax = plt.subplots(figsize=(10, 10))
 
-    probs = bdt.predict_proba(test).transpose()[1]
-    thresholds = [utils.weighted_quantile(probs[labels.values], quantiles=1-eff,
-                                          sample_weight=test.weights[labels])
+    probs = bdt.predict_proba(for_bdt_eval).transpose()[1]
+    thresholds = [helpers.weighted_quantile(probs[labels.values],
+                                            quantiles=1-eff,
+                                            sample_weight=weights[labels])
                   for eff in quantiles]
-    ret = utils.get_efficiencies(
+    ret = helpers.get_efficiencies(
         probs[labels.values], test[varname][labels], bins_number=15,
-        sample_weight=test.weights[labels], errors=True, thresholds=thresholds)
+        sample_weight=weights[labels], errors=True, thresholds=thresholds)
 
     dt_options = dict(
         fmt='o', markersize=5, capthick=1, capsize=0, elinewidth=2)

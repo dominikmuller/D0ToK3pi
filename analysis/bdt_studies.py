@@ -28,8 +28,6 @@ log = get_logger('bdt_studies')
 
 @processify
 def train_bdts(sw=False, comb_bkg=False):
-    from rep.estimators import SklearnClassifier
-    from rep.metaml import ClassifiersFactory
     log.info('Training BDTs for {} {} {}'.format(gcm().mode, gcm().polarity,
                                                  gcm().year))
     (train, test, train_lbl, test_lbl), features, spectators = bdt_data.prep_data_for_sklearn(sw=sw, same_weight=True, comb_data=comb_bkg)  # NOQA
@@ -37,7 +35,7 @@ def train_bdts(sw=False, comb_bkg=False):
     uniform_features = [vars.ltime(gcm().D0)]
     n_estimators = 400
 
-    classifiers = ClassifiersFactory()
+    classifiers = {}
     log.info('Configuring classifiers')
 
     min_samples = 2000 if sw else 10
@@ -49,7 +47,7 @@ def train_bdts(sw=False, comb_bkg=False):
     base_ada = GradientBoostingClassifier(
         max_depth=3, n_estimators=n_estimators, learning_rate=lrate,
         min_samples_leaf=min_samples, loss='exponential')
-    classifiers['Exponential'] = SklearnClassifier(base_ada, features=features)
+    classifiers['Exponential'] = base_ada
 
     flatnessloss = ugb.KnnFlatnessLossFunction(
         uniform_features, fl_coefficient=3., power=1.3, uniform_label=1,
@@ -58,7 +56,7 @@ def train_bdts(sw=False, comb_bkg=False):
         loss=flatnessloss, max_depth=3, n_estimators=n_estimators,
         learning_rate=lrate, train_features=features,
         min_samples_leaf=min_samples)
-    classifiers['KnnFlatness'] = SklearnClassifier(ugbFL)
+    classifiers['KnnFlatness'] = ugbFL
 
     binflatnessloss = ugb.BinFlatnessLossFunction(
         uniform_features, fl_coefficient=3., power=2.0, uniform_label=1,
@@ -67,13 +65,19 @@ def train_bdts(sw=False, comb_bkg=False):
         loss=binflatnessloss, max_depth=3, n_estimators=n_estimators,
         learning_rate=lrate, train_features=features,
         min_samples_leaf=min_samples)
-    classifiers['BinFlatness'] = SklearnClassifier(ugbBFL)
+    classifiers['BinFlatness'] = ugbBFL
 
     log.info('Fitting classifiers')
 
-    classifiers.fit(
+    classifiers['Exponential'].fit(
+        train[features], train_lbl,
+        sample_weight=train.weights)
+    classifiers['KnnFlatness'].fit(
         train[features + uniform_features], train_lbl,
-        sample_weight=train.weights, parallel_profile='threads-3')
+        sample_weight=train.weights)
+    classifiers['BinFlatness'].fit(
+        train[features + uniform_features], train_lbl,
+        sample_weight=train.weights)
 
     log.info('Pickling the thing')
     bdt_utils.dump_classifiers(classifiers, comb_bkg=comb_bkg)
@@ -103,12 +107,12 @@ def plot_roc(sw=False, comb_bkg=False):
         [f.functor(f.particle) for f in features_config])))
 
     (train, test, train_lbl, test_lbl), features, spectators = bdt_data.prep_data_for_sklearn(sw=sw, comb_data=comb_bkg)  # NOQA
-    bdt.plot_roc(ax, 'AdaBoost', colours[0], test,
+    bdt.plot_roc(ax, 'AdaBoost', colours[0], test[features],
                  classifiers['Exponential'],
                  test_lbl, test.weights)
     # bdt.plot_roc(ax, 'KnnAdaFlatness', colours[1], test,
     # classifiers['KnnAdaFlatness'], test_lbl, test.weights)
-    bdt.plot_roc(ax, 'Uniformity', colours[1], test,
+    bdt.plot_roc(ax, 'Uniformity', colours[1], test[features],
                  classifiers['KnnFlatness'], test_lbl, test.weights)
 
     # bdt.plot_roc(ax, 'BinFlatness', colours[2], test,
@@ -174,7 +178,7 @@ def get_named_bdt_discriminant(df, name='KnnFlatness', comb_bkg=False):
     classifiers = bdt_utils.load_classifiers(comb_bkg=comb_bkg)
     assert False not in (features == df.columns), 'Mismatching feature order'
     bdt = classifiers[name]
-    probs = bdt.clf.predict_proba(df).transpose()[1]
+    probs = bdt.predict_proba(df).transpose()[1]
     log.info('Returning probability.')
     return pd.Series(probs, index=df.index)
 
@@ -253,13 +257,17 @@ def plot_efficiencies(sw=False, comb_bkg=False):
                     pdf, '{}: {}'.format(
                         bdt_name, var.functor.latex(var.particle)))
                 fig = bdt.plot_eff(var,
-                                   test, classifiers[bdt_name],
-                                   test_lbl, test.weights)
+                                   test[features+spectators],
+                                   classifiers[bdt_name],
+                                   test_lbl, test.weights,
+                                   features=features)
                 pdf.savefig(fig)
                 plt.clf()
                 fig = bdt.plot_eff(var,
-                                   test, classifiers[bdt_name],
-                                   ~test_lbl, test.weights)
+                                   test[features+spectators],
+                                   classifiers[bdt_name],
+                                   ~test_lbl, test.weights,
+                                   features=features)
                 pdf.savefig(fig)
                 plt.clf()
 
@@ -273,11 +281,11 @@ if __name__ == '__main__':
         if args.train:
             train_bdts(args.sweight)
             train_bdts(args.sweight, comb_bkg=True)
-        plot_bdt_discriminant()
-        plot_bdt_discriminant(comb_bkg=True)
-        create_feature_importance()
-        create_feature_importance(comb_bkg=True)
-        plot_roc(args.sweight)
-        plot_roc(args.sweight, comb_bkg=True)
+        # plot_bdt_discriminant()
+        # plot_bdt_discriminant(comb_bkg=True)
+        # create_feature_importance()
+        # create_feature_importance(comb_bkg=True)
+        # plot_roc(args.sweight)
+        # plot_roc(args.sweight, comb_bkg=True)
         plot_efficiencies(args.sweight)
         plot_efficiencies(args.sweight, comb_bkg=True)

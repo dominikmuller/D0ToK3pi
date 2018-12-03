@@ -32,7 +32,7 @@ def remove_right_sign_candidates():
     with MODE(polarity, year, rs):
         RS = gcm().get_data(
             [vars.evt_num(), vars.run_num(), vars.dtf_dm(), vars.pt(gcm().D0)])
-        rs_sel = extended_selection.get_complete_selection(False)
+        rs_sel = extended_selection.get_complete_selection(True)
     # RS modes should not be selected using this:
     if gcm().mode not in config.wrong_sign_modes:
         return pd.Series(True, RS.index)

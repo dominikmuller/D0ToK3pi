@@ -1,5 +1,8 @@
 import tempfile
-from k3pi_utilities import helpers
+from k3pi_utilities import helpers, logger
+
+
+log = logger.get_logger('fit_config')
 
 
 WS_DMASS_NAME = 'dmass_var'
@@ -42,7 +45,7 @@ def pandas_to_roodataset(df, st, dataname='roofit_ds'):
     tmpfile = tempfile.mktemp()+'.root'
     treename = 'default'
     df.index = df.index.astype('int32')
-    df.to_root(tmpfile)
+    df.to_root(tmpfile, treename)
     f = ROOT.TFile.Open(tmpfile)
     tree = f.Get(treename)
     ds = ROOT.RooDataSet(dataname, dataname, st, RF.Import(tree))

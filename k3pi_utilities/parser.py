@@ -34,6 +34,8 @@ def create_parser(logger=None):
                         help='Run the training and plotting for the comb. Bkg BDT')  # NOQA
     parser.add_argument('--root', default=False, action='store_true',
                         help='Allows ROOT to be imported')  # NOQA
+    parser.add_argument('--noprocessify', default=False, action='store_true',
+                        help='Deactivates the processify feature')  # NOQA
     parser.add_argument('-s', '--selections', nargs='+', default=None,
                         help='Run the specified selections')
     parser.add_argument('--spearmint', default=False, action='store_true',
@@ -76,4 +78,10 @@ def create_parser(logger=None):
     else:
         import ROOT
         ROOT.PyConfig.IgnoreCommandLineOptions = True
+    if args.noprocessify is True:
+        from k3pi_utilities import processify
+
+        def dummy(func):
+            return func
+        processify.processify = dummy
     return args
