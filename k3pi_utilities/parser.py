@@ -11,6 +11,8 @@ def create_parser(logger=None):
     parser = argparse.ArgumentParser(description='Generate sWeights for PID')
     parser.add_argument('-f', '--fraction', default=0.05,
                         help='Fraction of events to download. 5 percent of the data')  # NOQA
+    parser.add_argument('-j', '--jobs', default=1, type=int,
+                        help='Number of concurrent units')  # NOQA
     parser.add_argument('-t', '--test', action='store_true', default=False,
                         help='Acticates testing mode')
     parser.add_argument('-m', '--mode', default='RS', choices=['RS', 'WS', '2tag_RS', '2tag_WS'],  # NOQA
@@ -32,6 +34,8 @@ def create_parser(logger=None):
                         help='Run the training and plotting for the comb. Bkg BDT')  # NOQA
     parser.add_argument('--root', default=False, action='store_true',
                         help='Allows ROOT to be imported')  # NOQA
+    parser.add_argument('--noprocessify', default=False, action='store_true',
+                        help='Deactivates the processify feature')  # NOQA
     parser.add_argument('-s', '--selections', nargs='+', default=None,
                         help='Run the specified selections')
     parser.add_argument('--spearmint', default=False, action='store_true',
@@ -74,4 +78,10 @@ def create_parser(logger=None):
     else:
         import ROOT
         ROOT.PyConfig.IgnoreCommandLineOptions = True
+    if args.noprocessify is True:
+        from k3pi_utilities import processify
+
+        def dummy(func):
+            return func
+        processify.processify = dummy
     return args

@@ -16,7 +16,7 @@ import pandas as pd
 log = get_logger('download_data')
 
 
-def download(modename, polarity, year, full, test=False, mc=None):
+def download(modename, polarity, year, full, test=False, mc=None, njobs=1):
     import root_pandas
     log.info('Getting data for {} {} {}'.format(
         modename, polarity, year))
@@ -84,7 +84,7 @@ def download(modename, polarity, year, full, test=False, mc=None):
                      addvariables=add_vars)
         return temp_file
 
-    pool = ProcessingPool(8)
+    pool = ProcessingPool(njobs)
     temp_files = []
     for r in tqdm.tqdm(pool.uimap(run_splitter, chunked),
                        leave=True, total=length, smoothing=0):
@@ -142,4 +142,5 @@ if __name__ == '__main__':
     else:
         years = [args.year]
     for p, y in product(pols, years):
-        download(args.mode, p, y, args.fraction, args.test, args.mc)
+        download(args.mode, p, y, args.fraction, args.test, args.mc,
+                 njobs=args.jobs)

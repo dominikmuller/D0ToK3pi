@@ -2,7 +2,6 @@ from __future__ import print_function
 
 import collections
 import itertools
-from functools import reduce
 try:
     from itertools import izip, izip_longest
 except ImportError:
@@ -19,6 +18,7 @@ from math import ceil
 import sys
 from scipy.stats import gaussian_kde
 from scipy.optimize import fmin
+from collections import OrderedDict
 
 import numpy
 import matplotlib.pyplot as plt
@@ -425,7 +425,7 @@ def check_sample_weight(y_true, sample_weight):
         return numpy.ones(len(y_true), dtype=numpy.float)
     else:
         sample_weight = numpy.array(sample_weight, dtype=numpy.float)
-        assert len(y_true) == len(sample_weight), "The length of weights is different: not {0}, but {1}".format(
+        assert len(y_true) == len(sample_weight), "The length of weights is different: not {0}, but {1}".format(  # NOQA
             len(y_true), len(sample_weight))
         return sample_weight
 
@@ -436,13 +436,17 @@ def weighted_quantile(
         sample_weight=None,
         array_sorted=False,
         old_style=False):
-    """Computing quantiles of array. Unlike the numpy.percentile, this function supports weights,
+    """Computing quantiles of array. Unlike the numpy.percentile,
+    this function supports weights,
     but it is inefficient and performs complete sorting.
     :param array: distribution, array of shape [n_samples]
-    :param quantiles: floats from range [0, 1] with quantiles of shape [n_quantiles]
-    :param sample_weight: optional weights of samples, array of shape [n_samples]
+    :param quantiles: floats from range [0, 1] with quantiles
+        of shape [n_quantiles]
+    :param sample_weight: optional weights of samples,
+        array of shape [n_samples]
     :param array_sorted: if True, the sorting step will be skipped
-    :param old_style: if True, will correct output to be consistent with numpy.percentile.
+    :param old_style: if True, will correct output
+        to be consistent with numpy.percentile.
     :return: array of shape [n_quantiles]
     Example:
     >>> weighted_quantile([1, 2, 3, 4, 5], [0.5])
@@ -493,7 +497,7 @@ class Binner(object):
 
         if weights:
             assert len(weights) == len(values), "weights not same length"
-        percentiles = [i * 100.0 / bins_number for i in range(1, bins_number)]
+        percentiles = [i * 1.0 / bins_number for i in range(1, bins_number)]
         self.limits = weighted_quantile(values, percentiles, weights)
 
     def get_bins(self, values):
@@ -515,7 +519,8 @@ class Binner(object):
     def split_into_bins(self, *arrays):
         """
         :param arrays: data to be splitted, the first array corresponds
-        :return: sequence of length [n_bins] with values corresponding to each bin.
+        :return: sequence of length [n_bins] with values corresponding to
+        each bin.
         """
         values = arrays[0]
         for array in arrays:
@@ -555,7 +560,7 @@ def make_efficiency(numerator, denominator, bins, weight_n=None,
     h_den_errsq, _ = numpy.histogram(
         denominator, bins=edges, weights=weight_d**2.)
     if independent:
-        h_eff_err = numpy.sqrt(h_num_errsq/h_den**2 + (h_num/h_den**2)**2*h_den_errsq)
+        h_eff_err = numpy.sqrt(h_num_errsq/h_den**2 + (h_num/h_den**2)**2*h_den_errsq)  # NOQA
     else:
         h_eff_err = numpy.abs(
             ((1. -
@@ -570,3 +575,70 @@ def make_efficiency(numerator, denominator, bins, weight_n=None,
     mask = ~numpy.isnan(h_eff) & ~numpy.isnan(h_eff_err)
 
     return x_ctr[mask], h_eff[mask], x_err[mask], h_eff_err[mask]
+
+
+# FIXME: copied from rep.utils
+def get_efficiencies(prediction, spectator, sample_weight=None, bins_number=20,
+                     thresholds=None, errors=False, ignored_sideband=0.0):
+    """
+    Construct efficiency function dependent on spectator for each threshold
+    Different score functions available: Efficiency, Precision, Recall
+    and other things from sklearn.metrics
+    :param prediction: list of probabilities
+    :param spectator: list of spectator's values
+    :param bins_number: int, count of bins for plot
+    :param thresholds: list of prediction's threshold
+        (default=prediction's cuts for which efficiency
+         will be [0.2, 0.4, 0.5, 0.6, 0.8])
+    :return:
+        if errors=False
+        OrderedDict threshold -> (x_values, y_values)
+        if errors=True
+        OrderedDict threshold -> (x_values, y_values, y_err, x_err)
+        All the parts: x_values, y_values, y_err, x_err are numpy.arrays
+        of the same length.
+    """
+    prediction, spectator, sample_weight = \
+        check_arrays(prediction, spectator, sample_weight)
+
+    spectator_min, spectator_max = weighted_quantile(
+        spectator, [ignored_sideband, (1. - ignored_sideband)])
+    mask = (spectator >= spectator_min) & (spectator <= spectator_max)
+    spectator = spectator[mask]
+    prediction = prediction[mask]
+    bins_number = min(bins_number, len(prediction))
+    sample_weight = sample_weight if sample_weight is None else numpy.array(sample_weight)[mask]  # NOQA
+
+    if thresholds is None:
+        thresholds = [weighted_quantile(prediction, quantiles=1 - eff,
+                                        sample_weight=sample_weight)
+                      for eff in [0.2, 0.4, 0.5, 0.6, 0.8]]
+
+    binner = Binner(spectator, bins_number=bins_number)
+    if sample_weight is None:
+        sample_weight = numpy.ones(len(prediction))
+    bins_data = binner.split_into_bins(spectator, prediction, sample_weight)
+
+    bin_edges = numpy.array([spectator_min] + list(binner.limits) + [spectator_max])  # NOQA
+    xerr = numpy.diff(bin_edges) / 2.
+    result = OrderedDict()
+    for threshold in thresholds:
+        x_values = []
+        y_values = []
+        N_in_bin = []
+        for num, (masses, probabilities, weights) in enumerate(bins_data):
+            y_values.append(numpy.average(probabilities > threshold,
+                                          weights=weights))
+            N_in_bin.append(numpy.sum(weights))
+            if errors:
+                x_values.append((bin_edges[num + 1] + bin_edges[num]) / 2.)
+            else:
+                x_values.append(numpy.mean(masses))
+
+        x_values, y_values, N_in_bin = check_arrays(x_values, y_values,
+                                                    N_in_bin)
+        if errors:
+            result[threshold] = (x_values, y_values, numpy.sqrt(y_values * (1 - y_values) / N_in_bin), xerr)  # NOQA
+        else:
+            result[threshold] = (x_values, y_values)
+    return result
